@@ -1,7 +1,7 @@
 import React from "react";
 
 import myPicture from "../assets/avatar.png";
-import { FaGithub, FaLinkedin, FaFacebook } from "react-icons/fa";
+import { FaGithub, FaLinkedin, FaInstagram } from "react-icons/fa";
 import { TypeAnimation } from "react-type-animation";
 import { motion } from "framer-motion";
 import { fadeIn } from "../variants";
@@ -79,18 +79,15 @@ const Banner = () => {
               viewport={{ once: false, amount: 0.7 }}
               className="flex text-[20px] gap-x-6 max-w-max mx-auto lg:mx-0"
             >
-              <a href="#">
+              <a href="https://github.com/MarioGoDevLike">
                 <FaGithub />
               </a>
-              <a href="#">
+              <a href="https://LinkedIn.com/in/mario-nassar">
                 <FaLinkedin />
               </a>
-              <a href="www.youtube.com">
-              <FaFacebook/>
+              <a href="https://Instagram.com/marionasssar">
+              <FaInstagram/>
               </a>
-                
-              
-                
             </motion.div>
           </div>
 
