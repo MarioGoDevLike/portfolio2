@@ -12,7 +12,7 @@ import { BsArrowLeft } from "react-icons/bs";
 const Projects = () => {
   return (
     <section
-      className="bg-site bg-no-repeat bg-cover overflow-hidden h-[150vh]"
+      className="bg-site bg-no-repeat bg-cover overflow-hidden h-[full]"
       id="work"
     >
       <div className="container mx-auto">
