@@ -1,7 +1,7 @@
 import React from "react";
 
 import myPicture from "../assets/avatar.png";
-import { FaGithub, FaYoutube, FaLinkedin } from "react-icons/fa";
+import { FaGithub, FaLinkedin, FaFacebook } from "react-icons/fa";
 import { TypeAnimation } from "react-type-animation";
 import { motion } from "framer-motion";
 import { fadeIn } from "../variants";
@@ -68,7 +68,7 @@ const Banner = () => {
               <Link to="contact">
                 <button className="btn btn-lg">Contact me</button>
               </Link>
-              <a download="../assets/My_Updated_Resume.docx" className="text-gradient btn-link">
+              <a href="https://drive.usercontent.google.com/download?id=18jpTJGaM-068sXnotDWdO_W_mo-8mSPK&export=download&authuser=0&confirm=t&uuid=dec67b3f-b01b-4d94-a3d8-a172befdb289&at=APZUnTVVlsxSwJ-K9OxNtk7a6D9d:1692700543980" className="cursor-pointer text-gradient btn-link">
                 My portfolio
               </a>
             </motion.div>
@@ -80,14 +80,17 @@ const Banner = () => {
               className="flex text-[20px] gap-x-6 max-w-max mx-auto lg:mx-0"
             >
               <a href="#">
-                <FaYoutube />
-              </a>
-              <a href="#">
                 <FaGithub />
               </a>
               <a href="#">
                 <FaLinkedin />
               </a>
+              <a href="www.youtube.com">
+              <FaFacebook/>
+              </a>
+                
+              
+                
             </motion.div>
           </div>
 

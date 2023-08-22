@@ -76,7 +76,7 @@ const About = () => {
               <Link to="services">
                 <button className="btn btn-lg">What I do</button>
               </Link>
-              <a download="../assets/My_Updated_Resume.docx" className="text-gradient btn-link">My Portfolio</a>
+              <a href="https://drive.usercontent.google.com/download?id=18jpTJGaM-068sXnotDWdO_W_mo-8mSPK&export=download&authuser=0&confirm=t&uuid=dec67b3f-b01b-4d94-a3d8-a172befdb289&at=APZUnTVVlsxSwJ-K9OxNtk7a6D9d:1692700543980" className="cursor-pointer text-gradient btn-link">My Portfolio</a>
             </div>
           </motion.div>
         </div>
