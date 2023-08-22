@@ -12,7 +12,7 @@ import { BsArrowLeft } from "react-icons/bs";
 const Projects = () => {
   return (
     <section
-      className="bg-site bg-no-repeat bg-cover overflow-hidden h-[220vh]"
+      className="bg-site bg-no-repeat bg-cover overflow-scroll h-[170vh]"
       id="work"
     >
       <div className="container mx-auto">
@@ -24,7 +24,7 @@ const Projects = () => {
             viewport={{ once: false, amount: 0.3 }}
             className="flex-1 flex flex-col gap-y-7 lg:mb-0"
           >
-            <div className="flex h-[13vh] items-center justify-start space-x-20">
+            <div className="flex h-[13vh] items-center justify-start space-x-2">
               <a href="https://marionassar.vercel.app">
                 <BsArrowLeft className="flex items-center" size={"40px"} />
               </a>
