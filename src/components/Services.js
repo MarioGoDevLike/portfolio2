@@ -2,6 +2,7 @@ import React from "react";
 import { BsArrowUpRight } from "react-icons/bs";
 import { motion } from "framer-motion";
 import { fadeIn } from "../variants";
+import { Link } from "react-scroll";
 
 const service = [
   {
@@ -38,7 +39,10 @@ const Services = () => {
               I create cross-platform mobile apps and user-friendly websites
               with versatility.
             </h3>
+            <Link to="work">
             <button className="btn btn-sm">See my work</button>
+            </Link>
+            
           </motion.div>
           <motion.div
             variants={fadeIn("left", 0.5)}

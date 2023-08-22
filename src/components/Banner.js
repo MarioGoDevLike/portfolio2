@@ -5,6 +5,7 @@ import { FaGithub, FaYoutube, FaLinkedin } from "react-icons/fa";
 import { TypeAnimation } from "react-type-animation";
 import { motion } from "framer-motion";
 import { fadeIn } from "../variants";
+import { Link } from "react-scroll";
 
 const Banner = () => {
   return (
@@ -54,8 +55,8 @@ const Banner = () => {
               viewport={{ once: false, amount: 0.7 }}
               className="mb-8 max-w-lg mx-auto lg:mx-0"
             >
-              Lorem ipsum dolor sit amet consectetur adipisicing elit. Fugit
-              reiciendis quasi.
+              Passionate developer dedicated to crafting exceptional digital
+              solutions with innovative and creative approaches.
             </motion.p>
             <motion.div
               variants={fadeIn("up", 0.6)}
@@ -64,8 +65,10 @@ const Banner = () => {
               viewport={{ once: false, amount: 0.7 }}
               className="flex max-w-max gap-x-6 items-center mb-12 mx-auto lg:mx-0"
             >
-              <button className="btn btn-lg">Contact me</button>
-              <a href="#" className="text-gradient btn-link">
+              <Link to="contact">
+                <button className="btn btn-lg">Contact me</button>
+              </Link>
+              <a download="../assets/My_Updated_Resume.docx" className="text-gradient btn-link">
                 My portfolio
               </a>
             </motion.div>
@@ -89,9 +92,11 @@ const Banner = () => {
           </div>
 
           <motion.div
-          variants={fadeIn('down', 0.5)}
-          initial="hidden"
-          whileInView={"show"} className="hidden lg:flex flex-1 max-w-[350px] lg:max-w-[482px]">
+            variants={fadeIn("down", 0.5)}
+            initial="hidden"
+            whileInView={"show"}
+            className="hidden lg:flex flex-1 max-w-[350px] lg:max-w-[482px]"
+          >
             <img className="" src={myPicture} alt="" />
           </motion.div>
         </div>
