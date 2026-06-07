@@ -3,9 +3,20 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Preloader from "./components/layout/Preloader";
 import HomePage from "./pages/HomePage";
 import ProjectsPage from "./pages/ProjectsPage";
+import MaintenancePage from "./pages/MaintenancePage";
+
+// ─── Toggle maintenance mode here ───────────────
+//   true  → every route shows the maintenance page
+//   false → normal site
+const MAINTENANCE_MODE = true;
+// ────────────────────────────────────────────────
 
 const App = () => {
   const [loading, setLoading] = useState(true);
+
+  if (MAINTENANCE_MODE) {
+    return <MaintenancePage />;
+  }
 
   return (
     <BrowserRouter>
