@@ -7,9 +7,9 @@ import FormField from "../ui/FormField";
 import SocialLinks from "../ui/SocialLinks";
 
 const ContactSection = () => (
-  <section className="section pb-24 md:pb-20 lg:pb-32" id="contact">
+  <section className="section pb-28 md:pb-24 lg:pb-28" id="contact">
     <div className="container">
-      <div className="divider mb-12 lg:mb-28" />
+      <div className="divider mb-12 lg:mb-16" />
 
       <div className="flex flex-col lg:flex-row gap-16 lg:gap-24">
         <AnimatedSection direction="right" delay={0.2} className="flex-1">

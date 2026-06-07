@@ -134,7 +134,7 @@
   }
 
   .section {
-    @apply py-14 md:py-20 lg:py-32;
+    @apply py-16 md:py-20 lg:py-24;
   }
 
   .glass {
@@ -224,7 +224,7 @@
   }
 
   .hero-section {
-    @apply min-h-screen flex items-center pt-16 pb-28 md:pt-[96px] md:pb-[60px];
+    @apply min-h-screen flex items-center pt-12 pb-16 md:pt-[104px] md:pb-16;
   }
 
   .hero-portrait {
@@ -560,8 +560,13 @@
 }
 
 @keyframes marquee-ltr {
-  0% { transform: translateX(0); }
+  0%   { transform: translateX(0); }
   100% { transform: translateX(-50%); }
+}
+
+@keyframes marquee-rtl {
+  0%   { transform: translateX(-50%); }
+  100% { transform: translateX(0); }
 }
 
 .marquee-track-ltr {
@@ -569,6 +574,31 @@
   width: max-content;
   animation: marquee-ltr 28s linear infinite;
   will-change: transform;
+}
+
+.marquee-track-rtl {
+  display: flex;
+  width: max-content;
+  animation: marquee-rtl 32s linear infinite;
+  will-change: transform;
+}
+
+/* edge-fade mask applied to the scroll container */
+.marquee-fade {
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    black 9%,
+    black 91%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    black 9%,
+    black 91%,
+    transparent 100%
+  );
 }
 
 .orb {

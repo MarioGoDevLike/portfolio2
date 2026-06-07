@@ -2,9 +2,9 @@ import React from "react";
 import CountUp from "react-countup";
 import { useInView } from "react-intersection-observer";
 import { Link } from "react-scroll";
-import workspaceImage from "../../assets/computer.jpeg";
 import { ABOUT_STATS, SITE } from "../../constants";
 import AnimatedSection from "../ui/AnimatedSection";
+import TagCloud3D from "../ui/TagCloud3D";
 
 const AboutSection = () => {
   const [ref, inView] = useInView({ threshold: 0.3, triggerOnce: true });
@@ -13,25 +13,17 @@ const AboutSection = () => {
     <section className="section" id="about">
       <div className="container">
         <div className="flex flex-col lg:flex-row lg:items-center gap-16 lg:gap-24">
+
+          {/* ── Left: 3D sphere — desktop only ── */}
           <AnimatedSection
             direction="right"
             delay={0.2}
             className="hidden lg:block flex-shrink-0"
           >
-            <div className="about-visual">
-              <div className="about-visual__accent" aria-hidden="true" />
-              <div className="about-visual__frame">
-                <img
-                  src={workspaceImage}
-                  alt="Development workspace"
-                  className="about-visual__image"
-                />
-                <div className="about-visual__fade" aria-hidden="true" />
-              </div>
-              <div className="about-visual__dot" aria-hidden="true" />
-            </div>
+            <TagCloud3D width={380} height={460} radius={152} />
           </AnimatedSection>
 
+          {/* ── Right: text content ── */}
           <AnimatedSection
             ref={ref}
             direction="left"
@@ -43,35 +35,19 @@ const AboutSection = () => {
             <h2 className="h2 mb-6">
               Freelance <span className="text-gradient">Front-end Developer</span>
               <br />
-              with 2+ years of experience
+              with 3+ years of experience
             </h2>
 
-            <p className="text-body text-white/40 mb-10 max-w-[480px]">
+            <p className="text-body text-white/40 mb-8 max-w-[480px]">
               I'm a passionate creator dedicated to crafting digital experiences
               that blend aesthetics with functionality. With a keen eye for
               design and a love for coding, I specialize in transforming ideas
               into captivating websites and applications that resonate.
             </p>
 
-            <div className="flex gap-8 lg:gap-12 mb-12">
-              {ABOUT_STATS.map(({ value, suffix, label, decimals }) => (
-                <div key={label}>
-                  <div className="stat-value mb-2">
-                    {inView ? (
-                      <CountUp
-                        start={0}
-                        end={value}
-                        decimals={decimals}
-                        duration={2.4}
-                      />
-                    ) : (
-                      "0"
-                    )}
-                    {suffix}
-                  </div>
-                  <div className="stat-label whitespace-pre-line">{label}</div>
-                </div>
-              ))}
+            {/* ── Mobile 3D sphere — below bio on small screens ── */}
+            <div className="flex justify-center lg:hidden mb-12">
+              <TagCloud3D width={320} height={320} radius={118} />
             </div>
 
             <div className="divider mb-10" />

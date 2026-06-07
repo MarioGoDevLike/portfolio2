@@ -133,14 +133,14 @@ const HeroSection = () => (
               </div>
             </div>
 
-            <motion.div
+            {/* <motion.div
               animate={{ y: [0, -10, 0] }}
               transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
               className="glass hero-portrait__badge hero-portrait__badge--top"
             >
               <p className="stat-value">5+</p>
               <p className="stat-label">Projects Done</p>
-            </motion.div>
+            </motion.div> */}
 
             <motion.div
               animate={{ y: [0, 10, 0] }}
@@ -166,7 +166,7 @@ const HeroSection = () => (
       {/* Scroll hint — desktop only */}
       <AnimatedSection
         delay={0.8}
-        className="hidden lg:flex items-center gap-3 mt-16"
+        className="hidden lg:flex items-center gap-3 mt-10"
       >
         <motion.div
           animate={{ y: [0, 6, 0] }}
