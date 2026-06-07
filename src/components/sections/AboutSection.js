@@ -1,15 +1,10 @@
 import React from "react";
-import CountUp from "react-countup";
-import { useInView } from "react-intersection-observer";
 import { Link } from "react-scroll";
-import { ABOUT_STATS, SITE } from "../../constants";
+import { SITE } from "../../constants";
 import AnimatedSection from "../ui/AnimatedSection";
 import TagCloud3D from "../ui/TagCloud3D";
 
-const AboutSection = () => {
-  const [ref, inView] = useInView({ threshold: 0.3, triggerOnce: true });
-
-  return (
+const AboutSection = () => (
     <section className="section" id="about">
       <div className="container">
         <div className="flex flex-col lg:flex-row lg:items-center gap-16 lg:gap-24">
@@ -25,7 +20,6 @@ const AboutSection = () => {
 
           {/* ── Right: text content ── */}
           <AnimatedSection
-            ref={ref}
             direction="left"
             delay={0.3}
             className="flex-1"
@@ -64,7 +58,6 @@ const AboutSection = () => {
         </div>
       </div>
     </section>
-  );
-};
+);
 
 export default AboutSection;
