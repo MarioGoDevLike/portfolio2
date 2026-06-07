@@ -1,34 +1,21 @@
-import React from "react";
-import { BrowserRouter} from "react-router-dom";
-import {Routes, Route} from 'react-router';
-import Banner from "./components/Banner";
-import Header from "./components/Header";
-import Nav from "./components/Nav";
-import About from "./components/About";
-import Services from "./components/Services";
-import Work from "./components/Work";
-import Contact from "./components/Contact";
-import Projects from "./components/Projects.js";
+import React, { useState } from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Preloader from "./components/layout/Preloader";
+import HomePage from "./pages/HomePage";
+import ProjectsPage from "./pages/ProjectsPage";
 
-const HomeScreen = () => {
-  return <div className="bg-site bg-no-repeat bg-cover overflow-hidden">
-    <Header />
-    <Banner />
-    <Nav />
-    <About />
-    <Services />
-    <Work />
-    <Contact />
-  </div>
-
-}
 const App = () => {
+  const [loading, setLoading] = useState(true);
+
   return (
     <BrowserRouter>
-     <Routes>
-          <Route path="/" element={<HomeScreen />}/>
-          <Route path="/projects" Component={() => <Projects />} />
-      </Routes> 
+      {loading && <Preloader onComplete={() => setLoading(false)} />}
+      {!loading && (
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/projects" element={<ProjectsPage />} />
+        </Routes>
+      )}
     </BrowserRouter>
   );
 };
