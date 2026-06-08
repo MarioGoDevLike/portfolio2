@@ -1,6 +1,4 @@
 import React from "react";
-import { Link } from "react-scroll";
-import { SITE } from "../../constants";
 import AnimatedSection from "../ui/AnimatedSection";
 import TagCloud3D from "../ui/TagCloud3D";
 

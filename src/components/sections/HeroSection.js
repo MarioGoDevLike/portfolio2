@@ -25,57 +25,6 @@ const LetterReveal = ({ text, baseDelay = 0 }) =>
     </motion.span>
   ));
 
-/* ─── floating data chip ──────────────────────── */
-const DataChip = ({ value, label, accentColor, style, delay = 0 }) => (
-  <motion.div
-    style={{
-      position: "absolute",
-      borderRadius: 16,
-      background: "rgba(7,7,11,0.90)",
-      border: "1px solid rgba(255,255,255,0.08)",
-      backdropFilter: "blur(22px)",
-      WebkitBackdropFilter: "blur(22px)",
-      boxShadow: "0 16px 48px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.05)",
-      padding: "12px 18px",
-      zIndex: 20,
-      ...style,
-    }}
-    initial={{ opacity: 0, scale: 0.78 }}
-    animate={{ opacity: 1, scale: 1 }}
-    transition={{ duration: 0.55, ease: EASE_EXPO, delay }}
-  >
-    <motion.div
-      animate={{ y: [0, -7, 0] }}
-      transition={{ duration: 3.8 + delay, repeat: Infinity, ease: "easeInOut", delay: delay + 0.5 }}
-    >
-      <p
-        style={{
-          margin: 0,
-          fontFamily: "'Space Grotesk', sans-serif",
-          fontWeight: 700,
-          fontSize: 20,
-          lineHeight: 1,
-          color: accentColor,
-        }}
-      >
-        {value}
-      </p>
-      <p
-        style={{
-          margin: "5px 0 0",
-          fontFamily: "'Inter', sans-serif",
-          fontSize: 10,
-          letterSpacing: "0.18em",
-          textTransform: "uppercase",
-          color: "rgba(255,255,255,0.30)",
-        }}
-      >
-        {label}
-      </p>
-    </motion.div>
-  </motion.div>
-);
-
 /* ─── rotating SVG ring ───────────────────────── */
 const OrbitalRing = ({ size, dashArray, stroke, duration, reverse = false }) => (
   <motion.div
@@ -420,22 +369,6 @@ const HeroSection = () => {
                   aria-hidden="true"
                 />
               </div>
-
-              {/* ── floating stat chips ── */}
-              {/* <DataChip
-                value="1.5+"
-                label="Years Experience"
-                accentColor="#818cf8"
-                delay={1.0}
-                style={{ left: -100, top: "20%" }}
-              />
-              <DataChip
-                value="5+"
-                label="Projects Done"
-                accentColor="#22d3ee"
-                delay={1.12}
-                style={{ right: -90, bottom: "22%" }}
-              /> */}
 
               {/* status pill — bottom center */}
               <motion.div

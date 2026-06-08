@@ -1,5 +1,4 @@
 import React from "react";
-import { Link } from "react-scroll";
 import AnimatedSection from "../ui/AnimatedSection";
 import ServiceStage3D from "../ui/ServiceStage3D";
 
