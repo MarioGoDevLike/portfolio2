@@ -8,7 +8,7 @@ import MaintenancePage from "./pages/MaintenancePage";
 // ─── Toggle maintenance mode here ───────────────
 //   true  → every route shows the maintenance page
 //   false → normal site
-const MAINTENANCE_MODE = true;
+const MAINTENANCE_MODE = false;
 // ────────────────────────────────────────────────
 
 const App = () => {

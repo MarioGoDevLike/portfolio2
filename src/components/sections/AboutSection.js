@@ -46,14 +46,14 @@ const AboutSection = () => (
 
             <div className="divider mb-10" />
 
-            <div className="flex items-center flex-wrap gap-4">
+            {/* <div className="flex items-center flex-wrap gap-4">
               <Link to="services" smooth className="cursor-pointer">
                 <button type="button" className="btn btn-primary">What I Do</button>
               </Link>
               <a href={SITE.portfolioUrl} className="btn btn-outline">
                 My Portfolio
               </a>
-            </div>
+            </div> */}
           </AnimatedSection>
         </div>
       </div>
