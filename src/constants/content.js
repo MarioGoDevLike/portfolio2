@@ -47,11 +47,13 @@ export const PROJECTS = [
   {
     id: "ello",
     title: "Ello Café",
-    category: "WordPress Website",
+    category: "Mobile / Web Application E-learning",
     description:
-      "A full website for a local café — custom design, menu integration, and WordPress CMS.",
+      "A comprehensive e-learning platform accessible via both mobile and web. Features interactive courses, user progress tracking, and a responsive, intuitive interface for seamless learning across all devices.",
+ 
     image: elloImage,
-    href: "https://ello.cafe",
+    imageFit: "contain",
+    href: "https://ellos-new-website.vercel.app/",
     tag: "Web",
     accent: "violet",
     featured: true,

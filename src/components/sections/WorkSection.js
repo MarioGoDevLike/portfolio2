@@ -1,6 +1,7 @@
 import React, { useRef, useState, useCallback } from "react";
 import {
   motion,
+  AnimatePresence,
   useMotionValue,
   useSpring,
   useTransform,
@@ -10,6 +11,7 @@ import { HiArrowUpRight } from "react-icons/hi2";
 import { Link } from "react-router-dom";
 import { HOME_PROJECTS } from "../../constants";
 import AnimatedSection from "../ui/AnimatedSection";
+import ElloCafeModal from "../project/ElloCafeModal";
 
 const EASE_EXPO = [0.22, 1, 0.36, 1];
 
@@ -117,7 +119,7 @@ const HudCorners = ({ color, visible }) =>
   ));
 
 /* ─── Single 3D project card ─── */
-const Card3D = ({ project, featured = false, index = 0 }) => {
+const Card3D = ({ project, featured = false, index = 0, onCustomClick }) => {
   const cardRef = useRef(null);
   const [hovered, setHovered] = useState(false);
   const meta = ACCENT[project.accent] || ACCENT.violet;
@@ -161,6 +163,7 @@ const Card3D = ({ project, featured = false, index = 0 }) => {
   }, [mx, my]);
 
   const imageHeight = featured ? 420 : 280;
+  const imageFit = project.imageFit || "cover";
   const cardRadius = 22;
   const enterDir = featured ? 0 : index % 2 === 0 ? -60 : 60;
 
@@ -186,7 +189,7 @@ const Card3D = ({ project, featured = false, index = 0 }) => {
             ? `0 40px 100px rgba(0,0,0,0.65), 0 0 0 1px ${meta.border}, 0 0 80px ${meta.glow}`
             : "0 20px 60px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.05)",
           background: "rgba(9,9,11,0.92)",
-          cursor: project.href ? "pointer" : "default",
+          cursor: (project.href || onCustomClick) ? "pointer" : "default",
           transition: "border-color 0.3s, box-shadow 0.3s",
         }}
         whileHover={{ scale: featured ? 1.012 : 1.018 }}
@@ -194,7 +197,10 @@ const Card3D = ({ project, featured = false, index = 0 }) => {
         onMouseMove={onMove}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={onLeave}
-        onClick={() => project.href && window.open(project.href, "_blank", "noopener")}
+        onClick={() => {
+          if (onCustomClick) { onCustomClick(); }
+          else if (project.href) { window.open(project.href, "_blank", "noopener"); }
+        }}
       >
         {/* ambient accent glow behind card */}
         <div
@@ -229,20 +235,29 @@ const Card3D = ({ project, featured = false, index = 0 }) => {
             <motion.div
               style={{
                 position: "absolute",
-                inset: "-5% -3%",
-                x: imgX,
-                y: imgY,
+                inset: imageFit === "contain" ? 0 : "-5% -3%",
+                x: imageFit === "contain" ? 0 : imgX,
+                y: imageFit === "contain" ? 0 : imgY,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: imageFit === "contain" ? "28px 40px" : 0,
               }}
             >
               <img
                 src={project.image}
                 alt={project.title}
                 style={{
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "cover",
-                  objectPosition: "top",
-                  filter: `brightness(${hovered ? 0.82 : 0.72}) saturate(0.9)`,
+                  width: imageFit === "contain" ? "auto" : "100%",
+                  height: imageFit === "contain" ? "auto" : "100%",
+                  maxWidth: "100%",
+                  maxHeight: "100%",
+                  objectFit: imageFit,
+                  objectPosition: "center",
+                  filter:
+                    imageFit === "contain"
+                      ? "none"
+                      : `brightness(${hovered ? 0.82 : 0.72}) saturate(0.9)`,
                   transition: "filter 0.35s ease",
                   display: "block",
                 }}
@@ -256,7 +271,10 @@ const Card3D = ({ project, featured = false, index = 0 }) => {
             style={{
               position: "absolute",
               inset: 0,
-              background: `linear-gradient(to top, rgba(5,5,5,0.96) 0%, rgba(5,5,5,0.3) 42%, transparent 70%)`,
+              background:
+                imageFit === "contain"
+                  ? "none"
+                  : "linear-gradient(to top, rgba(5,5,5,0.96) 0%, rgba(5,5,5,0.3) 42%, transparent 70%)",
               pointerEvents: "none",
             }}
             aria-hidden="true"
@@ -381,8 +399,34 @@ const Card3D = ({ project, featured = false, index = 0 }) => {
               </h3>
             </div>
 
-            {/* CTA circle */}
-            {project.href && (
+            {/* CTA — case study badge or arrow */}
+            {onCustomClick ? (
+              <motion.span
+                animate={{
+                  background: hovered ? meta.bg : "rgba(255,255,255,0.04)",
+                  borderColor: hovered ? meta.border : "rgba(255,255,255,0.08)",
+                  color: hovered ? meta.color : "rgba(255,255,255,0.3)",
+                }}
+                style={{
+                  padding: "5px 12px",
+                  borderRadius: 999,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 5,
+                  flexShrink: 0,
+                  border: "1px solid",
+                  fontFamily: "'Space Grotesk', sans-serif",
+                  fontSize: 10,
+                  letterSpacing: "0.1em",
+                  textTransform: "uppercase",
+                  fontWeight: 600,
+                  whiteSpace: "nowrap",
+                  transition: "all 0.25s ease",
+                }}
+              >
+                Case Study
+              </motion.span>
+            ) : project.href && (
               <motion.span
                 style={{
                   width: 38,
@@ -451,45 +495,60 @@ const Card3D = ({ project, featured = false, index = 0 }) => {
 /* ─── Section ─── */
 const WorkSection = () => {
   const [featured, ...rest] = HOME_PROJECTS;
+  const [showElloModal, setShowElloModal] = useState(false);
 
   return (
-    <section className="section" id="work">
-      <div className="container">
-        {/* header */}
-        <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between mb-12 gap-6">
-          <AnimatedSection direction="right" delay={0.15}>
-            <span className="label">Portfolio</span>
-            <h2 className="h2">
-              My Latest <span className="text-gradient">Work.</span>
-            </h2>
-            <p className="text-body-sm text-white/30 max-w-md">
-              From visually stunning websites to cutting-edge mobile
-              applications — a collection committed to craft and excellence.
-            </p>
-          </AnimatedSection>
+    <>
+      <section className="section" id="work">
+        <div className="container">
+          {/* header */}
+          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between mb-12 gap-6">
+            <AnimatedSection direction="right" delay={0.15}>
+              <span className="label">Portfolio</span>
+              <h2 className="h2">
+                My Latest <span className="text-gradient">Work.</span>
+              </h2>
+              <p className="text-body-sm text-white/30 max-w-md">
+                From visually stunning websites to cutting-edge mobile
+                applications — a collection committed to craft and excellence.
+              </p>
+            </AnimatedSection>
 
-          <AnimatedSection direction="left" delay={0.25}>
-            <Link to="/projects">
-              <button type="button" className="btn btn-outline">
-                View all projects
-              </button>
-            </Link>
-          </AnimatedSection>
-        </div>
+            <AnimatedSection direction="left" delay={0.25}>
+              <Link to="/projects">
+                <button type="button" className="btn btn-outline">
+                  View all projects
+                </button>
+              </Link>
+            </AnimatedSection>
+          </div>
 
-        {/* featured */}
-        <div className="mb-5 lg:mb-6">
-          <Card3D project={featured} featured index={0} />
-        </div>
+          {/* featured */}
+          <div className="mb-5 lg:mb-6">
+            <Card3D
+              project={featured}
+              featured
+              index={0}
+              onCustomClick={featured.id === "ello" ? () => setShowElloModal(true) : undefined}
+            />
+          </div>
 
-        {/* grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 lg:gap-6">
-          {rest.map((project, i) => (
-            <Card3D key={project.id} project={project} index={i + 1} />
-          ))}
+          {/* grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 lg:gap-6">
+            {rest.map((project, i) => (
+              <Card3D key={project.id} project={project} index={i + 1} />
+            ))}
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
+
+      {/* Ello Café case study modal */}
+      <AnimatePresence>
+        {showElloModal && (
+          <ElloCafeModal onClose={() => setShowElloModal(false)} />
+        )}
+      </AnimatePresence>
+    </>
   );
 };
 

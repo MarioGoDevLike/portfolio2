@@ -14,6 +14,7 @@ const ProjectCard = ({
   category,
   description,
   image,
+  imageFit = "cover",
   videoSrc,
   href,
   tag,
@@ -38,7 +39,9 @@ const ProjectCard = ({
             <img
               src={image}
               alt={title}
-              className="project-card__image"
+              className={`project-card__image ${
+                imageFit === "contain" ? "project-card__image--contain" : ""
+              }`}
               loading="lazy"
             />
           )
