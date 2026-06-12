@@ -6,6 +6,7 @@ import {
   useSpring,
   useTransform,
 } from "framer-motion";
+import { Link } from "react-router-dom";
 import { HiChevronLeft, HiChevronRight } from "react-icons/hi";
 import { HiX } from "react-icons/hi";
 import { HiArrowUpRight, HiArrowsPointingOut } from "react-icons/hi2";
@@ -932,17 +933,7 @@ const ElloCafeCaseStudy = () => {
         style={{
           position: "relative",
           width: "100%",
-          maxWidth: 1040,
-          margin: "0 auto",
           overflowX: "hidden",
-          background: "#09090b",
-          border: "1px solid rgba(255,255,255,0.07)",
-          borderRadius: isMobile ? 16 : 24,
-          boxShadow: [
-            "0 40px 100px rgba(0,0,0,0.55)",
-            "0 0 0 1px rgba(255,255,255,0.03)",
-            `0 0 90px ${T(0.08)}`,
-          ].join(", "),
         }}
       >
 
@@ -952,14 +943,23 @@ const ElloCafeCaseStudy = () => {
             position: "sticky",
             top: 0,
             zIndex: 30,
-            padding: isMobile ? "14px 16px 10px" : "16px 24px",
+            padding: isMobile ? "12px 16px 10px" : "14px 24px 12px",
             background: "rgba(9,9,11,0.92)",
             backdropFilter: "blur(24px)",
             WebkitBackdropFilter: "blur(24px)",
             borderBottom: "1px solid rgba(255,255,255,0.05)",
           }}
         >
-          {/* Row 1: Logo + Close */}
+          <Link
+            to="/"
+            className="projects-page__back"
+            style={{ marginBottom: isMobile ? 10 : 12 }}
+          >
+            <HiChevronLeft size={16} />
+            Back to home
+          </Link>
+
+          {/* Row 1: Logo + tabs */}
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
               <ElloMark size={isMobile ? 0.85 : 1} />

@@ -6,7 +6,6 @@ import {
   useTransform,
   useMotionTemplate,
 } from "framer-motion";
-import { HiArrowUpRight } from "react-icons/hi2";
 import { Link, useNavigate } from "react-router-dom";
 import { HOME_PROJECTS } from "../../constants";
 import AnimatedSection from "../ui/AnimatedSection";
