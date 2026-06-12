@@ -398,7 +398,7 @@ const Card3D = ({ project, featured = false, index = 0, onCustomClick }) => {
             </div>
 
             {/* CTA — case study badge or arrow */}
-            {onCustomClick ? (
+            {/* {onCustomClick ? (
               <motion.span
                 animate={{
                   background: hovered ? meta.bg : "rgba(255,255,255,0.04)",
@@ -444,7 +444,7 @@ const Card3D = ({ project, featured = false, index = 0, onCustomClick }) => {
               >
                 <HiArrowUpRight size={15} />
               </motion.span>
-            )}
+            )} */}
           </div>
 
           {project.description && (
