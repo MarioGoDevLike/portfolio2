@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import { BsArrowUpRight } from "react-icons/bs";
 import { Player } from "video-react";
 import "video-react/dist/video-react.css";
@@ -17,20 +18,16 @@ const ProjectCard = ({
   imageFit = "cover",
   videoSrc,
   href,
+  caseStudyPath,
   tag,
   accent = "violet",
   featured = false,
 }) => {
-  const Wrapper = href ? "a" : "div";
-  const wrapperProps = href
-    ? { href, target: "_blank", rel: "noopener noreferrer" }
-    : {};
+  const isClickable = Boolean(caseStudyPath || href);
+  const cardClassName = `project-card group ${isClickable ? "cursor-pointer" : "cursor-default"}`;
 
-  return (
-    <Wrapper
-      {...wrapperProps}
-      className={`project-card group ${href ? "cursor-pointer" : "cursor-default"}`}
-    >
+  const cardContent = (
+    <>
       <div className={`project-card__media ${featured ? "project-card__media--featured" : ""}`}>
         {videoSrc ? (
           <Player autoPlay muted playsInline src={videoSrc} />
@@ -58,7 +55,7 @@ const ProjectCard = ({
             </span>
             <h3 className="project-card__title">{title}</h3>
           </div>
-          {href && (
+          {isClickable && (
             <span className="project-card__cta" aria-hidden="true">
               <BsArrowUpRight size={14} className="text-primary" />
             </span>
@@ -72,8 +69,31 @@ const ProjectCard = ({
           <Tag>{tag}</Tag>
         </div>
       )}
-    </Wrapper>
+    </>
   );
+
+  if (caseStudyPath) {
+    return (
+      <Link to={caseStudyPath} className={cardClassName}>
+        {cardContent}
+      </Link>
+    );
+  }
+
+  if (href) {
+    return (
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={cardClassName}
+      >
+        {cardContent}
+      </a>
+    );
+  }
+
+  return <div className={cardClassName}>{cardContent}</div>;
 };
 
 export default ProjectCard;

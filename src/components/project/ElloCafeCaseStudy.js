@@ -6,8 +6,9 @@ import {
   useSpring,
   useTransform,
 } from "framer-motion";
-import { HiX, HiChevronLeft, HiChevronRight } from "react-icons/hi";
-import { HiArrowUpRight } from "react-icons/hi2";
+import { HiChevronLeft, HiChevronRight } from "react-icons/hi";
+import { HiX } from "react-icons/hi";
+import { HiArrowUpRight, HiArrowsPointingOut } from "react-icons/hi2";
 
 /* ─── App screenshots ──────────────────────────────── */
 import appWelcome from "../../assets/ello_app_images/unlogged page.png";
@@ -56,11 +57,11 @@ const WEB_SCREENS = [
 ];
 
 const ALL_TECH = [
-  { name: "React", note: "Web App" },
-  { name: "WordPress", note: "Marketing" },
-  { name: "Flutter", note: "Mobile" },
+  { name: "React.js", note: "Web App" },
+  { name: "React Native", note: "Mobile" },
   { name: "Firebase", note: "Backend" },
   { name: "Node.js", note: "API" },
+  { name: "Stripe", note: "Payments" },
   { name: "Figma", note: "Design" },
 ];
 
@@ -69,7 +70,7 @@ const FEATURES = [
   "Multi-tier session booking with Stripe checkout",
   "Real-time messaging between students and instructors",
   "Student & teacher dashboards with session tracking",
-  "Cross-platform Flutter app for iOS and Android",
+  "Cross-platform React Native app for iOS and Android",
   "Dark mode checkout flow with pricing packages",
 ];
 
@@ -106,7 +107,7 @@ const ElloMark = ({ size = 1 }) => (
 );
 
 /* ─── Tab bar with sliding pill ────────────────────── */
-const TabBar = ({ active, onChange }) => (
+const TabBar = ({ active, onChange, tabs = TABS }) => (
   <div
     style={{
       display: "flex",
@@ -117,7 +118,7 @@ const TabBar = ({ active, onChange }) => (
       border: "1px solid rgba(255,255,255,0.07)",
     }}
   >
-    {TABS.map((tab) => (
+    {tabs.map((tab) => (
       <button
         key={tab.id}
         onClick={() => onChange(tab.id)}
@@ -237,10 +238,16 @@ const ProgressBar = ({ duration, trackKey }) => (
 );
 
 /* ─── Phone mockup ─────────────────────────────────── */
-const PhoneMockup = ({ screen, dir, width = 200, autoAdvanceDur }) => {
+const PhoneMockup = ({ screen, dir, width = 200, autoAdvanceDur, onClick }) => {
   const h = Math.round(width * 2.08);
+  const [hov, setHov] = useState(false);
   return (
-    <div style={{ width, height: h, position: "relative", flexShrink: 0 }}>
+    <div
+      style={{ width, height: h, position: "relative", flexShrink: 0, cursor: onClick ? "zoom-in" : "default" }}
+      onClick={onClick}
+      onMouseEnter={() => onClick && setHov(true)}
+      onMouseLeave={() => setHov(false)}
+    >
       <div
         style={{
           position: "absolute",
@@ -359,19 +366,56 @@ const PhoneMockup = ({ screen, dir, width = 200, autoAdvanceDur }) => {
           pointerEvents: "none",
         }}
       />
+
+      {/* Expand overlay (hover on desktop, always-dim badge on touch) */}
+      {onClick && (
+        <motion.div
+          animate={{ opacity: hov ? 1 : 0 }}
+          transition={{ duration: 0.18 }}
+          style={{
+            position: "absolute",
+            inset: 0,
+            borderRadius: width * 0.19,
+            background: "rgba(0,0,0,0.38)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 25,
+            pointerEvents: "none",
+          }}
+        >
+          <div style={{
+            width: 46, height: 46, borderRadius: "50%",
+            background: "rgba(255,255,255,0.14)",
+            border: "1px solid rgba(255,255,255,0.28)",
+            backdropFilter: "blur(10px)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            color: "white",
+          }}>
+            <HiArrowsPointingOut size={20} />
+          </div>
+        </motion.div>
+      )}
     </div>
   );
 };
 
 /* ─── Browser mockup ───────────────────────────────── */
-const BrowserMockup = ({ screen, dir, height = 240, autoAdvanceDur }) => (
+const BrowserMockup = ({ screen, dir, height = 240, autoAdvanceDur, onClick }) => {
+  const [hov, setHov] = useState(false);
+  return (
   <div
+    onClick={onClick}
+    onMouseEnter={() => onClick && setHov(true)}
+    onMouseLeave={() => setHov(false)}
     style={{
+      position: "relative",
       width: "100%",
       borderRadius: 12,
       overflow: "hidden",
       background: "#0d0d0d",
       border: "1px solid rgba(255,255,255,0.07)",
+      cursor: onClick ? "zoom-in" : "default",
       boxShadow: [
         "0 28px 60px rgba(0,0,0,0.6)",
         `0 0 45px ${T(0.1)}`,
@@ -424,7 +468,7 @@ const BrowserMockup = ({ screen, dir, height = 240, autoAdvanceDur }) => (
             whiteSpace: "nowrap",
           }}
         >
-          ello.cafe
+          ellos-new-website.vercel.app
         </span>
       </div>
     </div>
@@ -467,8 +511,38 @@ const BrowserMockup = ({ screen, dir, height = 240, autoAdvanceDur }) => (
       />
       {autoAdvanceDur && <ProgressBar duration={autoAdvanceDur} trackKey={screen.src} />}
     </div>
+
+    {/* Expand overlay */}
+    {onClick && (
+      <motion.div
+        animate={{ opacity: hov ? 1 : 0 }}
+        transition={{ duration: 0.18 }}
+        style={{
+          position: "absolute",
+          inset: 0,
+          background: "rgba(0,0,0,0.32)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 25,
+          pointerEvents: "none",
+        }}
+      >
+        <div style={{
+          width: 50, height: 50, borderRadius: "50%",
+          background: "rgba(255,255,255,0.14)",
+          border: "1px solid rgba(255,255,255,0.28)",
+          backdropFilter: "blur(10px)",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          color: "white",
+        }}>
+          <HiArrowsPointingOut size={22} />
+        </div>
+      </motion.div>
+    )}
   </div>
-);
+  );
+};
 
 /* ─── Thumbnail grid ───────────────────────────────── */
 const ThumbnailGrid = ({ screens, current, onChange, aspectRatio = "16/10", cols }) => (
@@ -583,12 +657,12 @@ const TechPill = ({ name, delay = 0 }) => (
 /* ─── Live site button ─────────────────────────────── */
 const LiveButton = ({ label = "Visit Live Site" }) => (
   <motion.a
-    href="https://ello.cafe"
+    href="https://ellos-new-website.vercel.app/"
     target="_blank"
     rel="noopener noreferrer"
     whileHover={{ scale: 1.04, boxShadow: `0 0 28px ${T(0.45)}` }}
     whileTap={{ scale: 0.97 }}
-    style={{
+    style={{  
       display: "inline-flex",
       alignItems: "center",
       gap: 6,
@@ -611,16 +685,159 @@ const LiveButton = ({ label = "Visit Live Site" }) => (
   </motion.a>
 );
 
+/* ─── Fullscreen Lightbox ──────────────────────────── */
+const Lightbox = ({ type, screens, idx, dir, onStep, onJump, onClose }) => {
+  const screen = screens[idx];
+
+  useEffect(() => {
+    const fn = (e) => {
+      if (e.key === "Escape") onClose();
+      if (e.key === "ArrowLeft") onStep(-1);
+      if (e.key === "ArrowRight") onStep(1);
+    };
+    window.addEventListener("keydown", fn);
+    return () => window.removeEventListener("keydown", fn);
+  }, [onStep, onClose]);
+
+  const lbPhoneW = Math.min(Math.round((window.innerHeight * 0.78) / 2.08), 360);
+  const lbBrowserH = Math.min(Math.round(window.innerHeight * 0.68), 560);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.22 }}
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 10002,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        background: "rgba(0,0,0,0.97)",
+        backdropFilter: "blur(32px)",
+        WebkitBackdropFilter: "blur(32px)",
+        padding: "64px 24px 28px",
+        gap: 20,
+      }}
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+    >
+      {/* Ambient glow */}
+      <div style={{
+        position: "absolute", top: "42%", left: "50%",
+        transform: "translate(-50%,-50%)",
+        width: 700, height: 500,
+        background: `radial-gradient(ellipse, ${T(0.07)} 0%, transparent 65%)`,
+        filter: "blur(60px)", pointerEvents: "none",
+      }} />
+
+      {/* Counter top-left */}
+      <div style={{
+        position: "absolute", top: 22, left: 24,
+        fontFamily: "'Space Grotesk', sans-serif",
+        fontSize: 12, letterSpacing: "0.1em",
+        color: "rgba(255,255,255,0.22)",
+      }}>
+        {idx + 1} / {screens.length}
+      </div>
+
+      {/* Close top-right */}
+      <motion.button
+        whileHover={{ scale: 1.08, background: "rgba(255,255,255,0.12)" }}
+        whileTap={{ scale: 0.9 }}
+        onClick={onClose}
+        style={{
+          position: "absolute", top: 16, right: 16,
+          width: 40, height: 40, borderRadius: "50%",
+          background: "rgba(255,255,255,0.07)",
+          border: "1px solid rgba(255,255,255,0.12)",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          cursor: "pointer", color: "rgba(255,255,255,0.65)", outline: "none", zIndex: 10,
+        }}
+      >
+        <HiX size={18} />
+      </motion.button>
+
+      {/* Device + nav row */}
+      <div style={{
+        display: "flex", alignItems: "center",
+        gap: type === "phone" ? 28 : 20,
+        width: "100%", justifyContent: "center",
+        flex: 1, minHeight: 0,
+      }}>
+        <motion.button
+          whileHover={{ scale: 1.1, background: "rgba(255,255,255,0.1)" }}
+          whileTap={{ scale: 0.9 }}
+          onClick={() => onStep(-1)}
+          style={{
+            width: 44, height: 44, borderRadius: "50%",
+            background: "rgba(255,255,255,0.06)",
+            border: "1px solid rgba(255,255,255,0.1)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            cursor: "pointer", color: "rgba(255,255,255,0.55)", outline: "none", flexShrink: 0,
+          }}
+        >
+          <HiChevronLeft size={22} />
+        </motion.button>
+
+        <motion.div
+          key={screen.src}
+          initial={{ opacity: 0, scale: 0.88, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ type: "spring", stiffness: 280, damping: 24 }}
+          style={type !== "phone" ? { width: "min(88vw, 1000px)", flexShrink: 0 } : {}}
+        >
+          {type === "phone" ? (
+            <PhoneMockup screen={screen} dir={dir} width={lbPhoneW} />
+          ) : (
+            <BrowserMockup screen={screen} dir={dir} height={lbBrowserH} />
+          )}
+        </motion.div>
+
+        <motion.button
+          whileHover={{ scale: 1.1, background: "rgba(255,255,255,0.1)" }}
+          whileTap={{ scale: 0.9 }}
+          onClick={() => onStep(1)}
+          style={{
+            width: 44, height: 44, borderRadius: "50%",
+            background: "rgba(255,255,255,0.06)",
+            border: "1px solid rgba(255,255,255,0.1)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            cursor: "pointer", color: "rgba(255,255,255,0.55)", outline: "none", flexShrink: 0,
+          }}
+        >
+          <HiChevronRight size={22} />
+        </motion.button>
+      </div>
+
+      {/* Label + dots */}
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
+        <span style={{
+          fontFamily: "'Space Grotesk', sans-serif",
+          fontSize: 13, color: "rgba(255,255,255,0.45)",
+          letterSpacing: "0.04em",
+        }}>
+          {screen.label}
+        </span>
+        <Dots count={screens.length} current={idx} onChange={onJump} />
+      </div>
+    </motion.div>
+  );
+};
+
 /* ══════════════════════════════════════════════════════
-   MAIN MODAL
+   CASE STUDY (page content)
 ═══════════════════════════════════════════════════════ */
-const ElloCafeModal = ({ onClose }) => {
-  const [tab, setTab] = useState("overview");
+const ElloCafeCaseStudy = () => {
+  const [tab, setTab] = useState(() => (window.innerWidth < 640 ? "website" : "overview"));
   const [appIdx, setAppIdx] = useState(0);
   const [webIdx, setWebIdx] = useState(0);
   const [appDir, setAppDir] = useState(1);
   const [webDir, setWebDir] = useState(1);
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < 640);
+  const [lightbox, setLightbox] = useState(null); // null | "phone" | "web"
 
   const containerRef = useRef(null);
   const mx = useMotionValue(0);
@@ -670,19 +887,6 @@ const ElloCafeModal = ({ onClose }) => {
     return () => { clearInterval(a); clearInterval(w); };
   }, [stepApp, stepWeb]);
 
-  /* Escape key */
-  useEffect(() => {
-    const fn = (e) => e.key === "Escape" && onClose();
-    window.addEventListener("keydown", fn);
-    return () => window.removeEventListener("keydown", fn);
-  }, [onClose]);
-
-  /* Body scroll lock */
-  useEffect(() => {
-    document.body.style.overflow = "hidden";
-    return () => { document.body.style.overflow = ""; };
-  }, []);
-
   /* Responsive breakpoint tracker */
   useEffect(() => {
     const fn = () => setIsMobile(window.innerWidth < 640);
@@ -690,31 +894,26 @@ const ElloCafeModal = ({ onClose }) => {
     return () => window.removeEventListener("resize", fn);
   }, []);
 
+  const visibleTabs = isMobile ? TABS.filter((t) => t.id !== "overview") : TABS;
+
+  /* Overview is desktop-only — fall back when entering mobile */
+  useEffect(() => {
+    if (isMobile && tab === "overview") setTab("website");
+  }, [isMobile, tab]);
+
   return (
+    <>
     <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.22 }}
-      style={{
-        position: "fixed",
-        inset: 0,
-        zIndex: 9999,
-        display: "flex",
-        alignItems: isMobile ? "flex-end" : "center",
-        justifyContent: "center",
-        padding: isMobile ? 0 : 16,
-        background: "rgba(0,0,0,0.9)",
-        backdropFilter: "blur(16px)",
-        WebkitBackdropFilter: "blur(16px)",
-      }}
-      onClick={(e) => e.target === e.currentTarget && onClose()}
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35, ease: EASE }}
+      style={{ position: "relative", width: "100%" }}
     >
       {/* Ambient teal radial glow */}
       <div
         style={{
           position: "absolute",
-          top: "22%",
+          top: "12%",
           left: "50%",
           transform: "translate(-50%,-50%)",
           width: 900,
@@ -725,31 +924,25 @@ const ElloCafeModal = ({ onClose }) => {
         }}
       />
 
-      {/* ── Modal panel ── */}
-      <motion.div
-        initial={{ opacity: 0, scale: isMobile ? 1 : 0.93, y: isMobile ? 60 : 40 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: isMobile ? 1 : 0.93, y: isMobile ? 60 : 24 }}
-        transition={{ type: "spring", stiffness: 300, damping: 28, delay: 0.06 }}
+      {/* ── Page content panel ── */}
+      <div
         ref={containerRef}
         onMouseMove={isMobile ? undefined : handleMouse}
         onMouseLeave={isMobile ? undefined : resetMouse}
         style={{
           position: "relative",
           width: "100%",
-          maxWidth: isMobile ? "100%" : 980,
-          maxHeight: isMobile ? "92dvh" : "90vh",
-          overflowY: "auto",
+          maxWidth: 1040,
+          margin: "0 auto",
           overflowX: "hidden",
-          borderRadius: isMobile ? "20px 20px 0 0" : 24,
           background: "#09090b",
           border: "1px solid rgba(255,255,255,0.07)",
+          borderRadius: isMobile ? 16 : 24,
           boxShadow: [
-            "0 70px 140px rgba(0,0,0,0.85)",
+            "0 40px 100px rgba(0,0,0,0.55)",
             "0 0 0 1px rgba(255,255,255,0.03)",
-            `0 0 90px ${T(0.1)}`,
+            `0 0 90px ${T(0.08)}`,
           ].join(", "),
-          scrollbarWidth: "none",
         }}
       >
 
@@ -796,38 +989,14 @@ const ElloCafeModal = ({ onClose }) => {
               </div>
             </div>
 
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              {/* Tabs inline on desktop only */}
-              {!isMobile && <TabBar active={tab} onChange={setTab} />}
-              {/* Close button */}
-              <motion.button
-                whileHover={{ scale: 1.1, background: "rgba(255,255,255,0.1)" }}
-                whileTap={{ scale: 0.9 }}
-                onClick={onClose}
-                style={{
-                  width: 34,
-                  height: 34,
-                  borderRadius: "50%",
-                  background: "rgba(255,255,255,0.06)",
-                  border: "1px solid rgba(255,255,255,0.1)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  cursor: "pointer",
-                  color: "rgba(255,255,255,0.5)",
-                  outline: "none",
-                  transition: "background 0.2s",
-                }}
-              >
-                <HiX size={16} />
-              </motion.button>
-            </div>
+            {/* Tabs inline on desktop only */}
+            {!isMobile && <TabBar active={tab} onChange={setTab} tabs={visibleTabs} />}
           </div>
 
           {/* Row 2 (mobile only): Tabs full-width */}
           {isMobile && (
             <div style={{ display: "flex", justifyContent: "center", marginTop: 10 }}>
-              <TabBar active={tab} onChange={setTab} />
+              <TabBar active={tab} onChange={setTab} tabs={visibleTabs} />
             </div>
           )}
         </div>
@@ -836,7 +1005,7 @@ const ElloCafeModal = ({ onClose }) => {
         <AnimatePresence mode="wait">
 
           {/* ════════════════ OVERVIEW ════════════════ */}
-          {tab === "overview" && (
+          {tab === "overview" && !isMobile && (
             <motion.div
               key="overview"
               initial={{ opacity: 0, y: 16 }}
@@ -864,8 +1033,8 @@ const ElloCafeModal = ({ onClose }) => {
                   }}
                 >
                   A full-stack ed-tech ecosystem connecting students with verified instructors.
-                  Built solo — three platforms, one cohesive product: a WordPress marketing site,
-                  a React web app with dual dashboards, and a Flutter mobile app.
+                  Built solo — one cohesive product across web and mobile: a React.js web platform
+                  with dual dashboards, and a React Native app for iOS and Android.
                 </p>
               </motion.div>
 
@@ -896,14 +1065,14 @@ const ElloCafeModal = ({ onClose }) => {
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", marginBottom: 10 }}>
                       <div>
                         <SectionLabel color="rgba(255,255,255,0.3)">Mobile App</SectionLabel>
-                        <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 9, color: "rgba(255,255,255,0.18)", marginTop: 2, letterSpacing: "0.12em", textTransform: "uppercase" }}>Flutter · iOS &amp; Android</div>
+                        <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 9, color: "rgba(255,255,255,0.18)", marginTop: 2, letterSpacing: "0.12em", textTransform: "uppercase" }}>React Native · iOS &amp; Android</div>
                       </div>
                       <div style={{ display: "flex", gap: 5 }}>
                         <NavArrow dir={-1} onClick={() => stepApp(-1)} />
                         <NavArrow dir={1} onClick={() => stepApp(1)} />
                       </div>
                     </div>
-                    <PhoneMockup screen={APP_SCREENS[appIdx]} dir={appDir} width={160} autoAdvanceDur={3.8} />
+                    <PhoneMockup screen={APP_SCREENS[appIdx]} dir={appDir} width={160} autoAdvanceDur={3.8} onClick={() => setLightbox("phone")} />
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 10, width: "100%", gap: 8 }}>
                       <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 11, color: "rgba(255,255,255,0.3)" }}>{APP_SCREENS[appIdx].label}</span>
                       <Dots count={APP_SCREENS.length} current={appIdx} onChange={(i) => { setAppDir(i > appIdx ? 1 : -1); setAppIdx(i); }} />
@@ -942,7 +1111,7 @@ const ElloCafeModal = ({ onClose }) => {
                           textTransform: "uppercase",
                         }}
                       >
-                        WordPress + React
+                        React.js
                       </div>
                     </div>
                     <div style={{ display: "flex", gap: 5 }}>
@@ -967,6 +1136,7 @@ const ElloCafeModal = ({ onClose }) => {
                         dir={webDir}
                         height={isMobile ? 180 : 236}
                         autoAdvanceDur={4.5}
+                        onClick={() => setLightbox("web")}
                       />
                     </motion.div>
                   </motion.div>
@@ -1037,7 +1207,7 @@ const ElloCafeModal = ({ onClose }) => {
                             textTransform: "uppercase",
                           }}
                         >
-                          Flutter · iOS &amp; Android
+                          React Native · iOS &amp; Android
                         </div>
                       </div>
                       <div style={{ display: "flex", gap: 5 }}>
@@ -1062,6 +1232,7 @@ const ElloCafeModal = ({ onClose }) => {
                           dir={appDir}
                           width={190}
                           autoAdvanceDur={3.8}
+                          onClick={() => setLightbox("phone")}
                         />
                       </motion.div>
                     </motion.div>
@@ -1197,7 +1368,7 @@ const ElloCafeModal = ({ onClose }) => {
               style={{ padding: isMobile ? "20px 16px 24px" : "28px 28px 32px" }}
             >
               <div style={{ marginBottom: isMobile ? 16 : 22 }}>
-                <SectionLabel>WordPress + React</SectionLabel>
+                <SectionLabel>React.js</SectionLabel>
                 <h2
                   style={{
                     fontFamily: "'Space Grotesk', sans-serif",
@@ -1219,9 +1390,9 @@ const ElloCafeModal = ({ onClose }) => {
                     maxWidth: 580,
                   }}
                 >
-                  A public-facing WordPress marketing site paired with a custom React web app.
-                  Students book sessions, track progress, and message instructors —
-                  all in one place.
+                  A React.js web platform where students book sessions, track progress,
+                  and message instructors. Teachers manage courses, availability,
+                  and student interactions — all in one place.
                 </p>
               </div>
 
@@ -1249,7 +1420,7 @@ const ElloCafeModal = ({ onClose }) => {
                     <NavArrow dir={1} onClick={() => stepWeb(1)} />
                   </div>
                 </div>
-                <BrowserMockup screen={WEB_SCREENS[webIdx]} dir={webDir} height={isMobile ? 200 : 330} />
+                <BrowserMockup screen={WEB_SCREENS[webIdx]} dir={webDir} height={isMobile ? 200 : 330} onClick={() => setLightbox("web")} />
                 <div style={{ display: "flex", justifyContent: "center", marginTop: 12 }}>
                   <Dots
                     count={WEB_SCREENS.length}
@@ -1259,28 +1430,30 @@ const ElloCafeModal = ({ onClose }) => {
                 </div>
               </div>
 
-              {/* Thumbnail grid */}
-              <div style={{ marginTop: 16 }}>
-                <div
-                  style={{
-                    fontFamily: "'Space Grotesk', sans-serif",
-                    fontSize: 10,
-                    letterSpacing: "0.28em",
-                    textTransform: "uppercase",
-                    color: "rgba(255,255,255,0.2)",
-                    marginBottom: 10,
-                  }}
-                >
-                  All Screens
+              {/* Thumbnail grid — desktop only */}
+              {!isMobile && (
+                <div style={{ marginTop: 16 }}>
+                  <div
+                    style={{
+                      fontFamily: "'Space Grotesk', sans-serif",
+                      fontSize: 10,
+                      letterSpacing: "0.28em",
+                      textTransform: "uppercase",
+                      color: "rgba(255,255,255,0.2)",
+                      marginBottom: 10,
+                    }}
+                  >
+                    All Screens
+                  </div>
+                  <ThumbnailGrid
+                    screens={WEB_SCREENS}
+                    current={webIdx}
+                    onChange={(i) => { setWebDir(i > webIdx ? 1 : -1); setWebIdx(i); }}
+                    aspectRatio="16/10"
+                    cols={Math.min(WEB_SCREENS.length, 9)}
+                  />
                 </div>
-                <ThumbnailGrid
-                  screens={WEB_SCREENS}
-                  current={webIdx}
-                  onChange={(i) => { setWebDir(i > webIdx ? 1 : -1); setWebIdx(i); }}
-                  aspectRatio="16/10"
-                  cols={isMobile ? 3 : Math.min(WEB_SCREENS.length, 9)}
-                />
-              </div>
+              )}
 
               {/* Footer */}
               <div
@@ -1296,7 +1469,7 @@ const ElloCafeModal = ({ onClose }) => {
                 }}
               >
                 <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                  {["WordPress", "React", "Node.js", "MySQL", "PHP", "Tailwind"].map((t, i) => (
+                  {["React.js", "Node.js", "Tailwind", "Stripe", "REST API"].map((t, i) => (
                     <TechPill key={t} name={t} delay={i * 0.04} />
                   ))}
                 </div>
@@ -1316,7 +1489,7 @@ const ElloCafeModal = ({ onClose }) => {
               style={{ padding: isMobile ? "20px 16px 24px" : "28px 28px 32px" }}
             >
               <div style={{ marginBottom: isMobile ? 16 : 22 }}>
-                <SectionLabel>Flutter · Dart · Firebase</SectionLabel>
+                <SectionLabel>React Native · Firebase</SectionLabel>
                 <h2
                   style={{
                     fontFamily: "'Space Grotesk', sans-serif",
@@ -1338,7 +1511,7 @@ const ElloCafeModal = ({ onClose }) => {
                     maxWidth: 580,
                   }}
                 >
-                  A cross-platform Flutter app built for both students and instructors.
+                  A cross-platform React Native app built for both students and instructors.
                   Features onboarding, course discovery, instructor profiles,
                   real-time messaging, session booking, and progress tracking —
                   shipping natively on iOS and Android.
@@ -1374,6 +1547,7 @@ const ElloCafeModal = ({ onClose }) => {
                         dir={appDir}
                         width={isMobile ? 190 : 230}
                         autoAdvanceDur={3.8}
+                        onClick={() => setLightbox("phone")}
                       />
                     </motion.div>
                   </motion.div>
@@ -1397,28 +1571,30 @@ const ElloCafeModal = ({ onClose }) => {
                 </div>
               </div>
 
-              {/* Thumbnail strip */}
-              <div>
-                <div
-                  style={{
-                    fontFamily: "'Space Grotesk', sans-serif",
-                    fontSize: 10,
-                    letterSpacing: "0.28em",
-                    textTransform: "uppercase",
-                    color: "rgba(255,255,255,0.2)",
-                    marginBottom: 10,
-                  }}
-                >
-                  All Screens
+              {/* Thumbnail strip — desktop only */}
+              {!isMobile && (
+                <div>
+                  <div
+                    style={{
+                      fontFamily: "'Space Grotesk', sans-serif",
+                      fontSize: 10,
+                      letterSpacing: "0.28em",
+                      textTransform: "uppercase",
+                      color: "rgba(255,255,255,0.2)",
+                      marginBottom: 10,
+                    }}
+                  >
+                    All Screens
+                  </div>
+                  <ThumbnailGrid
+                    screens={APP_SCREENS}
+                    current={appIdx}
+                    onChange={(i) => { setAppDir(i > appIdx ? 1 : -1); setAppIdx(i); }}
+                    aspectRatio="9/18"
+                    cols={Math.min(APP_SCREENS.length, 6)}
+                  />
                 </div>
-                <ThumbnailGrid
-                  screens={APP_SCREENS}
-                  current={appIdx}
-                  onChange={(i) => { setAppDir(i > appIdx ? 1 : -1); setAppIdx(i); }}
-                  aspectRatio="9/18"
-                  cols={isMobile ? 3 : Math.min(APP_SCREENS.length, 6)}
-                />
-              </div>
+              )}
 
               {/* Footer */}
               <div
@@ -1434,7 +1610,7 @@ const ElloCafeModal = ({ onClose }) => {
                 }}
               >
                 <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                  {["Flutter", "Dart", "Firebase", "Figma", "REST API"].map((t, i) => (
+                  {["React Native", "Firebase", "Figma", "REST API"].map((t, i) => (
                     <TechPill key={t} name={t} delay={i * 0.04} />
                   ))}
                 </div>
@@ -1452,9 +1628,28 @@ const ElloCafeModal = ({ onClose }) => {
             </motion.div>
           )}
         </AnimatePresence>
-      </motion.div>
+      </div>
     </motion.div>
+
+    {/* ── Lightbox ── */}
+    <AnimatePresence>
+      {lightbox && (
+        <Lightbox
+          type={lightbox}
+          screens={lightbox === "phone" ? APP_SCREENS : WEB_SCREENS}
+          idx={lightbox === "phone" ? appIdx : webIdx}
+          dir={lightbox === "phone" ? appDir : webDir}
+          onStep={lightbox === "phone" ? stepApp : stepWeb}
+          onJump={lightbox === "phone"
+            ? (i) => { setAppDir(i > appIdx ? 1 : -1); setAppIdx(i); }
+            : (i) => { setWebDir(i > webIdx ? 1 : -1); setWebIdx(i); }
+          }
+          onClose={() => setLightbox(null)}
+        />
+      )}
+    </AnimatePresence>
+    </>
   );
 };
 
-export default ElloCafeModal;
+export default ElloCafeCaseStudy;

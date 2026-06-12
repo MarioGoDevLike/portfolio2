@@ -1,17 +1,15 @@
 import React, { useRef, useState, useCallback } from "react";
 import {
   motion,
-  AnimatePresence,
   useMotionValue,
   useSpring,
   useTransform,
   useMotionTemplate,
 } from "framer-motion";
 import { HiArrowUpRight } from "react-icons/hi2";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { HOME_PROJECTS } from "../../constants";
 import AnimatedSection from "../ui/AnimatedSection";
-import ElloCafeModal from "../project/ElloCafeModal";
 
 const EASE_EXPO = [0.22, 1, 0.36, 1];
 
@@ -495,11 +493,10 @@ const Card3D = ({ project, featured = false, index = 0, onCustomClick }) => {
 /* ─── Section ─── */
 const WorkSection = () => {
   const [featured, ...rest] = HOME_PROJECTS;
-  const [showElloModal, setShowElloModal] = useState(false);
+  const navigate = useNavigate();
 
   return (
-    <>
-      <section className="section" id="work">
+    <section className="section" id="work">
         <div className="container">
           {/* header */}
           <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between mb-12 gap-6">
@@ -529,7 +526,7 @@ const WorkSection = () => {
               project={featured}
               featured
               index={0}
-              onCustomClick={featured.id === "ello" ? () => setShowElloModal(true) : undefined}
+              onCustomClick={featured.caseStudyPath ? () => navigate(featured.caseStudyPath) : undefined}
             />
           </div>
 
@@ -541,14 +538,6 @@ const WorkSection = () => {
           </div>
         </div>
       </section>
-
-      {/* Ello Café case study modal */}
-      <AnimatePresence>
-        {showElloModal && (
-          <ElloCafeModal onClose={() => setShowElloModal(false)} />
-        )}
-      </AnimatePresence>
-    </>
   );
 };
 

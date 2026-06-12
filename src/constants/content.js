@@ -53,7 +53,8 @@ export const PROJECTS = [
  
     image: elloImage,
     imageFit: "contain",
-    href: "https://ellos-new-website.vercel.app/",
+    caseStudyPath: "/projects/ello-cafe",
+    liveHref: "https://ellos-new-website.vercel.app/",
     tag: "Web",
     accent: "violet",
     featured: true,
