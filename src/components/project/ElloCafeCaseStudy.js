@@ -8,8 +8,8 @@ import {
 } from "framer-motion";
 import { Link } from "react-router-dom";
 import { HiChevronLeft, HiChevronRight } from "react-icons/hi";
-import { HiX } from "react-icons/hi";
 import { HiArrowUpRight, HiArrowsPointingOut } from "react-icons/hi2";
+import CaseStudyLightbox, { LandscapeWebImage } from "./CaseStudyLightbox";
 
 /* ─── App screenshots ──────────────────────────────── */
 import appWelcome from "../../assets/ello_app_images/unlogged page.png";
@@ -683,148 +683,6 @@ const LiveButton = ({ label = "Visit Live Site" }) => (
   </motion.a>
 );
 
-/* ─── Fullscreen Lightbox ──────────────────────────── */
-const Lightbox = ({ type, screens, idx, dir, onStep, onJump, onClose }) => {
-  const screen = screens[idx];
-
-  useEffect(() => {
-    const fn = (e) => {
-      if (e.key === "Escape") onClose();
-      if (e.key === "ArrowLeft") onStep(-1);
-      if (e.key === "ArrowRight") onStep(1);
-    };
-    window.addEventListener("keydown", fn);
-    return () => window.removeEventListener("keydown", fn);
-  }, [onStep, onClose]);
-
-  const lbPhoneW = Math.min(Math.round((window.innerHeight * 0.78) / 2.08), 360);
-  const lbBrowserH = Math.min(Math.round(window.innerHeight * 0.68), 560);
-
-  return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.22 }}
-      style={{
-        position: "fixed",
-        inset: 0,
-        zIndex: 10002,
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        background: "rgba(0,0,0,0.97)",
-        backdropFilter: "blur(32px)",
-        WebkitBackdropFilter: "blur(32px)",
-        padding: "64px 24px 28px",
-        gap: 20,
-      }}
-      onClick={(e) => e.target === e.currentTarget && onClose()}
-    >
-      {/* Ambient glow */}
-      <div style={{
-        position: "absolute", top: "42%", left: "50%",
-        transform: "translate(-50%,-50%)",
-        width: 700, height: 500,
-        background: `radial-gradient(ellipse, ${T(0.07)} 0%, transparent 65%)`,
-        filter: "blur(60px)", pointerEvents: "none",
-      }} />
-
-      {/* Counter top-left */}
-      <div style={{
-        position: "absolute", top: 22, left: 24,
-        fontFamily: "'Space Grotesk', sans-serif",
-        fontSize: 12, letterSpacing: "0.1em",
-        color: "rgba(255,255,255,0.22)",
-      }}>
-        {idx + 1} / {screens.length}
-      </div>
-
-      {/* Close top-right */}
-      <motion.button
-        whileHover={{ scale: 1.08, background: "rgba(255,255,255,0.12)" }}
-        whileTap={{ scale: 0.9 }}
-        onClick={onClose}
-        style={{
-          position: "absolute", top: 16, right: 16,
-          width: 40, height: 40, borderRadius: "50%",
-          background: "rgba(255,255,255,0.07)",
-          border: "1px solid rgba(255,255,255,0.12)",
-          display: "flex", alignItems: "center", justifyContent: "center",
-          cursor: "pointer", color: "rgba(255,255,255,0.65)", outline: "none", zIndex: 10,
-        }}
-      >
-        <HiX size={18} />
-      </motion.button>
-
-      {/* Device + nav row */}
-      <div style={{
-        display: "flex", alignItems: "center",
-        gap: type === "phone" ? 28 : 20,
-        width: "100%", justifyContent: "center",
-        flex: 1, minHeight: 0,
-      }}>
-        <motion.button
-          whileHover={{ scale: 1.1, background: "rgba(255,255,255,0.1)" }}
-          whileTap={{ scale: 0.9 }}
-          onClick={() => onStep(-1)}
-          style={{
-            width: 44, height: 44, borderRadius: "50%",
-            background: "rgba(255,255,255,0.06)",
-            border: "1px solid rgba(255,255,255,0.1)",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            cursor: "pointer", color: "rgba(255,255,255,0.55)", outline: "none", flexShrink: 0,
-          }}
-        >
-          <HiChevronLeft size={22} />
-        </motion.button>
-
-        <motion.div
-          key={screen.src}
-          initial={{ opacity: 0, scale: 0.88, y: 20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          transition={{ type: "spring", stiffness: 280, damping: 24 }}
-          style={type !== "phone" ? { width: "min(88vw, 1000px)", flexShrink: 0 } : {}}
-        >
-          {type === "phone" ? (
-            <PhoneMockup screen={screen} dir={dir} width={lbPhoneW} />
-          ) : (
-            <BrowserMockup screen={screen} dir={dir} height={lbBrowserH} />
-          )}
-        </motion.div>
-
-        <motion.button
-          whileHover={{ scale: 1.1, background: "rgba(255,255,255,0.1)" }}
-          whileTap={{ scale: 0.9 }}
-          onClick={() => onStep(1)}
-          style={{
-            width: 44, height: 44, borderRadius: "50%",
-            background: "rgba(255,255,255,0.06)",
-            border: "1px solid rgba(255,255,255,0.1)",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            cursor: "pointer", color: "rgba(255,255,255,0.55)", outline: "none", flexShrink: 0,
-          }}
-        >
-          <HiChevronRight size={22} />
-        </motion.button>
-      </div>
-
-      {/* Label + dots */}
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
-        <span style={{
-          fontFamily: "'Space Grotesk', sans-serif",
-          fontSize: 13, color: "rgba(255,255,255,0.45)",
-          letterSpacing: "0.04em",
-        }}>
-          {screen.label}
-        </span>
-        <Dots count={screens.length} current={idx} onChange={onJump} />
-      </div>
-    </motion.div>
-  );
-};
-
 /* ══════════════════════════════════════════════════════
    CASE STUDY (page content)
 ═══════════════════════════════════════════════════════ */
@@ -905,9 +763,10 @@ const ElloCafeCaseStudy = () => {
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, ease: EASE }}
-      style={{ position: "relative", width: "100%" }}
+      style={{ position: "relative", width: "100%", maxWidth: "100%", overflowX: "hidden" }}
     >
-      {/* Ambient teal radial glow */}
+      {/* Ambient teal radial glow — desktop only (blur + fixed width overflows mobile) */}
+      {!isMobile && (
       <div
         style={{
           position: "absolute",
@@ -921,6 +780,7 @@ const ElloCafeCaseStudy = () => {
           pointerEvents: "none",
         }}
       />
+      )}
 
       {/* ── Page content panel ── */}
       <div
@@ -930,6 +790,7 @@ const ElloCafeCaseStudy = () => {
         style={{
           position: "relative",
           width: "100%",
+          maxWidth: "100%",
           overflowX: "hidden",
         }}
       >
@@ -1393,7 +1254,7 @@ const ElloCafeCaseStudy = () => {
               </div>
 
               {/* Browser mockup + nav */}
-              <div>
+              <div style={{ maxWidth: "100%", overflow: "hidden" }}>
                 <div
                   style={{
                     display: "flex",
@@ -1524,7 +1385,7 @@ const ElloCafeCaseStudy = () => {
                   marginBottom: isMobile ? 20 : 28,
                 }}
               >
-                <div style={{ display: "flex", alignItems: "center", gap: isMobile ? 16 : 28 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: isMobile ? 12 : 28, maxWidth: "100%", justifyContent: "center" }}>
                   <NavArrow dir={-1} onClick={() => stepApp(-1)} />
                   <motion.div
                     animate={isMobile ? {} : { y: [0, -6, 0] }}
@@ -1605,7 +1466,7 @@ const ElloCafeCaseStudy = () => {
     {/* ── Lightbox ── */}
     <AnimatePresence>
       {lightbox && (
-        <Lightbox
+        <CaseStudyLightbox
           type={lightbox}
           screens={lightbox === "phone" ? APP_SCREENS : WEB_SCREENS}
           idx={lightbox === "phone" ? appIdx : webIdx}
@@ -1616,6 +1477,35 @@ const ElloCafeCaseStudy = () => {
             : (i) => { setWebDir(i > webIdx ? 1 : -1); setWebIdx(i); }
           }
           onClose={() => setLightbox(null)}
+          glowColor={T(0.07)}
+          renderSlide={(screen, dims) => (
+            lightbox === "phone" ? (
+              <PhoneMockup screen={screen} dir={appDir} width={dims.phoneW} />
+            ) : (
+              <LandscapeWebImage screen={screen} dir={webDir} width={dims.webWidth} />
+            )
+          )}
+          renderFooter={(screen) => (
+            <>
+              <span style={{
+                fontFamily: "'Space Grotesk', sans-serif",
+                fontSize: 13,
+                color: "rgba(255,255,255,0.45)",
+                letterSpacing: "0.04em",
+              }}
+              >
+                {screen.label}
+              </span>
+              <Dots
+                count={(lightbox === "phone" ? APP_SCREENS : WEB_SCREENS).length}
+                current={lightbox === "phone" ? appIdx : webIdx}
+                onChange={lightbox === "phone"
+                  ? (i) => { setAppDir(i > appIdx ? 1 : -1); setAppIdx(i); }
+                  : (i) => { setWebDir(i > webIdx ? 1 : -1); setWebIdx(i); }
+                }
+              />
+            </>
+          )}
         />
       )}
     </AnimatePresence>

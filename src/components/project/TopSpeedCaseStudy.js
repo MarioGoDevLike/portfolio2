@@ -7,8 +7,9 @@ import {
   useTransform,
 } from "framer-motion";
 import { Link } from "react-router-dom";
-import { HiChevronLeft, HiChevronRight, HiX } from "react-icons/hi";
+import { HiChevronLeft, HiChevronRight } from "react-icons/hi";
 import { HiArrowsPointingOut } from "react-icons/hi2";
+import CaseStudyLightbox from "./CaseStudyLightbox";
 
 /* ─── Vendor app screenshots ───────────────────────── */
 import vendorDashboard from "../../assets/Top_speed_apps/vendor_dashboard_page.png";
@@ -225,54 +226,6 @@ const TechPill = ({ name, delay = 0 }) => (
   </motion.span>
 );
 
-const Lightbox = ({ screens, idx, dir, onStep, onJump, onClose }) => {
-  const screen = screens[idx];
-  const lbPhoneW = Math.min(Math.round((window.innerHeight * 0.78) / 2.08), 360);
-
-  useEffect(() => {
-    const fn = (e) => {
-      if (e.key === "Escape") onClose();
-      if (e.key === "ArrowLeft") onStep(-1);
-      if (e.key === "ArrowRight") onStep(1);
-    };
-    window.addEventListener("keydown", fn);
-    return () => window.removeEventListener("keydown", fn);
-  }, [onStep, onClose]);
-
-  return (
-    <motion.div
-      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-      transition={{ duration: 0.22 }}
-      style={{ position: "fixed", inset: 0, zIndex: 10002, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: "rgba(0,0,0,0.97)", backdropFilter: "blur(32px)", WebkitBackdropFilter: "blur(32px)", padding: "64px 24px 28px", gap: 20 }}
-      onClick={(e) => e.target === e.currentTarget && onClose()}
-    >
-      <div style={{ position: "absolute", top: "42%", left: "50%", transform: "translate(-50%,-50%)", width: 700, height: 500, background: `radial-gradient(ellipse, ${R(0.07)} 0%, transparent 65%)`, filter: "blur(60px)", pointerEvents: "none" }} />
-      <div style={{ position: "absolute", top: 22, left: 24, fontFamily: "'Space Grotesk', sans-serif", fontSize: 12, letterSpacing: "0.1em", color: "rgba(255,255,255,0.22)" }}>{idx + 1} / {screens.length}</div>
-      <motion.button
-        whileHover={{ scale: 1.08, background: "rgba(255,255,255,0.12)" }} whileTap={{ scale: 0.9 }} onClick={onClose}
-        style={{ position: "absolute", top: 16, right: 16, width: 40, height: 40, borderRadius: "50%", background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "rgba(255,255,255,0.65)", outline: "none", zIndex: 10 }}
-      >
-        <HiX size={18} />
-      </motion.button>
-      <div style={{ display: "flex", alignItems: "center", gap: 28, width: "100%", justifyContent: "center", flex: 1, minHeight: 0 }}>
-        <motion.button whileHover={{ scale: 1.1, background: "rgba(255,255,255,0.1)" }} whileTap={{ scale: 0.9 }} onClick={() => onStep(-1)} style={{ width: 44, height: 44, borderRadius: "50%", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "rgba(255,255,255,0.55)", outline: "none", flexShrink: 0 }}>
-          <HiChevronLeft size={22} />
-        </motion.button>
-        <motion.div key={screen.src} initial={{ opacity: 0, scale: 0.88, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} transition={{ type: "spring", stiffness: 280, damping: 24 }}>
-          <PhoneMockup screen={screen} dir={dir} width={lbPhoneW} />
-        </motion.div>
-        <motion.button whileHover={{ scale: 1.1, background: "rgba(255,255,255,0.1)" }} whileTap={{ scale: 0.9 }} onClick={() => onStep(1)} style={{ width: 44, height: 44, borderRadius: "50%", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "rgba(255,255,255,0.55)", outline: "none", flexShrink: 0 }}>
-          <HiChevronRight size={22} />
-        </motion.button>
-      </div>
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
-        <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 13, color: "rgba(255,255,255,0.45)", letterSpacing: "0.04em" }}>{screen.label}</span>
-        <Dots count={screens.length} current={idx} onChange={onJump} />
-      </div>
-    </motion.div>
-  );
-};
-
 /* ─── Phone column (reused in overview + tabs) ───────── */
 const PhoneColumn = ({ label, sublabel, screens, idx, dir, step, setLightbox, phoneRotX, phoneRotY, width, autoAdvance, isMobile, levitateDelay = 0 }) => (
   <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: isMobile ? "100%" : "auto" }}>
@@ -380,15 +333,17 @@ const TopSpeedCaseStudy = () => {
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.35, ease: EASE }}
-        style={{ position: "relative", width: "100%" }}
+        style={{ position: "relative", width: "100%", maxWidth: "100%", overflowX: "hidden" }}
       >
+        {!isMobile && (
         <div style={{ position: "absolute", top: "12%", left: "50%", transform: "translate(-50%,-50%)", width: 900, height: 600, background: `radial-gradient(ellipse, ${R(0.08)} 0%, transparent 65%)`, filter: "blur(50px)", pointerEvents: "none" }} />
+        )}
 
         <div
           ref={containerRef}
           onMouseMove={isMobile ? undefined : handleMouse}
           onMouseLeave={isMobile ? undefined : resetMouse}
-          style={{ position: "relative", width: "100%", overflowX: "hidden" }}
+          style={{ position: "relative", width: "100%", maxWidth: "100%", overflowX: "hidden" }}
         >
           {/* Header */}
           <div style={{
@@ -522,7 +477,7 @@ const TopSpeedCaseStudy = () => {
                   </p>
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 14 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: isMobile ? 16 : 28 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: isMobile ? 12 : 28, maxWidth: "100%", justifyContent: "center" }}>
                     <NavArrow dir={-1} onClick={() => stepVendor(-1)} />
                     <motion.div animate={isMobile ? {} : { y: [0, -6, 0] }} transition={{ duration: 3.4, repeat: Infinity, ease: "easeInOut" }} style={{ perspective: 1200 }}>
                       <motion.div style={isMobile ? {} : { rotateX: vendorRotX, rotateY: vendorRotY, transformStyle: "preserve-3d" }}>
@@ -563,7 +518,7 @@ const TopSpeedCaseStudy = () => {
                   </p>
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 14 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: isMobile ? 16 : 28 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: isMobile ? 12 : 28, maxWidth: "100%", justifyContent: "center" }}>
                     <NavArrow dir={-1} onClick={() => stepDriver(-1)} />
                     <motion.div animate={isMobile ? {} : { y: [0, -6, 0] }} transition={{ duration: 3.4, repeat: Infinity, ease: "easeInOut", delay: 0.4 }} style={{ perspective: 1200 }}>
                       <motion.div style={isMobile ? {} : { rotateX: driverRotX, rotateY: driverRotY, transformStyle: "preserve-3d" }}>
@@ -592,13 +547,24 @@ const TopSpeedCaseStudy = () => {
 
       <AnimatePresence>
         {lightbox && (
-          <Lightbox
+          <CaseStudyLightbox
+            type="phone"
             screens={lightboxScreens}
             idx={lightboxIdx}
             dir={lightboxDir}
             onStep={lightboxStep}
             onJump={(i) => lightboxStep(i > lightboxIdx ? 1 : -1, i)}
             onClose={() => setLightbox(null)}
+            glowColor={R(0.07)}
+            renderSlide={(screen, dims) => (
+              <PhoneMockup screen={screen} dir={lightboxDir} width={dims.phoneW} />
+            )}
+            renderFooter={(screen) => (
+              <>
+                <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 13, color: "rgba(255,255,255,0.45)", letterSpacing: "0.04em" }}>{screen.label}</span>
+                <Dots count={lightboxScreens.length} current={lightboxIdx} onChange={(i) => lightboxStep(i > lightboxIdx ? 1 : -1, i)} />
+              </>
+            )}
           />
         )}
       </AnimatePresence>

@@ -9,6 +9,7 @@ import {
 import { Link } from "react-router-dom";
 import { HiChevronLeft, HiX } from "react-icons/hi";
 import { HiArrowUpRight, HiArrowsPointingOut } from "react-icons/hi2";
+import { getLightboxDims } from "./CaseStudyLightbox";
 
 import alterWebVideo from "../../assets/alter_images/alter_web_view.mp4";
 import alterMobileVideo from "../../assets/alter_images/alter_mobile_view.mp4";
@@ -265,8 +266,32 @@ const VideoPhoneMockup = ({ src, onClick, width = 200 }) => {
 const VideoLightbox = ({ type, onClose }) => {
   const src = type === "phone" ? alterMobileVideo : alterWebVideo;
   const videoRef = useRef(null);
-  const lbPhoneW = Math.min(Math.round((window.innerHeight * 0.78) / 2.08), 360);
-  const lbBrowserH = Math.min(Math.round(window.innerHeight * 0.68), 560);
+  const [vp, setVp] = useState(() => ({
+    w: window.innerWidth,
+    h: window.innerHeight,
+    portrait: window.innerHeight > window.innerWidth,
+    mobile: window.innerWidth < 640,
+  }));
+
+  useEffect(() => {
+    const fn = () => setVp({
+      w: window.innerWidth,
+      h: window.innerHeight,
+      portrait: window.innerHeight > window.innerWidth,
+      mobile: window.innerWidth < 640,
+    });
+    window.addEventListener("resize", fn);
+    return () => window.removeEventListener("resize", fn);
+  }, []);
+
+  const dims = getLightboxDims(type === "phone" ? "phone" : "web", vp);
+  const isWebLandscape = type === "web" && dims.webRotateLandscape;
+
+  useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = prev; };
+  }, []);
 
   useEffect(() => {
     const fn = (e) => { if (e.key === "Escape") onClose(); };
@@ -280,43 +305,60 @@ const VideoLightbox = ({ type, onClose }) => {
     <motion.div
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
       transition={{ duration: 0.22 }}
-      style={{ position: "fixed", inset: 0, zIndex: 10002, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: "rgba(0,0,0,0.97)", backdropFilter: "blur(32px)", WebkitBackdropFilter: "blur(32px)", padding: "64px 24px 28px", gap: 20 }}
+      style={{ position: "fixed", inset: 0, zIndex: 10002, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: "rgba(0,0,0,0.97)", backdropFilter: "blur(32px)", WebkitBackdropFilter: "blur(32px)", padding: vp.mobile ? "52px 12px 20px" : "64px 24px 28px", gap: 16, overflow: "hidden" }}
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div style={{ position: "absolute", top: "42%", left: "50%", transform: "translate(-50%,-50%)", width: 700, height: 500, background: `radial-gradient(ellipse, ${G(0.07)} 0%, transparent 65%)`, filter: "blur(60px)", pointerEvents: "none" }} />
-      <div style={{ position: "absolute", top: 22, left: 24, fontFamily: "'Space Grotesk', sans-serif", fontSize: 12, letterSpacing: "0.1em", color: "rgba(255,255,255,0.22)" }}>
+      <div style={{ position: "absolute", top: "42%", left: "50%", transform: "translate(-50%,-50%)", width: Math.min(vp.w, 700), height: 500, background: `radial-gradient(ellipse, ${G(0.07)} 0%, transparent 65%)`, filter: "blur(60px)", pointerEvents: "none" }} />
+      <div style={{ position: "absolute", top: vp.mobile ? 16 : 22, left: vp.mobile ? 16 : 24, fontFamily: "'Space Grotesk', sans-serif", fontSize: 12, letterSpacing: "0.1em", color: "rgba(255,255,255,0.22)" }}>
         {type === "phone" ? "Mobile View" : "Website"}
       </div>
       <motion.button
+        type="button"
         whileHover={{ scale: 1.08, background: "rgba(255,255,255,0.12)" }} whileTap={{ scale: 0.9 }} onClick={onClose}
-        style={{ position: "absolute", top: 16, right: 16, width: 40, height: 40, borderRadius: "50%", background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "rgba(255,255,255,0.65)", outline: "none", zIndex: 10 }}
+        aria-label="Close"
+        style={{ position: "absolute", top: vp.mobile ? 12 : 16, right: vp.mobile ? 12 : 16, width: 40, height: 40, borderRadius: "50%", background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "rgba(255,255,255,0.65)", outline: "none", zIndex: 10 }}
       >
         <HiX size={18} />
       </motion.button>
-      <motion.div
-        initial={{ opacity: 0, scale: 0.9, y: 20 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={{ type: "spring", stiffness: 280, damping: 24 }}
-        style={type === "web" ? { width: "min(92vw, 1100px)" } : {}}
-      >
-        {type === "phone" ? (
-          <div style={{ width: lbPhoneW, height: Math.round(lbPhoneW * 2.08), borderRadius: lbPhoneW * 0.19, overflow: "hidden", border: "1.5px solid rgba(255,255,255,0.1)", boxShadow: `0 40px 80px rgba(0,0,0,0.8), 0 0 60px ${G(0.15)}` }}>
-            <ChromelessVideo
-              videoRef={videoRef}
-              src={src}
-              style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top" }}
-            />
-          </div>
-        ) : (
-          <div style={{ borderRadius: 12, overflow: "hidden", border: "1px solid rgba(255,255,255,0.1)", boxShadow: `0 40px 80px rgba(0,0,0,0.8), 0 0 60px ${G(0.12)}` }}>
-            <ChromelessVideo
-              videoRef={videoRef}
-              src={src}
-              style={{ width: "100%", height: lbBrowserH, objectFit: "contain", background: "#0a0a0a" }}
-            />
-          </div>
-        )}
-      </motion.div>
+      <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", width: "100%", minHeight: 0 }}>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ type: "spring", stiffness: 280, damping: 24 }}
+          style={{
+            transform: isWebLandscape ? "rotate(90deg)" : undefined,
+            transformOrigin: "center center",
+            flexShrink: 0,
+          }}
+        >
+          {type === "phone" ? (
+            <div style={{ width: dims.phoneW, height: Math.round(dims.phoneW * 2.08), borderRadius: dims.phoneW * 0.19, overflow: "hidden", border: "1.5px solid rgba(255,255,255,0.1)", boxShadow: `0 40px 80px rgba(0,0,0,0.8), 0 0 60px ${G(0.15)}` }}>
+              <ChromelessVideo
+                videoRef={videoRef}
+                src={src}
+                style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top" }}
+              />
+            </div>
+          ) : (
+            <div style={{
+              width: dims.webWidth,
+              aspectRatio: "16 / 9",
+              borderRadius: 10,
+              overflow: "hidden",
+              border: "1px solid rgba(255,255,255,0.1)",
+              boxShadow: `0 40px 80px rgba(0,0,0,0.8), 0 0 60px ${G(0.12)}`,
+              background: "#0a0a0a",
+            }}
+            >
+              <ChromelessVideo
+                videoRef={videoRef}
+                src={src}
+                style={{ width: "100%", height: "100%", objectFit: "contain", objectPosition: "top center", background: "#0a0a0a" }}
+              />
+            </div>
+          )}
+        </motion.div>
+      </div>
       <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 13, color: "rgba(255,255,255,0.4)", letterSpacing: "0.04em" }}>
         {type === "phone" ? "Mobile experience" : "Desktop experience"}
       </span>
@@ -367,15 +409,17 @@ const AlterCaseStudy = () => {
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.35, ease: EASE }}
-        style={{ position: "relative", width: "100%" }}
+        style={{ position: "relative", width: "100%", maxWidth: "100%", overflowX: "hidden" }}
       >
+        {!isMobile && (
         <div style={{ position: "absolute", top: "12%", left: "50%", transform: "translate(-50%,-50%)", width: 900, height: 600, background: `radial-gradient(ellipse, ${G(0.07)} 0%, transparent 65%)`, filter: "blur(50px)", pointerEvents: "none" }} />
+        )}
 
         <div
           ref={containerRef}
           onMouseMove={isMobile ? undefined : handleMouse}
           onMouseLeave={isMobile ? undefined : resetMouse}
-          style={{ position: "relative", width: "100%", overflowX: "hidden" }}
+          style={{ position: "relative", width: "100%", maxWidth: "100%", overflowX: "hidden" }}
         >
           <div style={{
             position: "sticky", top: 0, zIndex: 30,
@@ -497,7 +541,9 @@ const AlterCaseStudy = () => {
                     Every section is crafted to communicate scale, prestige, and creative authority.
                   </p>
                 </div>
+                <div style={{ maxWidth: "100%", overflow: "hidden" }}>
                 <VideoBrowserMockup src={alterWebVideo} onClick={() => setLightbox("web")} />
+                </div>
                 <div style={{ marginTop: 18, paddingTop: 16, borderTop: "1px solid rgba(255,255,255,0.05)", display: "flex", flexDirection: isMobile ? "column" : "row", alignItems: isMobile ? "stretch" : "center", justifyContent: "space-between", gap: 12 }}>
                   <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                     {["React.js", "JavaScript", "CSS3", "Vercel"].map((t, i) => <TechPill key={t} name={t} delay={i * 0.04} />)}
@@ -526,7 +572,7 @@ const AlterCaseStudy = () => {
                     impeccable on every screen size.
                   </p>
                 </div>
-                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 14 }}>
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 14, maxWidth: "100%", overflow: "hidden" }}>
                   <motion.div animate={isMobile ? {} : { y: [0, -6, 0] }} transition={{ duration: 3.4, repeat: Infinity, ease: "easeInOut" }} style={{ perspective: 1200 }}>
                     <motion.div style={isMobile ? {} : { rotateX: phoneRotX, rotateY: phoneRotY, transformStyle: "preserve-3d" }}>
                       <VideoPhoneMockup src={alterMobileVideo} width={isMobile ? 190 : 290} onClick={() => setLightbox("phone")} />
