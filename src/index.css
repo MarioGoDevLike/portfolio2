@@ -661,3 +661,16 @@
 .link-hover:hover::after {
   width: 100%;
 }
+
+/* Chromeless case-study videos — no native controls on hover */
+.alter-case-study-video::-webkit-media-controls {
+  display: none !important;
+}
+
+.alter-case-study-video::-webkit-media-controls-enclosure {
+  display: none !important;
+}
+
+.alter-case-study-video::-webkit-media-controls-panel {
+  display: none !important;
+}

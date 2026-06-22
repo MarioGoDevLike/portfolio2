@@ -16,6 +16,43 @@ import alterLogo from "../../assets/alter_images/alter logo white .png";
 
 const LIVE_URL = "https://altercoms.vercel.app/";
 
+const CHROMELESS_VIDEO_PROPS = {
+  autoPlay: true,
+  loop: true,
+  muted: true,
+  playsInline: true,
+  disablePictureInPicture: true,
+  disableRemotePlayback: true,
+  controls: false,
+  controlsList: "nodownload noplaybackrate noremoteplayback nofullscreen",
+  onContextMenu: (e) => e.preventDefault(),
+};
+
+const useChromelessVideo = (videoRef, src) => {
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v) return;
+
+    const keepPlaying = () => {
+      if (v.paused) v.play().catch(() => {});
+    };
+
+    v.play().catch(() => {});
+    v.addEventListener("pause", keepPlaying);
+    return () => v.removeEventListener("pause", keepPlaying);
+  }, [videoRef, src]);
+};
+
+const ChromelessVideo = ({ videoRef, src, style, className = "alter-case-study-video" }) => (
+  <video
+    ref={videoRef}
+    src={src}
+    className={className}
+    {...CHROMELESS_VIDEO_PROPS}
+    style={{ pointerEvents: "none", ...style }}
+  />
+);
+
 /* ─── Brand palette (luxury PR — white + champagne gold) ── */
 const GOLD = "#C4A574";
 const G = (a) => `rgba(196,165,116,${a})`;
@@ -130,11 +167,7 @@ const VideoBrowserMockup = ({ src, onClick, height }) => {
   const [hov, setHov] = useState(false);
   const videoRef = useRef(null);
 
-  useEffect(() => {
-    const v = videoRef.current;
-    if (!v) return;
-    v.play().catch(() => {});
-  }, [src]);
+  useChromelessVideo(videoRef, src);
 
   return (
     <div
@@ -160,13 +193,9 @@ const VideoBrowserMockup = ({ src, onClick, height }) => {
         </div>
       </div>
       <div style={{ position: "relative", overflow: "hidden", width: "100%", ...(height ? { height } : { aspectRatio: "16 / 9" }) }}>
-        <video
-          ref={videoRef}
+        <ChromelessVideo
+          videoRef={videoRef}
           src={src}
-          autoPlay
-          loop
-          muted
-          playsInline
           style={{ width: "100%", height: "100%", objectFit: "contain", objectPosition: "top center", display: "block", background: "#0a0a0a" }}
         />
       </div>
@@ -190,11 +219,7 @@ const VideoPhoneMockup = ({ src, onClick, width = 200 }) => {
   const [hov, setHov] = useState(false);
   const videoRef = useRef(null);
 
-  useEffect(() => {
-    const v = videoRef.current;
-    if (!v) return;
-    v.play().catch(() => {});
-  }, [src]);
+  useChromelessVideo(videoRef, src);
 
   return (
     <div
@@ -209,13 +234,9 @@ const VideoPhoneMockup = ({ src, onClick, width = 200 }) => {
         border: "1.5px solid rgba(255,255,255,0.08)", overflow: "hidden",
         boxShadow: ["0 35px 70px rgba(0,0,0,0.75)", `0 0 50px ${G(0.14)}`, "inset 0 1px 0 rgba(255,255,255,0.06)"].join(", "),
       }}>
-        <video
-          ref={videoRef}
+        <ChromelessVideo
+          videoRef={videoRef}
           src={src}
-          autoPlay
-          loop
-          muted
-          playsInline
           style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top", display: "block" }}
         />
         <div style={{ position: "absolute", top: width * 0.056, left: "50%", transform: "translateX(-50%)", width: width * 0.38, height: width * 0.11, borderRadius: width * 0.06, background: "#111", zIndex: 10 }} />
@@ -253,11 +274,7 @@ const VideoLightbox = ({ type, onClose }) => {
     return () => window.removeEventListener("keydown", fn);
   }, [onClose]);
 
-  useEffect(() => {
-    const v = videoRef.current;
-    if (!v) return;
-    v.play().catch(() => {});
-  }, [src]);
+  useChromelessVideo(videoRef, src);
 
   return (
     <motion.div
@@ -284,11 +301,19 @@ const VideoLightbox = ({ type, onClose }) => {
       >
         {type === "phone" ? (
           <div style={{ width: lbPhoneW, height: Math.round(lbPhoneW * 2.08), borderRadius: lbPhoneW * 0.19, overflow: "hidden", border: "1.5px solid rgba(255,255,255,0.1)", boxShadow: `0 40px 80px rgba(0,0,0,0.8), 0 0 60px ${G(0.15)}` }}>
-            <video ref={videoRef} src={src} autoPlay loop muted playsInline controls style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top" }} />
+            <ChromelessVideo
+              videoRef={videoRef}
+              src={src}
+              style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top" }}
+            />
           </div>
         ) : (
           <div style={{ borderRadius: 12, overflow: "hidden", border: "1px solid rgba(255,255,255,0.1)", boxShadow: `0 40px 80px rgba(0,0,0,0.8), 0 0 60px ${G(0.12)}` }}>
-            <video ref={videoRef} src={src} autoPlay loop muted playsInline controls style={{ width: "100%", height: lbBrowserH, objectFit: "contain", background: "#0a0a0a" }} />
+            <ChromelessVideo
+              videoRef={videoRef}
+              src={src}
+              style={{ width: "100%", height: lbBrowserH, objectFit: "contain", background: "#0a0a0a" }}
+            />
           </div>
         )}
       </motion.div>
