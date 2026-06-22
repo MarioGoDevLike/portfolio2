@@ -1,7 +1,4 @@
 import elloImage from "../assets/ello1.png";
-import weatherImage from "../assets/weatherProjectPic.png";
-import musicImage from "../assets/musicApp.png";
-import travelmateImage from "../assets/travelmateProject.png";
 import raffoulImage from "../assets/raffoulmotors.png";
 import topSpeedImage from "../assets/Top_speed_apps/topspeedlogo.png";
 import alterLogo from "../assets/alter_images/alter logo white .png";
