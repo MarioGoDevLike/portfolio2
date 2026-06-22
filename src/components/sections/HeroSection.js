@@ -1,4 +1,4 @@
-import React, { useRef, useCallback } from "react";
+import React, { useRef, useCallback, useState } from "react";
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { TypeAnimation } from "react-type-animation";
 import { Link } from "react-scroll";
@@ -6,6 +6,7 @@ import { BsArrowDown } from "react-icons/bs";
 import avatar from "../../assets/avatar.png";
 import { SITE } from "../../constants";
 import SocialLinks from "../ui/SocialLinks";
+import PortfolioModal from "../ui/PortfolioModal";
 
 const EASE_EXPO = [0.22, 1, 0.36, 1];
 const AVATAR_SIZE = 288;
@@ -48,6 +49,7 @@ const OrbitalRing = ({ size, dashArray, stroke, duration, reverse = false }) => 
 
 /* ─── HERO SECTION ────────────────────────────── */
 const HeroSection = () => {
+  const [portfolioOpen, setPortfolioOpen] = useState(false);
   const sectionRef = useRef(null);
   const mX = useMotionValue(0.5);
   const mY = useMotionValue(0.5);
@@ -270,9 +272,13 @@ const HeroSection = () => {
                   Contact me
                 </button>
               </Link>
-              <a href={SITE.portfolioUrl} className="btn btn-outline w-full sm:w-auto justify-center">
+              <button
+                type="button"
+                onClick={() => setPortfolioOpen(true)}
+                className="btn btn-outline w-full sm:w-auto justify-center"
+              >
                 My Portfolio
-              </a>
+              </button>
             </motion.div>
 
             {/* socials */}
@@ -437,6 +443,8 @@ const HeroSection = () => {
           <span className="scroll-hint">Scroll to explore</span>
         </motion.div>
       </div>
+
+      <PortfolioModal isOpen={portfolioOpen} onClose={() => setPortfolioOpen(false)} />
     </section>
   );
 };
