@@ -2,6 +2,9 @@ import elloImage from "../assets/ello1.png";
 import weatherImage from "../assets/weatherProjectPic.png";
 import musicImage from "../assets/musicApp.png";
 import travelmateImage from "../assets/travelmateProject.png";
+import raffoulImage from "../assets/raffoulmotors.png";
+import topSpeedImage from "../assets/Top_speed_apps/topspeedlogo.png";
+import alterLogo from "../assets/alter_images/alter logo white .png";
 
 export const SKILLS = [
   "React",
@@ -43,7 +46,7 @@ export const SERVICES = [
   },
 ];
 
-export const PROJECTS = [
+export const PROJECTS_ALL = [
   {
     id: "ello",
     title: "Ello Café",
@@ -61,62 +64,47 @@ export const PROJECTS = [
     showOnHome: true,
   },
   {
-    id: "weather",
-    title: "Weather App",
-    category: "ReactJS Application",
+    id: "raffoul-motors",
+    title: "Raffoul Motors",
+    category: "Car Dealership Platform",
     description:
-      "Real-time weather app with geolocation, 5-day forecasts, and clean responsive UI.",
-    image: weatherImage,
-    href: "https://weather-or-not-tan.vercel.app/",
+      "A bilingual dealership platform for a family-run pre-owned car showroom in South Lebanon. Full inventory browsing, car detail pages, workshop section, and a private admin panel.",
+    image: raffoulImage,
+    imageFit: "contain",
+    caseStudyPath: "/projects/raffoul-motors",
     tag: "Web",
     accent: "cyan",
     showOnHome: true,
   },
   {
-    id: "music",
-    title: "Music App",
-    category: "Flutter Mobile App",
+    id: "top-speed",
+    title: "Top Speed",
+    category: "Delivery Platform · Mobile Apps",
     description:
-      "Cross-platform music streaming app built with Flutter — custom player UI and audio controls.",
-    image: musicImage,
+      "A dual-app delivery ecosystem for vendors and drivers. Vendors post and track orders; drivers receive push notifications, manage packages, and are GPS-tracked on duty. Built with Flutter, PHP, and Firebase.",
+    image: topSpeedImage,
+    imageFit: "contain",
+    caseStudyPath: "/projects/top-speed",
     tag: "Mobile",
     accent: "violet",
     showOnHome: true,
   },
   {
-    id: "travelmate",
-    title: "TravelMate",
-    category: "University Project",
+    id: "alter",
+    title: "Alter",
+    category: "PR & Marketing Agency Website",
     description:
-      "A travel companion app designed and built as a university capstone project.",
-    image: travelmateImage,
-    href: "https://csci390project.vercel.app/",
-    tag: "Mobile",
-    accent: "cyan",
-    showOnHome: false,
-  },
-  {
-    id: "music-demo",
-    title: "Music App",
-    category: "Flutter Mobile Application",
-    description: "Interactive demo showcasing Flutter UI patterns and audio playback.",
-    videoSrc:
-      "https://dms-exp3.licdn.com/playlist/vid/D4E05AQFoZEAfsxt4Jg/mp4-720p-30fp-crf28/0/1687810398472?e=1693299600&v=beta&t=C2O6wiAfD5IOf9azlj9X9ULlHwK5QZuZb3Sk7WRduWc",
-    tag: "Mobile",
+      "A premium React.js website for a MENA-region PR & marketing agency. Cinematic hero, live campaign stats, artist marquee, influencer showcase, and fully responsive mobile experience.",
+    image: alterLogo,
+    imageFit: "contain",
+    caseStudyPath: "/projects/alter",
+    liveHref: "https://altercoms.vercel.app/",
+    tag: "Web",
     accent: "violet",
-    showOnHome: false,
+    showOnHome: true,
   },
-  {
-    id: "weather-android",
-    title: "Weather App",
-    category: "Android Mobile Application",
-    description: "Native Android weather experience with location-aware forecasts.",
-    videoSrc:
-      "https://dms-exp3.licdn.com/playlist/vid/D4E05AQFlGD76Y4nEZw/mp4-720p-30fp-crf28/0/1690888407608?e=1693299600&v=beta&t=tRKHgibABRQPW9eeuCDTyl__skUklYgoAQr5kMHiSFI",
-    tag: "Mobile",
-    accent: "cyan",
-    showOnHome: false,
-  },
+
 ];
 
+export const PROJECTS = PROJECTS_ALL.filter((project) => !project.hidden);
 export const HOME_PROJECTS = PROJECTS.filter((project) => project.showOnHome);

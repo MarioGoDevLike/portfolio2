@@ -186,7 +186,7 @@ const Card3D = ({ project, featured = false, index = 0, onCustomClick }) => {
             ? `0 40px 100px rgba(0,0,0,0.65), 0 0 0 1px ${meta.border}, 0 0 80px ${meta.glow}`
             : "0 20px 60px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.05)",
           background: "rgba(9,9,11,0.92)",
-          cursor: (project.href || onCustomClick) ? "pointer" : "default",
+          cursor: (project.href || project.caseStudyPath || onCustomClick) ? "pointer" : "default",
           transition: "border-color 0.3s, box-shadow 0.3s",
         }}
         whileHover={{ scale: featured ? 1.012 : 1.018 }}
@@ -215,7 +215,7 @@ const Card3D = ({ project, featured = false, index = 0, onCustomClick }) => {
 
         {/* browser chrome */}
         {isWeb && (
-          <BrowserChrome href={project.href} accentColor={meta.color} />
+          <BrowserChrome href={project.liveHref || project.href} accentColor={meta.color} />
         )}
 
         {/* image area */}
@@ -227,8 +227,34 @@ const Card3D = ({ project, featured = false, index = 0, onCustomClick }) => {
             background: "#050505",
           }}
         >
-          {/* inner-parallax image */}
-          {project.image && (
+          {/* inner-parallax image or video preview */}
+          {project.previewVideo ? (
+            <motion.div
+              style={{
+                position: "absolute",
+                inset: 0,
+                x: imgX,
+                y: imgY,
+              }}
+            >
+              <video
+                src={project.previewVideo}
+                autoPlay
+                muted
+                loop
+                playsInline
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  objectPosition: "top",
+                  filter: `brightness(${hovered ? 0.82 : 0.72}) saturate(0.9)`,
+                  transition: "filter 0.35s ease",
+                  display: "block",
+                }}
+              />
+            </motion.div>
+          ) : project.image && (
             <motion.div
               style={{
                 position: "absolute",
@@ -269,7 +295,7 @@ const Card3D = ({ project, featured = false, index = 0, onCustomClick }) => {
               position: "absolute",
               inset: 0,
               background:
-                imageFit === "contain"
+                imageFit === "contain" && !project.previewVideo
                   ? "none"
                   : "linear-gradient(to top, rgba(5,5,5,0.96) 0%, rgba(5,5,5,0.3) 42%, transparent 70%)",
               pointerEvents: "none",
@@ -532,7 +558,12 @@ const WorkSection = () => {
           {/* grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5 lg:gap-6">
             {rest.map((project, i) => (
-              <Card3D key={project.id} project={project} index={i + 1} />
+              <Card3D
+                key={project.id}
+                project={project}
+                index={i + 1}
+                onCustomClick={project.caseStudyPath ? () => navigate(project.caseStudyPath) : undefined}
+              />
             ))}
           </div>
         </div>

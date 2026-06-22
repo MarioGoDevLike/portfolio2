@@ -402,7 +402,7 @@ const PhoneMockup = ({ screen, dir, width = 200, autoAdvanceDur, onClick }) => {
 };
 
 /* ─── Browser mockup ───────────────────────────────── */
-const BrowserMockup = ({ screen, dir, height = 240, autoAdvanceDur, onClick }) => {
+const BrowserMockup = ({ screen, dir, height, autoAdvanceDur, onClick }) => {
   const [hov, setHov] = useState(false);
   return (
   <div
@@ -475,7 +475,14 @@ const BrowserMockup = ({ screen, dir, height = 240, autoAdvanceDur, onClick }) =
     </div>
 
     {/* Screenshot */}
-    <div style={{ position: "relative", overflow: "hidden", height }}>
+    <div
+      style={{
+        position: "relative",
+        overflow: "hidden",
+        width: "100%",
+        ...(height ? { height } : { aspectRatio: "16 / 9" }),
+      }}
+    >
       <AnimatePresence custom={dir}>
         <motion.div
           key={screen.src}
@@ -492,24 +499,14 @@ const BrowserMockup = ({ screen, dir, height = 240, autoAdvanceDur, onClick }) =
             style={{
               width: "100%",
               height: "100%",
-              objectFit: "cover",
-              objectPosition: "top",
+              objectFit: "contain",
+              objectPosition: "top center",
               display: "block",
+              background: "#0a0a0a",
             }}
           />
         </motion.div>
       </AnimatePresence>
-      <div
-        style={{
-          position: "absolute",
-          bottom: 0,
-          left: 0,
-          right: 0,
-          height: 52,
-          background: "linear-gradient(to top, #0d0d0d, transparent)",
-          pointerEvents: "none",
-        }}
-      />
       {autoAdvanceDur && <ProgressBar duration={autoAdvanceDur} trackKey={screen.src} />}
     </div>
 
@@ -1134,7 +1131,6 @@ const ElloCafeCaseStudy = () => {
                       <BrowserMockup
                         screen={WEB_SCREENS[webIdx]}
                         dir={webDir}
-                        height={isMobile ? 180 : 236}
                         autoAdvanceDur={4.5}
                         onClick={() => setLightbox("web")}
                       />
@@ -1420,7 +1416,7 @@ const ElloCafeCaseStudy = () => {
                     <NavArrow dir={1} onClick={() => stepWeb(1)} />
                   </div>
                 </div>
-                <BrowserMockup screen={WEB_SCREENS[webIdx]} dir={webDir} height={isMobile ? 200 : 330} onClick={() => setLightbox("web")} />
+                <BrowserMockup screen={WEB_SCREENS[webIdx]} dir={webDir} onClick={() => setLightbox("web")} />
                 <div style={{ display: "flex", justifyContent: "center", marginTop: 12 }}>
                   <Dots
                     count={WEB_SCREENS.length}
@@ -1545,7 +1541,7 @@ const ElloCafeCaseStudy = () => {
                       <PhoneMockup
                         screen={APP_SCREENS[appIdx]}
                         dir={appDir}
-                        width={isMobile ? 190 : 230}
+                        width={isMobile ? 190 : 290}
                         autoAdvanceDur={3.8}
                         onClick={() => setLightbox("phone")}
                       />
@@ -1570,31 +1566,6 @@ const ElloCafeCaseStudy = () => {
                   />
                 </div>
               </div>
-
-              {/* Thumbnail strip — desktop only */}
-              {!isMobile && (
-                <div>
-                  <div
-                    style={{
-                      fontFamily: "'Space Grotesk', sans-serif",
-                      fontSize: 10,
-                      letterSpacing: "0.28em",
-                      textTransform: "uppercase",
-                      color: "rgba(255,255,255,0.2)",
-                      marginBottom: 10,
-                    }}
-                  >
-                    All Screens
-                  </div>
-                  <ThumbnailGrid
-                    screens={APP_SCREENS}
-                    current={appIdx}
-                    onChange={(i) => { setAppDir(i > appIdx ? 1 : -1); setAppIdx(i); }}
-                    aspectRatio="9/18"
-                    cols={Math.min(APP_SCREENS.length, 6)}
-                  />
-                </div>
-              )}
 
               {/* Footer */}
               <div

@@ -1,7 +1,6 @@
 import React, { useEffect } from "react";
 import {
   motion,
-  AnimatePresence,
   useMotionValue,
   useSpring,
   useTransform,
@@ -54,46 +53,14 @@ const MobileNav = () => {
     });
   };
 
-  const activeLabel =
-    MOBILE_NAV.find((n) => n.to === activeSection)?.label ?? "";
-
   return (
     <nav className="mobile-nav md:hidden" aria-label="Section navigation">
-      {/* ── Wrapper: makes label + dock a single stacked unit ── */}
       <motion.div
         style={{ position: "relative" }}
         initial={{ y: 28, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1], delay: 0.25 }}
       >
-        {/* ── Active section label (floats above dock) ── */}
-        <AnimatePresence mode="wait">
-          <motion.span
-            key={activeSection}
-            initial={{ opacity: 0, y: 6, filter: "blur(5px)" }}
-            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-            exit={{ opacity: 0, y: -5, filter: "blur(5px)" }}
-            transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
-            style={{
-              position: "absolute",
-              bottom: "calc(100% + 10px)",
-              left: "50%",
-              transform: "translateX(-50%)",
-              fontFamily: "'Space Grotesk', sans-serif",
-              fontSize: 9,
-              fontWeight: 600,
-              letterSpacing: "0.22em",
-              textTransform: "uppercase",
-              color: "rgba(129,140,248,0.88)",
-              whiteSpace: "nowrap",
-              pointerEvents: "none",
-              userSelect: "none",
-            }}
-          >
-            {activeLabel}
-          </motion.span>
-        </AnimatePresence>
-
         {/* ── Dock ── */}
         <div
           style={{

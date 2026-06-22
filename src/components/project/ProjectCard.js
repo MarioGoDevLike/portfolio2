@@ -1,8 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { BsArrowUpRight } from "react-icons/bs";
-import { Player } from "video-react";
-import "video-react/dist/video-react.css";
 import Tag from "../ui/Tag";
 
 const accentClass = {
@@ -17,6 +15,7 @@ const ProjectCard = ({
   image,
   imageFit = "cover",
   videoSrc,
+  previewVideo,
   href,
   caseStudyPath,
   tag,
@@ -26,13 +25,21 @@ const ProjectCard = ({
   const isClickable = Boolean(caseStudyPath || href);
   const cardClassName = `project-card group ${isClickable ? "cursor-pointer" : "cursor-default"}`;
 
+  const mediaVideo = videoSrc || previewVideo;
+
   const cardContent = (
     <>
       <div className={`project-card__media ${featured ? "project-card__media--featured" : ""}`}>
-        {videoSrc ? (
-          <Player autoPlay muted playsInline src={videoSrc} />
-        ) : (
-          image && (
+        {mediaVideo ? (
+          <video
+            className="project-card__image"
+            autoPlay
+            muted
+            loop
+            playsInline
+            src={mediaVideo}
+          />
+        ) : image && (
             <img
               src={image}
               alt={title}
@@ -41,7 +48,6 @@ const ProjectCard = ({
               }`}
               loading="lazy"
             />
-          )
         )}
         <div className="project-card__overlay" />
         <div className="project-card__hover-tint" />
