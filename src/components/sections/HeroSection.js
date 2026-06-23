@@ -138,33 +138,44 @@ const HeroSection = () => {
 
       <div className="container w-full relative" style={{ zIndex: 1 }}>
 
-        {/* ── Mobile circular avatar ── */}
+        {/* ── Mobile hero avatar + status ── */}
         <motion.div
-          className="flex justify-center mb-10 lg:hidden"
-          initial={{ opacity: 0, scale: 0.88 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.7, ease: EASE_EXPO, delay: 0.15 }}
+          className="flex flex-col items-center mb-8 lg:hidden"
+          initial={{ opacity: 0, scale: 0.88, y: 12 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ duration: 0.75, ease: EASE_EXPO, delay: 0.15 }}
         >
-          <div style={{ position: "relative", width: 148, height: 148 }}>
-            {/* rotating ring */}
+          {/* Avatar */}
+          <div style={{ position: "relative", width: 172, height: 172 }}>
+            {/* outer rotating ring */}
             <motion.div
-              style={{ position: "absolute", inset: -14 }}
+              style={{ position: "absolute", inset: -18 }}
               animate={{ rotate: 360 }}
-              transition={{ duration: 22, repeat: Infinity, ease: "linear" }}
+              transition={{ duration: 26, repeat: Infinity, ease: "linear" }}
             >
-              <svg width={176} height={176} viewBox="0 0 176 176" fill="none">
-                <circle cx={88} cy={88} r={85} stroke="rgba(129,140,248,0.28)" strokeWidth="1" strokeDasharray="6 11" />
+              <svg width={208} height={208} viewBox="0 0 208 208" fill="none">
+                <circle cx={104} cy={104} r={101} stroke="rgba(129,140,248,0.22)" strokeWidth="1" strokeDasharray="6 12" />
+              </svg>
+            </motion.div>
+            {/* inner counter-rotating ring */}
+            <motion.div
+              style={{ position: "absolute", inset: -8 }}
+              animate={{ rotate: -360 }}
+              transition={{ duration: 18, repeat: Infinity, ease: "linear" }}
+            >
+              <svg width={188} height={188} viewBox="0 0 188 188" fill="none">
+                <circle cx={94} cy={94} r={91} stroke="rgba(34,211,238,0.14)" strokeWidth="1" strokeDasharray="3 16" />
               </svg>
             </motion.div>
             {/* pulse ring */}
             <motion.div
               style={{ position: "absolute", inset: -3, borderRadius: "50%", border: "1px solid rgba(129,140,248,0.28)" }}
-              animate={{ opacity: [0.28, 0.65, 0.28], scale: [1, 1.018, 1] }}
+              animate={{ opacity: [0.28, 0.68, 0.28], scale: [1, 1.016, 1] }}
               transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut" }}
             />
             <div
               style={{
-                width: 148, height: 148, borderRadius: "50%",
+                width: 172, height: 172, borderRadius: "50%",
                 overflow: "hidden",
                 border: "1px solid rgba(255,255,255,0.10)",
                 background: "rgba(0,0,0,0.35)",
@@ -174,25 +185,59 @@ const HeroSection = () => {
                 src={avatar}
                 alt={SITE.name}
                 style={{
-                  width: "100%",
-                  height: "100%",
-                  display: "block",
-                  objectFit: "cover",
-                  objectPosition: "center center",
+                  width: "100%", height: "100%",
+                  display: "block", objectFit: "cover", objectPosition: "center center",
                 }}
               />
             </div>
+            {/* status dot */}
             <span
               style={{
-                position: "absolute", bottom: 5, right: 5,
-                width: 14, height: 14, borderRadius: "50%",
+                position: "absolute", bottom: 8, right: 8,
+                width: 16, height: 16, borderRadius: "50%",
                 background: "#34d399",
                 border: "2.5px solid #050505",
-                boxShadow: "0 0 9px rgba(52,211,153,0.55)",
+                boxShadow: "0 0 10px rgba(52,211,153,0.6)",
               }}
               aria-label="Available for work"
             />
           </div>
+
+          {/* Status pill below avatar */}
+          <motion.div
+            style={{
+              marginTop: 14,
+              display: "flex", alignItems: "center", gap: 6,
+              padding: "7px 14px",
+              borderRadius: 999,
+              background: "rgba(7,7,11,0.85)",
+              border: "1px solid rgba(52,211,153,0.18)",
+              backdropFilter: "blur(20px)",
+              WebkitBackdropFilter: "blur(20px)",
+              boxShadow: "0 8px 24px rgba(0,0,0,0.4)",
+            }}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: EASE_EXPO, delay: 0.55 }}
+          >
+            <span
+              style={{
+                width: 6, height: 6, borderRadius: "50%",
+                background: "#34d399",
+                boxShadow: "0 0 8px rgba(52,211,153,0.55)",
+                flexShrink: 0,
+              }}
+            />
+            <span
+              style={{
+                fontFamily: "'Space Grotesk', sans-serif",
+                fontSize: 10, letterSpacing: "0.14em",
+                color: "rgba(255,255,255,0.46)",
+              }}
+            >
+              {SITE.availability}
+            </span>
+          </motion.div>
         </motion.div>
 
         {/* ── Main flex row ── */}
@@ -262,13 +307,13 @@ const HeroSection = () => {
 
             {/* CTAs */}
             <motion.div
-              className="flex flex-col sm:flex-row sm:items-center gap-3 mb-10"
+              className="flex flex-col sm:flex-row sm:items-center gap-3 mb-8"
               initial={{ opacity: 0, y: 14 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, ease: EASE_EXPO, delay: 1.2 }}
             >
-              <Link to="contact" smooth className="cursor-pointer">
-                <button type="button" className="btn btn-primary w-full sm:w-auto justify-center">
+              <Link to="contact" smooth className="cursor-pointer w-full sm:w-auto">
+                <button type="button" className="btn btn-primary w-full sm:w-auto justify-center" style={{ minHeight: 48, fontSize: 14 }}>
                   Contact me
                 </button>
               </Link>
@@ -276,6 +321,7 @@ const HeroSection = () => {
                 type="button"
                 onClick={() => setPortfolioOpen(true)}
                 className="btn btn-outline w-full sm:w-auto justify-center"
+                style={{ minHeight: 48, fontSize: 14 }}
               >
                 My Portfolio
               </button>
@@ -428,7 +474,7 @@ const HeroSection = () => {
 
         {/* scroll hint */}
         <motion.div
-          className="hidden lg:flex items-center gap-3 mt-10"
+          className="flex items-center gap-3 mt-6 lg:mt-10 justify-center lg:justify-start"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5, delay: 1.6 }}

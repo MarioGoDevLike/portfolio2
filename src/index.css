@@ -137,7 +137,7 @@
   }
 
   .section {
-    @apply py-16 md:py-20 lg:py-24;
+    @apply py-14 md:py-20 lg:py-24;
   }
 
   .glass {
@@ -286,7 +286,7 @@
   }
 
   .hero-section {
-    @apply min-h-screen flex items-center pt-12 pb-16 md:pt-[104px] md:pb-16;
+    @apply min-h-screen flex items-center pt-14 pb-14 md:pt-[104px] md:pb-16;
   }
 
   .hero-portrait {
@@ -728,6 +728,10 @@
 .link-hover:hover::after {
   width: 100%;
 }
+
+/* Hide scrollbar utility — used by horizontal carousels */
+.hide-scrollbar::-webkit-scrollbar { display: none; }
+.hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
 /* Chromeless case-study videos — no native controls on hover */
 .alter-case-study-video::-webkit-media-controls {

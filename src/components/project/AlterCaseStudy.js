@@ -1,212 +1,138 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
-import {
-  motion,
-  AnimatePresence,
-  useMotionValue,
-  useSpring,
-  useTransform,
-} from "framer-motion";
+import React, { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
-import { HiChevronLeft, HiX } from "react-icons/hi";
+import { HiChevronLeft } from "react-icons/hi";
 import { HiArrowUpRight, HiArrowsPointingOut } from "react-icons/hi2";
-import { getLightboxDims } from "./CaseStudyLightbox";
 
-import alterWebVideo from "../../assets/alter_images/alter_web_view.mp4";
+import alterWebVideo    from "../../assets/alter_images/alter_web_view.mp4";
 import alterMobileVideo from "../../assets/alter_images/alter_mobile_view.mp4";
-import alterLogo from "../../assets/alter_images/alter logo white .png";
+import alterLogo        from "../../assets/alter_images/alter logo white .png";
 
+/* ─── Brand ──────────────────────────────────────── */
+const GOLD = "#C4A574";
+const G    = (a) => `rgba(196,165,116,${a})`;
+const EASE = [0.22, 1, 0.36, 1];
 const LIVE_URL = "https://altercoms.vercel.app/";
 
-const CHROMELESS_VIDEO_PROPS = {
-  autoPlay: true,
-  loop: true,
-  muted: true,
-  playsInline: true,
-  disablePictureInPicture: true,
-  disableRemotePlayback: true,
-  controls: false,
-  controlsList: "nodownload noplaybackrate noremoteplayback nofullscreen",
-  onContextMenu: (e) => e.preventDefault(),
+/* ─── Chromeless video helpers ───────────────────── */
+const CHROMELESS_PROPS = {
+  autoPlay: true, loop: true, muted: true, playsInline: true,
+  disablePictureInPicture: true, disableRemotePlayback: true,
+  controls: false, controlsList: "nodownload noplaybackrate noremoteplayback nofullscreen",
+  onContextMenu: e => e.preventDefault(),
 };
 
-const useChromelessVideo = (videoRef, src) => {
+const useChromeless = (ref, src) => {
   useEffect(() => {
-    const v = videoRef.current;
+    const v = ref.current;
     if (!v) return;
-
-    const keepPlaying = () => {
-      if (v.paused) v.play().catch(() => {});
-    };
-
+    const resume = () => { if (v.paused) v.play().catch(() => {}); };
     v.play().catch(() => {});
-    v.addEventListener("pause", keepPlaying);
-    return () => v.removeEventListener("pause", keepPlaying);
-  }, [videoRef, src]);
+    v.addEventListener("pause", resume);
+    return () => v.removeEventListener("pause", resume);
+  }, [ref, src]);
 };
 
-const ChromelessVideo = ({ videoRef, src, style, className = "alter-case-study-video" }) => (
-  <video
-    ref={videoRef}
-    src={src}
-    className={className}
-    {...CHROMELESS_VIDEO_PROPS}
-    style={{ pointerEvents: "none", ...style }}
-  />
-);
-
-/* ─── Brand palette (luxury PR — white + champagne gold) ── */
-const GOLD = "#C4A574";
-const G = (a) => `rgba(196,165,116,${a})`;
-const EASE = [0.22, 1, 0.36, 1];
-const SPRING = { type: "spring", stiffness: 340, damping: 30 };
-
-const ALL_TECH = [
-  { name: "React.js" },
-  { name: "JavaScript" },
-  { name: "CSS3" },
-  { name: "Vercel" },
-  { name: "Responsive" },
-  { name: "Figma" },
+/* ─── Data ───────────────────────────────────────── */
+const STORY = [
+  {
+    num: "01",
+    label: "The Challenge",
+    heading: "A premium agency without a premium web presence",
+    body: "Alter manages 330+ artists and 1,651+ campaigns across MENA — but had no digital home that matched their brand prestige or communicated their scale to potential clients.",
+  },
+  {
+    num: "02",
+    label: "The Approach",
+    heading: "A cinematic React.js experience, built from scratch",
+    body: "A performance-first React.js site with a live-stat hero, scrolling marquee artist roster, influencer talent cards, six service pillars, and a trusted partners wall — all Figma-to-code.",
+  },
+  {
+    num: "03",
+    label: "The Outcome",
+    heading: "A digital home as ambitious as the agency",
+    body: "The site is live on Vercel. It opens with real campaign counts and artist numbers, scales from desktop spectacle to mobile elegance, and communicates authority at every scroll.",
+  },
 ];
 
 const FEATURES = [
-  "Cinematic hero with live agency stats — 1,651+ campaigns, 330+ artists",
-  "Scrolling artist roster with premium marquee presentation",
-  "Influencer network showcase with talent cards and social proof",
-  "Six service pillars — digital growth, influencer marketing, content, music, PR, branding",
-  "Trusted partners & brands section with polished logo wall",
-  "Fully responsive layout — desktop spectacle, mobile-first refinement",
+  { title: "Cinematic Hero",        desc: "Live agency stats — 1,651+ campaigns and 330+ artists front and center"  },
+  { title: "Artist Marquee",        desc: "Scrolling roster presenting the agency's talent in premium style"          },
+  { title: "Influencer Showcase",   desc: "Talent cards with social proof and network scale"                          },
+  { title: "Service Pillars",       desc: "Six core offerings — digital, influencer, content, music, PR, branding"    },
+  { title: "Partners Wall",         desc: "Trusted brands section with polished logo presentation"                    },
+  { title: "Mobile-First Responsive", desc: "Desktop spectacle that collapses into a clean, thumb-friendly mobile experience" },
 ];
 
-const TABS = [
-  { id: "overview", label: "Overview" },
-  { id: "website", label: "Website" },
-  { id: "mobile", label: "Mobile View" },
+const TECH = [
+  { category: "Frontend",  items: ["React.js", "JavaScript", "CSS3 Animations"] },
+  { category: "Design",    items: ["Figma", "Custom Typography", "Motion Design"]  },
+  { category: "Deploy",    items: ["Vercel", "Performance CDN", "Responsive Grid"] },
 ];
 
-const AlterMark = ({ size = 1 }) => (
-  <motion.img
-    src={alterLogo}
-    alt="Alter"
-    initial={{ opacity: 0, scale: 0.92 }}
-    animate={{ opacity: 1, scale: 1 }}
-    transition={{ delay: 0.2, duration: 0.35, ease: EASE }}
-    style={{
-      height: 28 * size,
-      width: "auto",
-      objectFit: "contain",
-      flexShrink: 0,
-      display: "block",
-    }}
-  />
+/* ─── Shared micro-components ─────────────────────── */
+
+const FadeUp = ({ children, delay = 0, style }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 28 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true, margin: "-72px 0px" }}
+    transition={{ duration: 0.6, ease: EASE, delay }}
+    style={style}
+  >
+    {children}
+  </motion.div>
 );
 
-const TabBar = ({ active, onChange, tabs = TABS }) => (
-  <div style={{ display: "flex", gap: 2, padding: 4, background: "rgba(255,255,255,0.04)", borderRadius: 10, border: "1px solid rgba(255,255,255,0.07)" }}>
-    {tabs.map((tab) => (
-      <button
-        key={tab.id}
-        onClick={() => onChange(tab.id)}
-        style={{
-          position: "relative", padding: "7px 15px", borderRadius: 7, border: "none", cursor: "pointer",
-          background: "transparent", color: active === tab.id ? "white" : "rgba(255,255,255,0.38)",
-          fontFamily: "'Space Grotesk', sans-serif", fontSize: 12, fontWeight: 500,
-          transition: "color 0.2s", outline: "none", zIndex: 1, whiteSpace: "nowrap",
-        }}
-      >
-        {active === tab.id && (
-          <motion.div
-            layoutId="alter-tab-pill"
-            style={{ position: "absolute", inset: 0, borderRadius: 7, background: G(0.12), border: `1px solid ${G(0.28)}`, zIndex: -1 }}
-            transition={SPRING}
-          />
-        )}
-        {tab.label}
-      </button>
-    ))}
+const SectionLabel = ({ children }) => (
+  <div style={{ display: "inline-flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+    <span style={{ width: 16, height: 1, background: G(0.65), display: "block" }} />
+    <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 10, letterSpacing: "0.28em", textTransform: "uppercase", color: GOLD, opacity: 0.85 }}>
+      {children}
+    </span>
   </div>
 );
 
-const SectionLabel = ({ children, color = GOLD }) => (
-  <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 10, letterSpacing: "0.3em", textTransform: "uppercase", color, opacity: 0.85 }}>
-    {children}
-  </span>
+const Divider = () => (
+  <div style={{ height: 1, background: "linear-gradient(to right,transparent,rgba(255,255,255,0.05) 30%,rgba(255,255,255,0.05) 70%,transparent)" }} />
 );
 
-const TechPill = ({ name, delay = 0 }) => (
-  <motion.span
-    initial={{ opacity: 0, scale: 0.8 }}
-    animate={{ opacity: 1, scale: 1 }}
-    transition={{ delay, duration: 0.24, ease: EASE }}
-    style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 10, letterSpacing: "0.06em", padding: "4px 11px", borderRadius: 999, background: G(0.08), border: `1px solid ${G(0.2)}`, color: GOLD, whiteSpace: "nowrap" }}
-  >
-    {name}
-  </motion.span>
-);
-
-const LiveButton = () => (
-  <motion.a
-    href={LIVE_URL}
-    target="_blank"
-    rel="noopener noreferrer"
-    whileHover={{ scale: 1.04, boxShadow: `0 0 28px ${G(0.45)}` }}
-    whileTap={{ scale: 0.97 }}
-    style={{
-      display: "inline-flex", alignItems: "center", gap: 6, padding: "9px 18px",
-      borderRadius: 9, background: GOLD, color: "#1a1408",
-      fontFamily: "'Space Grotesk', sans-serif", fontSize: 12, fontWeight: 700,
-      textDecoration: "none", boxShadow: `0 0 20px ${G(0.28)}`, letterSpacing: "0.03em",
-      flexShrink: 0,
-    }}
-  >
-    Visit Live Site
-    <HiArrowUpRight size={13} />
-  </motion.a>
-);
-
-const VideoBrowserMockup = ({ src, onClick, height }) => {
-  const [hov, setHov] = useState(false);
+/* ─── Video browser mockup ────────────────────────── */
+const VideoBrowser = ({ src, onClick }) => {
   const videoRef = useRef(null);
-
-  useChromelessVideo(videoRef, src);
-
+  const [hov, setHov] = useState(false);
+  useChromeless(videoRef, src);
   return (
     <div
       onClick={onClick}
       onMouseEnter={() => onClick && setHov(true)}
       onMouseLeave={() => setHov(false)}
       style={{
-        position: "relative", width: "100%", borderRadius: 12, overflow: "hidden",
-        background: "#0a0a0a", border: "1px solid rgba(255,255,255,0.07)",
+        position: "relative", width: "100%", borderRadius: 14, overflow: "hidden",
+        background: "#0d0d0d", border: "1px solid rgba(255,255,255,0.08)",
         cursor: onClick ? "zoom-in" : "default",
-        boxShadow: ["0 28px 60px rgba(0,0,0,0.6)", `0 0 45px ${G(0.1)}`, "inset 0 1px 0 rgba(255,255,255,0.04)"].join(", "),
+        boxShadow: [`0 32px 64px rgba(0,0,0,0.65)`, `0 0 50px ${G(0.1)}`, "inset 0 1px 0 rgba(255,255,255,0.05)"].join(", "),
       }}
     >
-      <div style={{ height: 36, display: "flex", alignItems: "center", padding: "0 12px", gap: 10, background: "rgba(0,0,0,0.55)", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+      <div style={{ height: 38, display: "flex", alignItems: "center", padding: "0 14px", gap: 10, background: "rgba(0,0,0,0.65)", borderBottom: "1px solid rgba(255,255,255,0.05)", flexShrink: 0 }}>
         <div style={{ display: "flex", gap: 5 }}>
-          {["#ef4444", "#f59e0b", "#22c55e"].map((c) => (
-            <span key={c} style={{ width: 8, height: 8, borderRadius: "50%", background: c, opacity: 0.8 }} />
-          ))}
+          {["#ef4444","#f59e0b","#22c55e"].map(c => <span key={c} style={{ width: 8, height: 8, borderRadius: "50%", background: c, opacity: 0.8 }} />)}
         </div>
-        <div style={{ flex: 1, height: 18, borderRadius: 5, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)", display: "flex", alignItems: "center", paddingLeft: 8, gap: 5 }}>
+        <div style={{ flex: 1, height: 20, borderRadius: 5, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)", display: "flex", alignItems: "center", paddingLeft: 10, gap: 6 }}>
           <span style={{ width: 5, height: 5, borderRadius: "50%", background: GOLD, flexShrink: 0 }} />
-          <span style={{ fontSize: 9, color: "rgba(255,255,255,0.25)", fontFamily: "monospace", whiteSpace: "nowrap" }}>altercoms.vercel.app</span>
+          <span style={{ fontSize: 9, color: "rgba(255,255,255,0.28)", fontFamily: "monospace", whiteSpace: "nowrap" }}>altercoms.vercel.app</span>
         </div>
       </div>
-      <div style={{ position: "relative", overflow: "hidden", width: "100%", ...(height ? { height } : { aspectRatio: "16 / 9" }) }}>
-        <ChromelessVideo
-          videoRef={videoRef}
-          src={src}
-          style={{ width: "100%", height: "100%", objectFit: "contain", objectPosition: "top center", display: "block", background: "#0a0a0a" }}
-        />
+      <div style={{ width: "100%", aspectRatio: "16/9", overflow: "hidden", background: "#000" }}>
+        <video ref={videoRef} src={src} {...CHROMELESS_PROPS}
+          style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", pointerEvents: "none" }} />
       </div>
       {onClick && (
         <motion.div
-          animate={{ opacity: hov ? 1 : 0 }}
-          transition={{ duration: 0.18 }}
+          animate={{ opacity: hov ? 1 : 0 }} transition={{ duration: 0.18 }}
           style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.32)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 25, pointerEvents: "none" }}
         >
-          <div style={{ width: 50, height: 50, borderRadius: "50%", background: "rgba(255,255,255,0.14)", border: "1px solid rgba(255,255,255,0.28)", backdropFilter: "blur(10px)", display: "flex", alignItems: "center", justifyContent: "center", color: "white" }}>
+          <div style={{ width: 52, height: 52, borderRadius: "50%", background: "rgba(255,255,255,0.14)", border: "1px solid rgba(255,255,255,0.28)", backdropFilter: "blur(10px)", display: "flex", alignItems: "center", justifyContent: "center", color: "white" }}>
             <HiArrowsPointingOut size={22} />
           </div>
         </motion.div>
@@ -215,13 +141,12 @@ const VideoBrowserMockup = ({ src, onClick, height }) => {
   );
 };
 
-const VideoPhoneMockup = ({ src, onClick, width = 200 }) => {
-  const h = Math.round(width * 2.08);
-  const [hov, setHov] = useState(false);
+/* ─── Video phone mockup ──────────────────────────── */
+const VideoPhone = ({ src, width = 220, onClick }) => {
   const videoRef = useRef(null);
-
-  useChromelessVideo(videoRef, src);
-
+  const [hov, setHov] = useState(false);
+  const h = Math.round(width * 2.08);
+  useChromeless(videoRef, src);
   return (
     <div
       style={{ width, height: h, position: "relative", flexShrink: 0, cursor: onClick ? "zoom-in" : "default" }}
@@ -231,28 +156,24 @@ const VideoPhoneMockup = ({ src, onClick, width = 200 }) => {
     >
       <div style={{
         position: "absolute", inset: 0, borderRadius: width * 0.19,
-        background: "linear-gradient(160deg, #252525, #141414)",
+        background: "linear-gradient(160deg,#252525,#141414)",
         border: "1.5px solid rgba(255,255,255,0.08)", overflow: "hidden",
-        boxShadow: ["0 35px 70px rgba(0,0,0,0.75)", `0 0 50px ${G(0.14)}`, "inset 0 1px 0 rgba(255,255,255,0.06)"].join(", "),
+        boxShadow: [`0 44px 88px rgba(0,0,0,0.8)`, `0 0 64px ${G(0.16)}`, "inset 0 1px 0 rgba(255,255,255,0.06)"].join(", "),
       }}>
-        <ChromelessVideo
-          videoRef={videoRef}
-          src={src}
-          style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top", display: "block" }}
-        />
+        <video ref={videoRef} src={src} {...CHROMELESS_PROPS}
+          style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top", display: "block", pointerEvents: "none" }} />
         <div style={{ position: "absolute", top: width * 0.056, left: "50%", transform: "translateX(-50%)", width: width * 0.38, height: width * 0.11, borderRadius: width * 0.06, background: "#111", zIndex: 10 }} />
         <div style={{ position: "absolute", bottom: 7, left: "50%", transform: "translateX(-50%)", width: width * 0.44, height: 4, borderRadius: 2, background: "rgba(255,255,255,0.2)", zIndex: 10 }} />
         <div style={{ position: "absolute", inset: 0, borderRadius: "inherit", boxShadow: "inset 0 0 24px rgba(0,0,0,0.45)", pointerEvents: "none", zIndex: 5 }} />
       </div>
-      {[{ side: "right", top: "28%", h: 56 }, { side: "left", top: "19%", h: 34 }, { side: "left", top: "33%", h: 34 }, { side: "left", top: "13%", h: 18 }].map((btn, i) => (
-        <div key={i} style={{ position: "absolute", [btn.side]: -2, top: btn.top, width: 3, height: btn.h, borderRadius: btn.side === "right" ? "0 2px 2px 0" : "2px 0 0 2px", background: "#252525" }} />
+      {[{ side: "right", top: "28%", h: 56 }, { side: "left", top: "19%", h: 34 }, { side: "left", top: "33%", h: 34 }, { side: "left", top: "13%", h: 18 }].map((b, i) => (
+        <div key={i} style={{ position: "absolute", [b.side]: -2, top: b.top, width: 3, height: b.h, borderRadius: b.side === "right" ? "0 2px 2px 0" : "2px 0 0 2px", background: "#252525" }} />
       ))}
-      <div style={{ position: "absolute", bottom: -18, left: "10%", right: "10%", height: 30, background: `radial-gradient(ellipse, ${G(0.28)}, transparent 70%)`, filter: "blur(10px)", pointerEvents: "none" }} />
+      <div style={{ position: "absolute", bottom: -22, left: "10%", right: "10%", height: 36, background: `radial-gradient(ellipse, ${G(0.28)}, transparent 70%)`, filter: "blur(12px)", pointerEvents: "none" }} />
       {onClick && (
         <motion.div
-          animate={{ opacity: hov ? 1 : 0 }}
-          transition={{ duration: 0.18 }}
-          style={{ position: "absolute", inset: 0, borderRadius: width * 0.19, background: "rgba(0,0,0,0.38)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 25, pointerEvents: "none" }}
+          animate={{ opacity: hov ? 1 : 0 }} transition={{ duration: 0.18 }}
+          style={{ position: "absolute", inset: 0, borderRadius: width * 0.19, background: "rgba(0,0,0,0.4)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 25, pointerEvents: "none" }}
         >
           <div style={{ width: 46, height: 46, borderRadius: "50%", background: "rgba(255,255,255,0.14)", border: "1px solid rgba(255,255,255,0.28)", backdropFilter: "blur(10px)", display: "flex", alignItems: "center", justifyContent: "center", color: "white" }}>
             <HiArrowsPointingOut size={20} />
@@ -263,339 +184,425 @@ const VideoPhoneMockup = ({ src, onClick, width = 200 }) => {
   );
 };
 
-const VideoLightbox = ({ type, onClose }) => {
-  const src = type === "phone" ? alterMobileVideo : alterWebVideo;
+/* ─── Video lightbox ──────────────────────────────── */
+const VideoLightbox = ({ src, type, onClose }) => {
   const videoRef = useRef(null);
-  const [vp, setVp] = useState(() => ({
-    w: window.innerWidth,
-    h: window.innerHeight,
-    portrait: window.innerHeight > window.innerWidth,
-    mobile: window.innerWidth < 640,
-  }));
-
+  useChromeless(videoRef, src);
   useEffect(() => {
-    const fn = () => setVp({
-      w: window.innerWidth,
-      h: window.innerHeight,
-      portrait: window.innerHeight > window.innerWidth,
-      mobile: window.innerWidth < 640,
-    });
-    window.addEventListener("resize", fn);
-    return () => window.removeEventListener("resize", fn);
-  }, []);
-
-  const dims = getLightboxDims(type === "phone" ? "phone" : "web", vp);
-  const isWebLandscape = type === "web" && dims.webRotateLandscape;
-
-  useEffect(() => {
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => { document.body.style.overflow = prev; };
-  }, []);
-
-  useEffect(() => {
-    const fn = (e) => { if (e.key === "Escape") onClose(); };
+    const fn = e => { if (e.key === "Escape") onClose(); };
     window.addEventListener("keydown", fn);
     return () => window.removeEventListener("keydown", fn);
   }, [onClose]);
 
-  useChromelessVideo(videoRef, src);
-
+  const isPhone = type === "phone";
   return (
     <motion.div
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-      transition={{ duration: 0.22 }}
-      style={{ position: "fixed", inset: 0, zIndex: 10002, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: "rgba(0,0,0,0.97)", backdropFilter: "blur(32px)", WebkitBackdropFilter: "blur(32px)", padding: vp.mobile ? "52px 12px 20px" : "64px 24px 28px", gap: 16, overflow: "hidden" }}
-      onClick={(e) => e.target === e.currentTarget && onClose()}
+      onClick={onClose}
+      style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.92)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 9999, backdropFilter: "blur(16px)", padding: 20 }}
     >
-      <div style={{ position: "absolute", top: "42%", left: "50%", transform: "translate(-50%,-50%)", width: Math.min(vp.w, 700), height: 500, background: `radial-gradient(ellipse, ${G(0.07)} 0%, transparent 65%)`, filter: "blur(60px)", pointerEvents: "none" }} />
-      <div style={{ position: "absolute", top: vp.mobile ? 16 : 22, left: vp.mobile ? 16 : 24, fontFamily: "'Space Grotesk', sans-serif", fontSize: 12, letterSpacing: "0.1em", color: "rgba(255,255,255,0.22)" }}>
-        {type === "phone" ? "Mobile View" : "Website"}
-      </div>
-      <motion.button
-        type="button"
-        whileHover={{ scale: 1.08, background: "rgba(255,255,255,0.12)" }} whileTap={{ scale: 0.9 }} onClick={onClose}
-        aria-label="Close"
-        style={{ position: "absolute", top: vp.mobile ? 12 : 16, right: vp.mobile ? 12 : 16, width: 40, height: 40, borderRadius: "50%", background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "rgba(255,255,255,0.65)", outline: "none", zIndex: 10 }}
+      <motion.div
+        initial={{ scale: 0.88, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.88, opacity: 0 }}
+        transition={{ type: "spring", stiffness: 300, damping: 28 }}
+        onClick={e => e.stopPropagation()}
+        style={{ width: isPhone ? "min(320px, 85vw)" : "min(900px, 92vw)", maxHeight: "90vh", borderRadius: 16, overflow: "hidden" }}
       >
-        <HiX size={18} />
-      </motion.button>
-      <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", width: "100%", minHeight: 0 }}>
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9, y: 20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          transition={{ type: "spring", stiffness: 280, damping: 24 }}
-          style={{
-            transform: isWebLandscape ? "rotate(90deg)" : undefined,
-            transformOrigin: "center center",
-            flexShrink: 0,
-          }}
-        >
-          {type === "phone" ? (
-            <div style={{ width: dims.phoneW, height: Math.round(dims.phoneW * 2.08), borderRadius: dims.phoneW * 0.19, overflow: "hidden", border: "1.5px solid rgba(255,255,255,0.1)", boxShadow: `0 40px 80px rgba(0,0,0,0.8), 0 0 60px ${G(0.15)}` }}>
-              <ChromelessVideo
-                videoRef={videoRef}
-                src={src}
-                style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top" }}
-              />
+        {isPhone ? (
+          <VideoPhone src={src} width={Math.min(320, window.innerWidth * 0.85)} />
+        ) : (
+          <div style={{ borderRadius: 14, overflow: "hidden", background: "#0d0d0d", border: "1px solid rgba(255,255,255,0.1)" }}>
+            <div style={{ height: 32, display: "flex", alignItems: "center", padding: "0 12px", gap: 8, background: "rgba(0,0,0,0.7)", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+              {["#ef4444","#f59e0b","#22c55e"].map(c => <span key={c} style={{ width: 8, height: 8, borderRadius: "50%", background: c, opacity: 0.8 }} />)}
             </div>
-          ) : (
-            <div style={{
-              width: dims.webWidth,
-              aspectRatio: "16 / 9",
-              borderRadius: 10,
-              overflow: "hidden",
-              border: "1px solid rgba(255,255,255,0.1)",
-              boxShadow: `0 40px 80px rgba(0,0,0,0.8), 0 0 60px ${G(0.12)}`,
-              background: "#0a0a0a",
-            }}
-            >
-              <ChromelessVideo
-                videoRef={videoRef}
-                src={src}
-                style={{ width: "100%", height: "100%", objectFit: "contain", objectPosition: "top center", background: "#0a0a0a" }}
-              />
-            </div>
-          )}
-        </motion.div>
-      </div>
-      <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 13, color: "rgba(255,255,255,0.4)", letterSpacing: "0.04em" }}>
-        {type === "phone" ? "Mobile experience" : "Desktop experience"}
-      </span>
+            <video ref={videoRef} src={src} {...CHROMELESS_PROPS}
+              style={{ width: "100%", display: "block", aspectRatio: "16/9", objectFit: "cover", pointerEvents: "none" }} />
+          </div>
+        )}
+      </motion.div>
+      <button
+        type="button" onClick={onClose}
+        style={{ position: "absolute", top: 20, right: 20, width: 40, height: 40, borderRadius: "50%", background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.2)", color: "white", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", fontSize: 18, outline: "none" }}
+      >
+        ✕
+      </button>
     </motion.div>
   );
 };
 
+/* ══════════════════════════════════════════════════════
+   MAIN COMPONENT
+══════════════════════════════════════════════════════ */
 const AlterCaseStudy = () => {
-  const [tab, setTab] = useState(() => (window.innerWidth < 640 ? "website" : "overview"));
-  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 640);
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
   const [lightbox, setLightbox] = useState(null);
 
-  const containerRef = useRef(null);
-  const mx = useMotionValue(0);
-  const my = useMotionValue(0);
-  const smx = useSpring(mx, { stiffness: 55, damping: 16 });
-  const smy = useSpring(my, { stiffness: 55, damping: 16 });
-  const browserRotX = useTransform(smy, [-0.5, 0.5], [4, -4]);
-  const browserRotY = useTransform(smx, [-0.5, 0.5], [6, -6]);
-  const phoneRotX = useTransform(smy, [-0.5, 0.5], [7, -7]);
-  const phoneRotY = useTransform(smx, [-0.5, 0.5], [-9, 9]);
-
-  const handleMouse = useCallback((e) => {
-    const el = containerRef.current;
-    if (!el) return;
-    const { left, top, width, height } = el.getBoundingClientRect();
-    mx.set((e.clientX - left) / width - 0.5);
-    my.set((e.clientY - top) / height - 0.5);
-  }, [mx, my]);
-
-  const resetMouse = useCallback(() => { mx.set(0); my.set(0); }, [mx, my]);
-
   useEffect(() => {
-    const fn = () => setIsMobile(window.innerWidth < 640);
+    const fn = () => setIsMobile(window.innerWidth < 768);
     window.addEventListener("resize", fn);
     return () => window.removeEventListener("resize", fn);
   }, []);
 
-  const visibleTabs = isMobile ? TABS.filter((t) => t.id !== "overview") : TABS;
-
-  useEffect(() => {
-    if (isMobile && tab === "overview") setTab("website");
-  }, [isMobile, tab]);
+  const wrap = { maxWidth: 1080, margin: "0 auto", padding: isMobile ? "0 20px" : "0 48px" };
 
   return (
     <>
-      <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.35, ease: EASE }}
-        style={{ position: "relative", width: "100%", maxWidth: "100%", overflowX: "hidden" }}
-      >
-        {!isMobile && (
-        <div style={{ position: "absolute", top: "12%", left: "50%", transform: "translate(-50%,-50%)", width: 900, height: 600, background: `radial-gradient(ellipse, ${G(0.07)} 0%, transparent 65%)`, filter: "blur(50px)", pointerEvents: "none" }} />
-        )}
+      <div style={{ position: "relative", width: "100%", maxWidth: "100%", overflowX: "hidden", background: "#080808" }}>
 
-        <div
-          ref={containerRef}
-          onMouseMove={isMobile ? undefined : handleMouse}
-          onMouseLeave={isMobile ? undefined : resetMouse}
-          style={{ position: "relative", width: "100%", maxWidth: "100%", overflowX: "hidden" }}
-        >
-          <div style={{
-            position: "sticky", top: 0, zIndex: 30,
-            padding: isMobile ? "12px 16px 10px" : "14px 24px 12px",
-            background: "rgba(9,9,11,0.92)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)",
-            borderBottom: "1px solid rgba(255,255,255,0.05)",
-          }}>
-            <Link to="/" className="projects-page__back" style={{ marginBottom: isMobile ? 10 : 12 }}>
-              <HiChevronLeft size={16} />
-              Back to home
+        {/* ══════════ HERO ══════════ */}
+        <section style={{ position: "relative", minHeight: "100vh", display: "flex", flexDirection: "column", justifyContent: "center", overflow: "hidden" }}>
+          {/* Ambient gold glow */}
+          <div style={{ position: "absolute", top: "35%", left: "50%", transform: "translate(-50%,-50%)", width: 900, height: 700, background: `radial-gradient(ellipse, ${G(0.07)} 0%, transparent 60%)`, filter: "blur(70px)", pointerEvents: "none" }} />
+
+          <div style={{ position: "absolute", top: 0, left: 0, right: 0, padding: isMobile ? "20px 20px" : "28px 48px", zIndex: 10 }}>
+            <Link to="/" style={{ display: "inline-flex", alignItems: "center", gap: 6, fontFamily: "'Space Grotesk', sans-serif", fontSize: 12, color: "rgba(255,255,255,0.35)", textDecoration: "none" }}>
+              <HiChevronLeft size={14} /> Back to home
             </Link>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                <AlterMark size={isMobile ? 0.85 : 1} />
-                <div>
-                  <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: isMobile ? 14 : 16, color: "rgba(255,255,255,0.9)", lineHeight: 1.1 }}>
-                    Alter
-                  </div>
-                  <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, color: GOLD, marginTop: 2, letterSpacing: "0.04em" }}>
-                    PR &amp; Marketing Agency · MENA
+          </div>
+
+          <div style={{ ...wrap, paddingTop: isMobile ? 110 : 130, paddingBottom: 80, display: "flex", flexDirection: isMobile ? "column" : "row", alignItems: isMobile ? "flex-start" : "center", gap: isMobile ? 52 : 64, position: "relative", zIndex: 1 }}>
+
+            <div style={{ flex: 1, minWidth: 0 }}>
+              {/* Logo + eyebrow */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, ease: EASE }}
+                style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 36 }}
+              >
+                <motion.img
+                  src={alterLogo} alt="Alter"
+                  initial={{ opacity: 0, scale: 0.92 }} animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.25, duration: 0.35, ease: EASE }}
+                  style={{ height: 28, width: "auto", objectFit: "contain", flexShrink: 0, display: "block" }}
+                />
+                <div style={{ borderLeft: `1px solid ${G(0.2)}`, paddingLeft: 14 }}>
+                  <div style={{ display: "inline-flex", alignItems: "center", gap: 10 }}>
+                    <span style={{ width: 22, height: 1, background: GOLD, opacity: 0.7, display: "block" }} />
+                    <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 10, letterSpacing: "0.3em", textTransform: "uppercase", color: GOLD, opacity: 0.85 }}>Case Study · 2024</span>
                   </div>
                 </div>
-              </div>
-              {!isMobile && <TabBar active={tab} onChange={setTab} tabs={visibleTabs} />}
+              </motion.div>
+
+              <motion.h1
+                initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.08, duration: 0.55, ease: EASE }}
+                style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: isMobile ? 42 : 72, lineHeight: 1.0, letterSpacing: "-0.025em", color: "rgba(255,255,255,0.95)", margin: "0 0 18px" }}
+              >
+                Alter
+              </motion.h1>
+
+              <motion.p
+                initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.14, duration: 0.5, ease: EASE }}
+                style={{ fontFamily: "'Inter', sans-serif", fontSize: isMobile ? 15 : 17, color: "rgba(255,255,255,0.36)", lineHeight: 1.7, margin: "0 0 32px", maxWidth: 500 }}
+              >
+                A cinematic digital presence for a leading MENA PR &amp; marketing agency — built in React.js with live campaign statistics, a marquee artist roster, and a fully responsive layout.
+              </motion.p>
+
+              <motion.div
+                initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2, duration: 0.45, ease: EASE }}
+                style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 36 }}
+              >
+                {[
+                  { label: "Role",    value: "Frontend Developer" },
+                  { label: "Client",  value: "Alter Agency — MENA" },
+                  { label: "Stack",   value: "React.js · Vercel"  },
+                  { label: "Type",    value: "Marketing Website"   },
+                ].map(m => (
+                  <div key={m.label} style={{ padding: "8px 14px", borderRadius: 8, background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
+                    <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 9, color: "rgba(255,255,255,0.28)", letterSpacing: "0.18em", textTransform: "uppercase", marginBottom: 2 }}>{m.label}</div>
+                    <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 12, color: "rgba(255,255,255,0.7)", fontWeight: 500 }}>{m.value}</div>
+                  </div>
+                ))}
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.28, duration: 0.4, ease: EASE }}
+                style={{ display: "flex", gap: 12, flexWrap: "wrap" }}
+              >
+                <motion.a
+                  href={LIVE_URL} target="_blank" rel="noopener noreferrer"
+                  whileHover={{ scale: 1.04, boxShadow: `0 0 36px ${G(0.55)}` }} whileTap={{ scale: 0.97 }}
+                  style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "12px 24px", borderRadius: 10, background: GOLD, fontFamily: "'Space Grotesk', sans-serif", fontSize: 13, fontWeight: 700, color: "#080808", textDecoration: "none" }}
+                >
+                  Visit Live Site <HiArrowUpRight size={14} />
+                </motion.a>
+                <motion.button
+                  type="button"
+                  onClick={() => document.getElementById("alter-web").scrollIntoView({ behavior: "smooth" })}
+                  whileHover={{ scale: 1.03, borderColor: G(0.4) }} whileTap={{ scale: 0.97 }}
+                  style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "12px 24px", borderRadius: 10, background: "transparent", border: `1px solid ${G(0.22)}`, fontFamily: "'Space Grotesk', sans-serif", fontSize: 13, fontWeight: 500, color: "rgba(255,255,255,0.6)", cursor: "pointer", outline: "none" }}
+                >
+                  View Showcase
+                </motion.button>
+              </motion.div>
             </div>
-            {isMobile && (
-              <div style={{ display: "flex", justifyContent: "center", marginTop: 10 }}>
-                <TabBar active={tab} onChange={setTab} tabs={visibleTabs} />
-              </div>
+
+            {/* RIGHT — hero video preview (desktop) */}
+            {!isMobile && (
+              <motion.div
+                initial={{ opacity: 0, x: 32, scale: 0.93 }} animate={{ opacity: 1, x: 0, scale: 1 }}
+                transition={{ delay: 0.18, duration: 0.75, ease: EASE }}
+                style={{ flexShrink: 0, width: 400, position: "relative" }}
+              >
+                <div style={{ borderRadius: 12, overflow: "hidden", border: "1px solid rgba(255,255,255,0.09)", boxShadow: `0 28px 56px rgba(0,0,0,0.65), 0 0 48px ${G(0.08)}` }}>
+                  <div style={{ height: 30, display: "flex", alignItems: "center", padding: "0 10px", gap: 6, background: "rgba(0,0,0,0.75)", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+                    {["#ef4444","#f59e0b","#22c55e"].map(c => <span key={c} style={{ width: 7, height: 7, borderRadius: "50%", background: c, opacity: 0.7 }} />)}
+                  </div>
+                  <HeroVideoPreview src={alterWebVideo} />
+                </div>
+                <motion.div
+                  animate={{ y: [0, -8, 0] }}
+                  transition={{ duration: 3.6, repeat: Infinity, ease: "easeInOut" }}
+                  style={{ position: "absolute", bottom: -36, right: -24, filter: `drop-shadow(0 28px 44px rgba(0,0,0,0.75)) drop-shadow(0 0 32px ${G(0.18)})` }}
+                >
+                  <VideoPhone src={alterMobileVideo} width={110} />
+                </motion.div>
+              </motion.div>
             )}
           </div>
 
-          <AnimatePresence mode="wait">
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1 }}
+            style={{ position: "absolute", bottom: 28, left: "50%", transform: "translateX(-50%)", display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}
+          >
+            <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 9, letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)" }}>Scroll</span>
+            <motion.div animate={{ y: [0, 6, 0] }} transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut" }} style={{ width: 1, height: 28, background: `linear-gradient(to bottom, ${G(0.5)}, transparent)` }} />
+          </motion.div>
+        </section>
 
-            {tab === "overview" && !isMobile && (
-              <motion.div
-                key="overview"
-                initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.28, ease: EASE }}
-                style={{ padding: "28px 28px 32px" }}
-              >
-                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.38, ease: EASE }} style={{ marginBottom: 28 }}>
-                  <SectionLabel>Case Study · React.js</SectionLabel>
-                  <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 13.5, color: "rgba(255,255,255,0.38)", lineHeight: 1.75, marginTop: 8, maxWidth: 680 }}>
-                    A premium digital presence for Alter — a PR &amp; marketing agency empowering artists,
-                    brands, and creators across the MENA region. Built in React.js with cinematic scroll
-                    experiences, live campaign statistics, a marquee artist roster, influencer showcases,
-                    and a fully responsive layout that scales from desktop spectacle to mobile elegance.
-                  </p>
-                </motion.div>
+        <Divider />
 
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1px auto", gap: "0 20px", alignItems: "start", marginBottom: 32, perspective: 1400 }}>
-                  <motion.div initial={{ opacity: 0, y: 22 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.18, duration: 0.5, ease: EASE }}>
-                    <div style={{ marginBottom: 10 }}>
-                      <SectionLabel color="rgba(255,255,255,0.3)">Website</SectionLabel>
-                      <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 9, color: "rgba(255,255,255,0.18)", marginTop: 2, letterSpacing: "0.12em", textTransform: "uppercase" }}>React.js · Desktop</div>
-                    </div>
-                    <motion.div animate={{ y: [0, -5, 0] }} transition={{ duration: 3.8, repeat: Infinity, ease: "easeInOut" }}>
-                      <motion.div style={{ rotateX: browserRotX, rotateY: browserRotY, transformStyle: "preserve-3d" }}>
-                        <VideoBrowserMockup src={alterWebVideo} onClick={() => setLightbox("web")} />
-                      </motion.div>
-                    </motion.div>
+        {/* ══════════ STORY ══════════ */}
+        <section style={{ padding: isMobile ? "72px 0" : "100px 0" }}>
+          <div style={wrap}>
+            <FadeUp>
+              <SectionLabel>Project Story</SectionLabel>
+              <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: isMobile ? 30 : 42, letterSpacing: "-0.02em", color: "rgba(255,255,255,0.92)", margin: "0 0 48px", lineHeight: 1.15 }}>
+                Prestige, on screen
+              </h2>
+            </FadeUp>
+            <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(3, 1fr)", gap: 14 }}>
+              {STORY.map((card, i) => (
+                <FadeUp key={card.num} delay={i * 0.1}>
+                  <motion.div
+                    whileHover={{ y: -5, borderColor: G(0.3) }}
+                    style={{ padding: "28px 24px", borderRadius: 14, background: "rgba(255,255,255,0.025)", border: `1px solid ${G(0.1)}`, height: "100%", position: "relative", overflow: "hidden", transition: "border-color 0.25s" }}
+                  >
+                    <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: `linear-gradient(to right, ${G(0.55)}, ${G(0.08)})` }} />
+                    <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 40, fontWeight: 800, color: G(0.07), letterSpacing: "-0.04em", marginBottom: 18, lineHeight: 1 }}>{card.num}</div>
+                    <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 9, letterSpacing: "0.26em", textTransform: "uppercase", color: GOLD, opacity: 0.75, marginBottom: 10 }}>{card.label}</div>
+                    <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: isMobile ? 15 : 16, color: "rgba(255,255,255,0.88)", margin: "0 0 10px", lineHeight: 1.35 }}>{card.heading}</h3>
+                    <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: "rgba(255,255,255,0.37)", lineHeight: 1.72, margin: 0 }}>{card.body}</p>
                   </motion.div>
+                </FadeUp>
+              ))}
+            </div>
+          </div>
+        </section>
 
-                  <div style={{ background: "linear-gradient(to bottom, transparent 0%, rgba(255,255,255,0.06) 30%, rgba(255,255,255,0.06) 70%, transparent 100%)", alignSelf: "stretch" }} />
+        <Divider />
 
-                  <motion.div initial={{ opacity: 0, y: 22 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.28, duration: 0.5, ease: EASE }} style={{ display: "flex", flexDirection: "column", alignItems: "center", width: 210 }}>
-                    <div style={{ width: "100%", marginBottom: 10 }}>
-                      <SectionLabel color="rgba(255,255,255,0.3)">Mobile View</SectionLabel>
-                      <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 9, color: "rgba(255,255,255,0.18)", marginTop: 2, letterSpacing: "0.12em", textTransform: "uppercase" }}>Responsive · React.js</div>
-                    </div>
-                    <motion.div animate={{ y: [0, -6, 0] }} transition={{ duration: 3.4, repeat: Infinity, ease: "easeInOut", delay: 0.6 }}>
-                      <motion.div style={{ rotateX: phoneRotX, rotateY: phoneRotY, transformStyle: "preserve-3d" }}>
-                        <VideoPhoneMockup src={alterMobileVideo} width={190} onClick={() => setLightbox("phone")} />
-                      </motion.div>
-                    </motion.div>
-                  </motion.div>
-                </div>
-
-                <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.36, duration: 0.4, ease: EASE }} style={{ marginBottom: 24 }}>
-                  <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 10, letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)", marginBottom: 12 }}>Key Features</div>
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "8px 20px" }}>
-                    {FEATURES.map((f, i) => (
-                      <motion.div key={i} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.42 + i * 0.06, duration: 0.3, ease: EASE }}
-                        style={{ display: "flex", alignItems: "flex-start", gap: 8, fontFamily: "'Inter', sans-serif", fontSize: 12, color: "rgba(255,255,255,0.42)", lineHeight: 1.55 }}>
-                        <span style={{ color: GOLD, flexShrink: 0, marginTop: 1, fontSize: 9 }}>▸</span>
-                        {f}
-                      </motion.div>
-                    ))}
-                  </div>
-                </motion.div>
-
-                <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.52, duration: 0.38, ease: EASE }}
-                  style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 14, paddingTop: 20, borderTop: "1px solid rgba(255,255,255,0.06)" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
-                    {ALL_TECH.map((t, i) => <TechPill key={t.name} name={t.name} delay={0.56 + i * 0.04} />)}
-                  </div>
-                  <LiveButton />
-                </motion.div>
-              </motion.div>
-            )}
-
-            {tab === "website" && (
-              <motion.div
-                key="website"
-                initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.28, ease: EASE }}
-                style={{ padding: isMobile ? "20px 16px 24px" : "28px 28px 32px" }}
-              >
-                <div style={{ marginBottom: isMobile ? 16 : 22 }}>
-                  <SectionLabel>React.js · Vercel</SectionLabel>
-                  <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: isMobile ? 18 : 22, color: "rgba(255,255,255,0.9)", margin: "7px 0 8px", lineHeight: 1.2 }}>
+        {/* ══════════ WEBSITE SHOWCASE ══════════ */}
+        <section id="alter-web" style={{ padding: isMobile ? "72px 0" : "100px 0" }}>
+          <div style={wrap}>
+            <FadeUp>
+              <SectionLabel>Desktop Experience</SectionLabel>
+              <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 16, marginBottom: 28, flexWrap: "wrap" }}>
+                <div>
+                  <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: isMobile ? 30 : 42, letterSpacing: "-0.02em", color: "rgba(255,255,255,0.92)", margin: 0, lineHeight: 1.15 }}>
                     The Website
                   </h2>
-                  <p style={{ fontFamily: "'Inter', sans-serif", fontSize: isMobile ? 12.5 : 13, color: "rgba(255,255,255,0.35)", lineHeight: 1.75, maxWidth: 580 }}>
-                    The desktop experience opens with a bold hero and live agency metrics — campaigns run,
-                    artists represented, influencers in network. Scroll reveals a marquee artist roster,
-                    influencer talent cards, six core service pillars, and a trusted partners wall.
-                    Every section is crafted to communicate scale, prestige, and creative authority.
+                  <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 14, color: "rgba(255,255,255,0.32)", margin: "8px 0 0", maxWidth: 520 }}>
+                    The desktop opens with a bold hero, live campaign metrics, a marquee artist roster, and a cinematic scroll experience that communicates prestige and scale.
                   </p>
                 </div>
-                <div style={{ maxWidth: "100%", overflow: "hidden" }}>
-                <VideoBrowserMockup src={alterWebVideo} onClick={() => setLightbox("web")} />
-                </div>
-                <div style={{ marginTop: 18, paddingTop: 16, borderTop: "1px solid rgba(255,255,255,0.05)", display: "flex", flexDirection: isMobile ? "column" : "row", alignItems: isMobile ? "stretch" : "center", justifyContent: "space-between", gap: 12 }}>
-                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                    {["React.js", "JavaScript", "CSS3", "Vercel"].map((t, i) => <TechPill key={t} name={t} delay={i * 0.04} />)}
-                  </div>
-                  <LiveButton />
-                </div>
-              </motion.div>
-            )}
+                <motion.a
+                  href={LIVE_URL} target="_blank" rel="noopener noreferrer"
+                  whileHover={{ scale: 1.04, boxShadow: `0 0 24px ${G(0.4)}` }} whileTap={{ scale: 0.97 }}
+                  style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "10px 20px", borderRadius: 10, background: GOLD, fontFamily: "'Space Grotesk', sans-serif", fontSize: 13, fontWeight: 700, color: "#080808", textDecoration: "none", flexShrink: 0 }}
+                >
+                  Live Site <HiArrowUpRight size={13} />
+                </motion.a>
+              </div>
+            </FadeUp>
+            <FadeUp delay={0.1}>
+              <VideoBrowser src={alterWebVideo} onClick={() => setLightbox("web")} />
+            </FadeUp>
+            <FadeUp delay={0.14}>
+              <div style={{ marginTop: 14, textAlign: "right" }}>
+                <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, color: "rgba(255,255,255,0.2)" }}>Tap to expand fullscreen</span>
+              </div>
+            </FadeUp>
+          </div>
+        </section>
 
-            {tab === "mobile" && (
-              <motion.div
-                key="mobile"
-                initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.28, ease: EASE }}
-                style={{ padding: isMobile ? "20px 16px 24px" : "28px 28px 32px" }}
-              >
-                <div style={{ marginBottom: isMobile ? 16 : 22 }}>
-                  <SectionLabel>Responsive Design</SectionLabel>
-                  <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: isMobile ? 18 : 22, color: "rgba(255,255,255,0.9)", margin: "7px 0 8px", lineHeight: 1.2 }}>
-                    Mobile View
-                  </h2>
-                  <p style={{ fontFamily: "'Inter', sans-serif", fontSize: isMobile ? 12.5 : 13, color: "rgba(255,255,255,0.35)", lineHeight: 1.75, maxWidth: 580 }}>
-                    On mobile, the same premium identity holds — hero stats stack cleanly,
-                    artist and influencer sections adapt to touch, and service cards reflow
-                    without losing impact. Built mobile-first in React so the agency looks
-                    impeccable on every screen size.
+        <Divider />
+
+        {/* ══════════ MOBILE VIEW ══════════ */}
+        <section style={{ padding: isMobile ? "72px 0" : "100px 0" }}>
+          <div style={wrap}>
+            <FadeUp>
+              <SectionLabel>Responsive Design</SectionLabel>
+              <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: isMobile ? 30 : 42, letterSpacing: "-0.02em", color: "rgba(255,255,255,0.92)", margin: "0 0 52px", lineHeight: 1.15 }}>
+                Mobile Experience
+              </h2>
+            </FadeUp>
+
+            <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", alignItems: "center", gap: isMobile ? 44 : 72 }}>
+              {/* Left — description */}
+              <div style={{ flex: 1, order: isMobile ? 2 : 1 }}>
+                <FadeUp>
+                  <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 15, color: "rgba(255,255,255,0.38)", lineHeight: 1.8, marginBottom: 28 }}>
+                    The same cinematic content collapses into a clean, thumb-friendly mobile layout — every scroll interaction, stat counter, and marquee preserved at any screen size.
                   </p>
+                </FadeUp>
+                <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                  {[
+                    { label: "Stats Hero",     desc: "Live campaign and artist counts, full-width on mobile" },
+                    { label: "Artist Roster",  desc: "Marquee scrolls and talent cards adapt to touch" },
+                    { label: "Service Grid",   desc: "Six pillars stack cleanly for mobile reading" },
+                    { label: "Partners Wall",  desc: "Logo grid reflows to 2-column on small screens" },
+                  ].map((item, i) => (
+                    <FadeUp key={item.label} delay={i * 0.07}>
+                      <div style={{ display: "flex", gap: 14, padding: "14px 16px", borderRadius: 12, background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)" }}>
+                        <div style={{ width: 8, height: 8, borderRadius: "50%", background: GOLD, opacity: 0.6, flexShrink: 0, marginTop: 4 }} />
+                        <div>
+                          <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 13, fontWeight: 600, color: "rgba(255,255,255,0.75)", marginBottom: 3 }}>{item.label}</div>
+                          <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, color: "rgba(255,255,255,0.3)", lineHeight: 1.55 }}>{item.desc}</div>
+                        </div>
+                      </div>
+                    </FadeUp>
+                  ))}
                 </div>
-                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 14, maxWidth: "100%", overflow: "hidden" }}>
-                  <motion.div animate={isMobile ? {} : { y: [0, -6, 0] }} transition={{ duration: 3.4, repeat: Infinity, ease: "easeInOut" }} style={{ perspective: 1200 }}>
-                    <motion.div style={isMobile ? {} : { rotateX: phoneRotX, rotateY: phoneRotY, transformStyle: "preserve-3d" }}>
-                      <VideoPhoneMockup src={alterMobileVideo} width={isMobile ? 190 : 290} onClick={() => setLightbox("phone")} />
-                    </motion.div>
+              </div>
+
+              {/* Phone */}
+              <FadeUp delay={0.15} style={{ flexShrink: 0, display: "flex", justifyContent: "center", order: isMobile ? 1 : 2 }}>
+                <motion.div animate={{ y: [0, -10, 0] }} transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }}>
+                  <VideoPhone src={alterMobileVideo} width={isMobile ? 210 : 270} onClick={() => setLightbox("phone")} />
+                </motion.div>
+              </FadeUp>
+            </div>
+          </div>
+        </section>
+
+        <Divider />
+
+        {/* ══════════ FEATURES ══════════ */}
+        <section style={{ padding: isMobile ? "72px 0" : "100px 0" }}>
+          <div style={wrap}>
+            <FadeUp style={{ marginBottom: 44 }}>
+              <SectionLabel>Capabilities</SectionLabel>
+              <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: isMobile ? 30 : 42, letterSpacing: "-0.02em", color: "rgba(255,255,255,0.92)", margin: 0, lineHeight: 1.15 }}>What it does</h2>
+            </FadeUp>
+            <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr 1fr" : "repeat(3, 1fr)", gap: 12 }}>
+              {FEATURES.map((f, i) => (
+                <FadeUp key={f.title} delay={i * 0.06}>
+                  <motion.div
+                    whileHover={{ y: -4, borderColor: G(0.25) }}
+                    style={{ padding: isMobile ? "18px 14px" : "24px 20px", borderRadius: 12, background: "rgba(255,255,255,0.025)", border: "1px solid rgba(255,255,255,0.06)", height: "100%", transition: "border-color 0.25s" }}
+                  >
+                    <div style={{ width: 34, height: 34, borderRadius: 9, background: G(0.09), border: `1px solid ${G(0.18)}`, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 14 }}>
+                      <span style={{ fontSize: 13, color: GOLD }}>✦</span>
+                    </div>
+                    <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: isMobile ? 12 : 13, fontWeight: 600, color: "rgba(255,255,255,0.82)", marginBottom: 6, lineHeight: 1.3 }}>{f.title}</div>
+                    <div style={{ fontFamily: "'Inter', sans-serif", fontSize: isMobile ? 11 : 12, color: "rgba(255,255,255,0.3)", lineHeight: 1.65 }}>{f.desc}</div>
                   </motion.div>
-                </div>
-                <div style={{ marginTop: 18, paddingTop: 16, borderTop: "1px solid rgba(255,255,255,0.05)", display: "flex", flexWrap: "wrap", gap: 6, justifyContent: "space-between", alignItems: "center" }}>
-                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                    {["React.js", "Responsive", "Mobile-first", "Figma"].map((t, i) => <TechPill key={t} name={t} delay={i * 0.04} />)}
+                </FadeUp>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <Divider />
+
+        {/* ══════════ TECH ══════════ */}
+        <section style={{ padding: isMobile ? "72px 0" : "100px 0" }}>
+          <div style={wrap}>
+            <FadeUp style={{ marginBottom: 44 }}>
+              <SectionLabel>Architecture</SectionLabel>
+              <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: isMobile ? 30 : 42, letterSpacing: "-0.02em", color: "rgba(255,255,255,0.92)", margin: 0, lineHeight: 1.15 }}>Built with</h2>
+            </FadeUp>
+            <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(3, 1fr)", gap: 14 }}>
+              {TECH.map((cat, i) => (
+                <FadeUp key={cat.category} delay={i * 0.1}>
+                  <div style={{ padding: "26px", borderRadius: 14, background: "rgba(255,255,255,0.025)", border: `1px solid ${G(0.1)}`, position: "relative", overflow: "hidden" }}>
+                    <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: `linear-gradient(to right, ${G(0.55)}, transparent)` }} />
+                    <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 10, letterSpacing: "0.24em", textTransform: "uppercase", color: GOLD, opacity: 0.8, marginBottom: 18 }}>{cat.category}</div>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                      {cat.items.map(item => (
+                        <div key={item} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                          <div style={{ width: 5, height: 5, borderRadius: "50%", background: GOLD, opacity: 0.55, flexShrink: 0 }} />
+                          <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 14, color: "rgba(255,255,255,0.7)", fontWeight: 500 }}>{item}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                  <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 11, color: "rgba(255,255,255,0.2)", letterSpacing: "0.04em" }}>MENA Region</span>
-                </div>
-              </motion.div>
-            )}
+                </FadeUp>
+              ))}
+            </div>
+          </div>
+        </section>
 
-          </AnimatePresence>
-        </div>
-      </motion.div>
+        {/* ══════════ FOOTER ══════════ */}
+        <section style={{ padding: isMobile ? "80px 0 110px" : "100px 0 130px" }}>
+          <div style={{ ...wrap, textAlign: "center" }}>
+            <FadeUp>
+              <div style={{ display: "inline-flex", alignItems: "center", gap: 10, marginBottom: 20 }}>
+                <div style={{ width: 28, height: 1, background: G(0.5) }} />
+                <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 10, letterSpacing: "0.3em", textTransform: "uppercase", color: GOLD, opacity: 0.8 }}>Live</span>
+                <div style={{ width: 28, height: 1, background: G(0.5) }} />
+              </div>
+              <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: isMobile ? 30 : 46, letterSpacing: "-0.025em", color: "rgba(255,255,255,0.92)", margin: "0 0 14px", lineHeight: 1.1 }}>
+                See the full experience
+              </h2>
+              <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 15, color: "rgba(255,255,255,0.32)", margin: "0 auto 40px", maxWidth: 380, lineHeight: 1.7 }}>
+                Alter is live. Explore the cinematic scroll experience for yourself.
+              </p>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 14, flexWrap: "wrap" }}>
+                <motion.a
+                  href={LIVE_URL} target="_blank" rel="noopener noreferrer"
+                  whileHover={{ scale: 1.04, boxShadow: `0 0 44px ${G(0.58)}` }} whileTap={{ scale: 0.97 }}
+                  style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "14px 30px", borderRadius: 12, background: GOLD, fontFamily: "'Space Grotesk', sans-serif", fontSize: 14, fontWeight: 700, color: "#080808", textDecoration: "none" }}
+                >
+                  Open Alter <HiArrowUpRight size={15} />
+                </motion.a>
+                <Link
+                  to="/"
+                  style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "14px 24px", borderRadius: 12, border: "1px solid rgba(255,255,255,0.1)", fontFamily: "'Space Grotesk', sans-serif", fontSize: 13, color: "rgba(255,255,255,0.4)", textDecoration: "none" }}
+                >
+                  <HiChevronLeft size={13} /> Back to portfolio
+                </Link>
+              </div>
+            </FadeUp>
+          </div>
+        </section>
 
+      </div>
+
+      {/* ══════════ LIGHTBOX ══════════ */}
       <AnimatePresence>
-        {lightbox && <VideoLightbox type={lightbox} onClose={() => setLightbox(null)} />}
+        {lightbox && (
+          <VideoLightbox
+            src={lightbox === "web" ? alterWebVideo : alterMobileVideo}
+            type={lightbox}
+            onClose={() => setLightbox(null)}
+          />
+        )}
       </AnimatePresence>
     </>
+  );
+};
+
+/* ─── Small hero preview video (no sound, shrunk) ── */
+const HeroVideoPreview = ({ src }) => {
+  const ref = useRef(null);
+  useChromeless(ref, src);
+  return (
+    <video ref={ref} src={src} {...CHROMELESS_PROPS}
+      style={{ width: "100%", display: "block", aspectRatio: "16/10", objectFit: "cover", pointerEvents: "none" }} />
   );
 };
 

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState, useRef, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { BsArrowRight, BsCheckLg, BsPhone, BsGlobe, BsLayers } from "react-icons/bs";
 import { HiArrowLeft } from "react-icons/hi2";
@@ -82,7 +82,7 @@ const TypeCard = ({ item, selected, onSelect }) => {
       onMouseMove={onMove}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={onLeave}
-      whileTap={{ scale: 0.96 }}
+      whileTap={{ scale: 0.97 }}
       style={{
         perspective: 800,
         background: "none",
@@ -92,6 +92,7 @@ const TypeCard = ({ item, selected, onSelect }) => {
         flex: 1,
         minWidth: 0,
         WebkitTapHighlightColor: "transparent",
+        touchAction: "manipulation",
       }}
     >
       <motion.div
@@ -100,7 +101,8 @@ const TypeCard = ({ item, selected, onSelect }) => {
         style={{
           transformStyle: "preserve-3d",
           borderRadius: 20,
-          padding: "20px 18px",
+          padding: "18px 16px",
+          minHeight: 80,
           background: active
             ? `linear-gradient(145deg, ${item.glow.replace("0.22", "0.18")}, rgba(0,0,0,0))`
             : "rgba(255,255,255,0.025)",
@@ -505,7 +507,14 @@ const STEP_VARIANTS = {
 
 /* ─── MissionConsole — the form console panel ───────────── */
 const MissionConsole = () => {
+  const [isMobile, setIsMobile] = useState(() => typeof window !== "undefined" && window.innerWidth < 640);
   const [step, setStep] = useState(0);
+
+  useEffect(() => {
+    const fn = () => setIsMobile(window.innerWidth < 640);
+    window.addEventListener("resize", fn, { passive: true });
+    return () => window.removeEventListener("resize", fn);
+  }, []);
   const [dir, setDir] = useState(1);
   const [pipelineStep, setPipelineStep] = useState(-1); // -1 = idle
   const [refId, setRefId] = useState(null);
@@ -600,7 +609,7 @@ const MissionConsole = () => {
         background: "rgba(10,10,13,0.75)",
         border: "1px solid rgba(255,255,255,0.07)",
         borderRadius: 24,
-        padding: "32px 28px",
+        padding: isMobile ? "24px 20px" : "32px 28px",
         backdropFilter: "blur(28px)",
         WebkitBackdropFilter: "blur(28px)",
         boxShadow: "0 24px 80px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.04)",
@@ -679,7 +688,7 @@ const MissionConsole = () => {
                 {errors.projectType && (
                   <p style={{ margin: "0 0 12px", color: "#f87171", fontSize: 12, fontFamily: "'Inter',sans-serif" }}>{errors.projectType}</p>
                 )}
-                <div style={{ display: "flex", gap: 10, marginBottom: 24, flexWrap: "wrap" }}>
+                <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", gap: isMobile ? 8 : 10, marginBottom: 24 }}>
                   {PROJECT_TYPES.map((t) => (
                     <TypeCard key={t.id} item={t} selected={projectType} onSelect={(id) => { setProjectType(id); setErrors((e) => ({ ...e, projectType: null })); }} />
                   ))}
@@ -736,7 +745,7 @@ const MissionConsole = () => {
                   So I can reply directly to you.
                 </p>
 
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px 24px", marginBottom: 8 }}>
+                <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: isMobile ? "18px" : "20px 24px", marginBottom: 8 }}>
                   <InlineInput label="Your Name" value={name} onChange={(v) => { setName(v); setErrors((e) => ({ ...e, name: null })); }} placeholder="Alex Johnson" error={errors.name} />
                   <InlineInput label="Email Address" type="email" value={email} onChange={(v) => { setEmail(v); setErrors((e) => ({ ...e, email: null })); }} placeholder="you@domain.com" error={errors.email} />
                 </div>

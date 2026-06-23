@@ -1,39 +1,30 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
-import {
-  motion,
-  AnimatePresence,
-  useMotionValue,
-  useSpring,
-  useTransform,
-} from "framer-motion";
+import React, { useState, useEffect, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import { HiChevronLeft, HiChevronRight } from "react-icons/hi";
-import { HiArrowsPointingOut } from "react-icons/hi2";
+import { HiArrowUpRight, HiArrowsPointingOut } from "react-icons/hi2";
 import CaseStudyLightbox, { LandscapeWebImage } from "./CaseStudyLightbox";
 
-/* ─── Desktop screenshots ──────────────────────────── */
+/* ─── Assets ─────────────────────────────────────── */
 import webHome1    from "../../assets/raffoul_motors_web/home_page_1.png";
 import webHome2    from "../../assets/raffoul_motors_web/home_page_2.png";
 import webCars     from "../../assets/raffoul_motors_web/available_cars_page.png";
 import webWorkshop from "../../assets/raffoul_motors_web/workshop_page.png";
 import webDash     from "../../assets/raffoul_motors_web/dashboard_page_1.png";
-
-/* ─── Mobile screenshots ───────────────────────────── */
 import mobHome     from "../../assets/raffoul_motors_web/mobile_view_home_page.png";
 import mobCars     from "../../assets/raffoul_motors_web/mobile_view_available_cars.png";
 import mobWorkshop from "../../assets/raffoul_motors_web/mobile_view_workshop_cars.png";
 import mobDash     from "../../assets/raffoul_motors_web/mobile_view_dashboard.png";
 import raffoulLogo from "../../assets/raffoulmotors.png";
 
-/* ─── Colour system (brand: white + red) ───────────── */
-const RED = "#E31E24";
-const R = (a) => `rgba(227,30,36,${a})`;
-const EASE  = [0.22, 1, 0.36, 1];
-const SPRING = { type: "spring", stiffness: 340, damping: 30 };
+/* ─── Brand ──────────────────────────────────────── */
+const RED  = "#E31E24";
+const R    = (a) => `rgba(227,30,36,${a})`;
+const EASE = [0.22, 1, 0.36, 1];
 
-/* ─── Screen arrays ────────────────────────────────── */
+/* ─── Data ───────────────────────────────────────── */
 const WEB_SCREENS = [
-  { src: webHome1,    label: "Home — Hero"    },
+  { src: webHome1,    label: "Home — Hero"     },
   { src: webHome2,    label: "Home — Showroom" },
   { src: webCars,     label: "Available Cars"  },
   { src: webWorkshop, label: "Workshop"        },
@@ -41,139 +32,123 @@ const WEB_SCREENS = [
 ];
 
 const MOB_SCREENS = [
-  { src: mobHome,     label: "Home"           },
-  { src: mobCars,     label: "Available Cars" },
-  { src: mobWorkshop, label: "Workshop"       },
-  { src: mobDash,     label: "Admin View"     },
+  { src: mobHome,     label: "Mobile Home"     },
+  { src: mobCars,     label: "Available Cars"  },
+  { src: mobWorkshop, label: "Workshop"        },
+  { src: mobDash,     label: "Admin View"      },
 ];
 
-/* ─── Content ──────────────────────────────────────── */
-const ALL_TECH = [
-  { name: "React 18"   },
-  { name: "TypeScript" },
-  { name: "Firebase"   },
-  { name: "Vite"       },
-  { name: "i18next"    },
-  { name: "Figma"      },
+const STORY = [
+  {
+    num: "01",
+    label: "The Problem",
+    heading: "A premium dealer with no digital showroom",
+    body: "Raffoul Motors had an outstanding physical inventory but no online presence. Customers couldn't browse stock, get specs, or connect — business was purely walk-in.",
+  },
+  {
+    num: "02",
+    label: "The Approach",
+    heading: "A bilingual platform built for non-technical owners",
+    body: "A React 18 web platform with full Arabic & English support, filterable inventory, car detail pages, a workshop section, and a zero-code admin panel powered by Firebase.",
+  },
+  {
+    num: "03",
+    label: "The Outcome",
+    heading: "The dealer now runs their site solo",
+    body: "Owners publish, edit, and delete listings without touching code. The site is fully bilingual, mobile-responsive, and live with the full inventory browsable online.",
+  },
 ];
 
 const FEATURES = [
-  "Full bilingual Arabic & English with live language picker",
-  "Inventory browse with filters — make, year, price & more",
-  "Car detail pages with gallery, specs & WhatsApp contact",
-  "Workshop section for cars currently in refurbishment",
-  "Admin panel — publish, edit and delete listings without code",
-  "Image upload & optimisation with 360° spin frame support",
+  { title: "Bilingual UI",         desc: "Full Arabic & English with live language picker and RTL support"  },
+  { title: "Inventory Filters",    desc: "Browse by make, year, price range, and availability"               },
+  { title: "Car Detail Pages",     desc: "Gallery, specs, features list, and direct WhatsApp contact"       },
+  { title: "Workshop Section",     desc: "Separate section for cars currently in refurbishment"             },
+  { title: "Admin Panel",          desc: "Publish, edit, and delete listings with zero code required"       },
+  { title: "Image Management",     desc: "Upload optimisation with 360° spin frame support"                  },
 ];
 
-const TABS = [
-  { id: "overview", label: "Overview"    },
-  { id: "website",  label: "Website"     },
-  { id: "mobile",   label: "Mobile View" },
+const MOB_HIGHLIGHTS = [
+  { idx: 0, label: "Mobile Home",  desc: "Full hero experience adapts perfectly on every device"             },
+  { idx: 1, label: "Car Listings", desc: "Responsive inventory grid with filters — swipe-friendly on mobile" },
+  { idx: 2, label: "Workshop",     desc: "Workshop inventory fully accessible on mobile"                      },
+  { idx: 3, label: "Admin Panel",  desc: "Owners can manage listings from their phone too"                    },
 ];
 
-/* ─── Raffoul Motors logo mark ─────────────────────── */
-const RaffoulMark = ({ size = 1 }) => (
-  <motion.img
-    src={raffoulLogo}
-    alt="Raffoul Motors"
-    initial={{ opacity: 0, scale: 0.92 }}
-    animate={{ opacity: 1, scale: 1 }}
-    transition={{ delay: 0.2, duration: 0.35, ease: EASE }}
-    style={{
-      height: 44 * size,
-      width: "auto",
-      objectFit: "contain",
-      flexShrink: 0,
-      display: "block",
-    }}
-  />
+const TECH = [
+  { category: "Frontend",  items: ["React 18", "TypeScript", "Tailwind CSS", "i18next"] },
+  { category: "Backend",   items: ["Firebase", "Firestore", "Cloud Storage"]             },
+  { category: "Tooling",   items: ["Vite", "Figma", "ESLint"]                            },
+];
+
+/* ─── Shared micro-components ─────────────────────── */
+
+const FadeUp = ({ children, delay = 0, style }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 28 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true, margin: "-72px 0px" }}
+    transition={{ duration: 0.6, ease: EASE, delay }}
+    style={style}
+  >
+    {children}
+  </motion.div>
 );
 
-/* ─── Tab bar ──────────────────────────────────────── */
-const TabBar = ({ active, onChange, tabs = TABS }) => (
-  <div style={{
-    display: "flex", gap: 2, padding: 4,
-    background: "rgba(255,255,255,0.04)",
-    borderRadius: 10, border: "1px solid rgba(255,255,255,0.07)",
-  }}>
-    {tabs.map((tab) => (
-      <button
-        key={tab.id}
-        onClick={() => onChange(tab.id)}
-        style={{
-          position: "relative", padding: "7px 15px", borderRadius: 7,
-          border: "none", cursor: "pointer", background: "transparent",
-          color: active === tab.id ? "white" : "rgba(255,255,255,0.38)",
-          fontFamily: "'Space Grotesk', sans-serif", fontSize: 12,
-          fontWeight: 500, transition: "color 0.2s", outline: "none",
-          zIndex: 1, whiteSpace: "nowrap",
-        }}
-      >
-        {active === tab.id && (
-          <motion.div
-            layoutId="rm-tab-pill"
-            style={{
-              position: "absolute", inset: 0, borderRadius: 7,
-              background: R(0.12), border: `1px solid ${R(0.28)}`, zIndex: -1,
-            }}
-            transition={SPRING}
-          />
-        )}
-        {tab.label}
-      </button>
-    ))}
+const SectionLabel = ({ children }) => (
+  <div style={{ display: "inline-flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+    <span style={{ width: 16, height: 1, background: R(0.65), display: "block" }} />
+    <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 10, letterSpacing: "0.28em", textTransform: "uppercase", color: RED, opacity: 0.85 }}>
+      {children}
+    </span>
   </div>
 );
 
-/* ─── Nav arrow ────────────────────────────────────── */
-const NavArrow = ({ dir, onClick }) => (
+const NavBtn = ({ dir, onClick }) => (
   <motion.button
-    whileHover={{ scale: 1.12, background: "rgba(255,255,255,0.1)" }}
+    type="button"
+    whileHover={{ scale: 1.1, background: R(0.1) }}
     whileTap={{ scale: 0.9 }}
     onClick={onClick}
     style={{
-      width: 28, height: 28, borderRadius: "50%",
-      background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.09)",
+      width: 40, height: 40, borderRadius: "50%",
+      background: "rgba(255,255,255,0.05)",
+      border: `1px solid ${R(0.22)}`,
       display: "flex", alignItems: "center", justifyContent: "center",
-      cursor: "pointer", color: "rgba(255,255,255,0.45)", outline: "none",
-      flexShrink: 0, transition: "background 0.2s",
+      cursor: "pointer", color: "rgba(255,255,255,0.5)",
+      outline: "none", flexShrink: 0, transition: "background 0.2s, border-color 0.2s",
     }}
   >
-    {dir === -1 ? <HiChevronLeft size={13} /> : <HiChevronRight size={13} />}
+    {dir === -1 ? <HiChevronLeft size={16} /> : <HiChevronRight size={16} />}
   </motion.button>
 );
 
-/* ─── Dots ─────────────────────────────────────────── */
 const Dots = ({ count, current, onChange }) => (
   <div style={{ display: "flex", gap: 5, alignItems: "center" }}>
     {Array.from({ length: count }).map((_, i) => (
       <motion.button
-        key={i}
-        onClick={() => onChange(i)}
-        animate={{ width: current === i ? 16 : 5, background: current === i ? RED : "rgba(255,255,255,0.15)" }}
-        transition={{ duration: 0.28, ease: EASE }}
-        style={{ height: 5, borderRadius: 3, border: "none", cursor: "pointer", padding: 0, flexShrink: 0, outline: "none" }}
+        key={i} type="button" onClick={() => onChange(i)}
+        animate={{ width: current === i ? 18 : 5, background: current === i ? RED : "rgba(255,255,255,0.15)" }}
+        transition={{ duration: 0.26, ease: EASE }}
+        style={{ height: 4, borderRadius: 2, border: "none", cursor: "pointer", padding: 0, flexShrink: 0, outline: "none" }}
       />
     ))}
   </div>
 );
 
-/* ─── Progress bar ─────────────────────────────────── */
 const ProgressBar = ({ duration, trackKey }) => (
-  <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 2, background: "rgba(255,255,255,0.05)", overflow: "hidden", zIndex: 8 }}>
+  <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 2, background: "rgba(255,255,255,0.04)", overflow: "hidden", zIndex: 8 }}>
     <motion.div
       key={trackKey}
-      initial={{ scaleX: 0 }}
-      animate={{ scaleX: 1 }}
+      initial={{ scaleX: 0 }} animate={{ scaleX: 1 }}
       transition={{ duration, ease: "linear" }}
-      style={{ position: "absolute", inset: 0, background: `linear-gradient(90deg, ${R(0.5)}, ${RED})`, transformOrigin: "left" }}
+      style={{ position: "absolute", inset: 0, background: `linear-gradient(90deg, ${R(0.4)}, ${RED})`, transformOrigin: "left" }}
     />
   </div>
 );
 
-/* ─── Phone mockup ─────────────────────────────────── */
-const PhoneMockup = ({ screen, dir, width = 200, autoAdvanceDur, onClick }) => {
+/* ─── Phone mockup ────────────────────────────────── */
+const Phone = ({ screen, dir, width = 220, autoAdvanceDur, onClick }) => {
   const h = Math.round(width * 2.08);
   const [hov, setHov] = useState(false);
   return (
@@ -185,42 +160,33 @@ const PhoneMockup = ({ screen, dir, width = 200, autoAdvanceDur, onClick }) => {
     >
       <div style={{
         position: "absolute", inset: 0, borderRadius: width * 0.19,
-        background: "linear-gradient(160deg, #252525, #141414)",
+        background: "linear-gradient(160deg,#252525,#141414)",
         border: "1.5px solid rgba(255,255,255,0.08)", overflow: "hidden",
-        boxShadow: ["0 35px 70px rgba(0,0,0,0.75)", `0 0 50px ${R(0.14)}`, "inset 0 1px 0 rgba(255,255,255,0.06)"].join(", "),
+        boxShadow: [`0 44px 88px rgba(0,0,0,0.8)`, `0 0 64px ${R(0.15)}`, "inset 0 1px 0 rgba(255,255,255,0.06)"].join(", "),
       }}>
         <AnimatePresence custom={dir}>
           <motion.div
             key={screen.src} custom={dir}
-            initial={{ x: dir * 28, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            exit={{ x: -dir * 28, opacity: 0 }}
-            transition={{ duration: 0.38, ease: EASE }}
+            initial={{ x: dir * 28, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -dir * 28, opacity: 0 }}
+            transition={{ duration: 0.36, ease: EASE }}
             style={{ position: "absolute", inset: 0 }}
           >
             <img src={screen.src} alt={screen.label} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top", display: "block" }} />
           </motion.div>
         </AnimatePresence>
-        {/* Dynamic island */}
         <div style={{ position: "absolute", top: width * 0.056, left: "50%", transform: "translateX(-50%)", width: width * 0.38, height: width * 0.11, borderRadius: width * 0.06, background: "#111", zIndex: 10 }} />
-        {/* Home bar */}
         <div style={{ position: "absolute", bottom: 7, left: "50%", transform: "translateX(-50%)", width: width * 0.44, height: 4, borderRadius: 2, background: "rgba(255,255,255,0.2)", zIndex: 10 }} />
-        {/* Inner shadow */}
         <div style={{ position: "absolute", inset: 0, borderRadius: "inherit", boxShadow: "inset 0 0 24px rgba(0,0,0,0.45)", pointerEvents: "none", zIndex: 5 }} />
         {autoAdvanceDur && <ProgressBar duration={autoAdvanceDur} trackKey={screen.src} />}
       </div>
-      {/* Side buttons */}
-      {[{ side: "right", top: "28%", h: 56 }, { side: "left", top: "19%", h: 34 }, { side: "left", top: "33%", h: 34 }, { side: "left", top: "13%", h: 18 }].map((btn, i) => (
-        <div key={i} style={{ position: "absolute", [btn.side]: -2, top: btn.top, width: 3, height: btn.h, borderRadius: btn.side === "right" ? "0 2px 2px 0" : "2px 0 0 2px", background: "#252525" }} />
+      {[{ side: "right", top: "28%", h: 56 }, { side: "left", top: "19%", h: 34 }, { side: "left", top: "33%", h: 34 }, { side: "left", top: "13%", h: 18 }].map((b, i) => (
+        <div key={i} style={{ position: "absolute", [b.side]: -2, top: b.top, width: 3, height: b.h, borderRadius: b.side === "right" ? "0 2px 2px 0" : "2px 0 0 2px", background: "#252525" }} />
       ))}
-      {/* Glow */}
-      <div style={{ position: "absolute", bottom: -18, left: "10%", right: "10%", height: 30, background: `radial-gradient(ellipse, ${R(0.28)}, transparent 70%)`, filter: "blur(10px)", pointerEvents: "none" }} />
-      {/* Expand overlay */}
+      <div style={{ position: "absolute", bottom: -22, left: "10%", right: "10%", height: 36, background: `radial-gradient(ellipse, ${R(0.28)}, transparent 70%)`, filter: "blur(12px)", pointerEvents: "none" }} />
       {onClick && (
         <motion.div
-          animate={{ opacity: hov ? 1 : 0 }}
-          transition={{ duration: 0.18 }}
-          style={{ position: "absolute", inset: 0, borderRadius: width * 0.19, background: "rgba(0,0,0,0.38)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 25, pointerEvents: "none" }}
+          animate={{ opacity: hov ? 1 : 0 }} transition={{ duration: 0.18 }}
+          style={{ position: "absolute", inset: 0, borderRadius: width * 0.19, background: "rgba(0,0,0,0.4)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 25, pointerEvents: "none" }}
         >
           <div style={{ width: 46, height: 46, borderRadius: "50%", background: "rgba(255,255,255,0.14)", border: "1px solid rgba(255,255,255,0.28)", backdropFilter: "blur(10px)", display: "flex", alignItems: "center", justifyContent: "center", color: "white" }}>
             <HiArrowsPointingOut size={20} />
@@ -231,8 +197,8 @@ const PhoneMockup = ({ screen, dir, width = 200, autoAdvanceDur, onClick }) => {
   );
 };
 
-/* ─── Browser mockup ───────────────────────────────── */
-const BrowserMockup = ({ screen, dir, height, autoAdvanceDur, onClick }) => {
+/* ─── Browser mockup ──────────────────────────────── */
+const Browser = ({ screen, dir, onClick }) => {
   const [hov, setHov] = useState(false);
   return (
     <div
@@ -240,55 +206,39 @@ const BrowserMockup = ({ screen, dir, height, autoAdvanceDur, onClick }) => {
       onMouseEnter={() => onClick && setHov(true)}
       onMouseLeave={() => setHov(false)}
       style={{
-        position: "relative", width: "100%", borderRadius: 12, overflow: "hidden",
-        background: "#0d0d0d", border: "1px solid rgba(255,255,255,0.07)",
+        position: "relative", width: "100%", borderRadius: 14, overflow: "hidden",
+        background: "#0d0d0d", border: "1px solid rgba(255,255,255,0.08)",
         cursor: onClick ? "zoom-in" : "default",
-        boxShadow: ["0 28px 60px rgba(0,0,0,0.6)", `0 0 45px ${R(0.1)}`, "inset 0 1px 0 rgba(255,255,255,0.04)"].join(", "),
+        boxShadow: [`0 32px 64px rgba(0,0,0,0.65)`, `0 0 50px ${R(0.08)}`, "inset 0 1px 0 rgba(255,255,255,0.05)"].join(", "),
       }}
     >
-      {/* Chrome bar */}
-      <div style={{ height: 36, display: "flex", alignItems: "center", padding: "0 12px", gap: 10, background: "rgba(0,0,0,0.55)", borderBottom: "1px solid rgba(255,255,255,0.05)", flexShrink: 0 }}>
+      <div style={{ height: 38, display: "flex", alignItems: "center", padding: "0 14px", gap: 10, background: "rgba(0,0,0,0.65)", borderBottom: "1px solid rgba(255,255,255,0.05)", flexShrink: 0 }}>
         <div style={{ display: "flex", gap: 5 }}>
-          {["#ef4444", "#f59e0b", "#22c55e"].map((c) => (
-            <span key={c} style={{ width: 8, height: 8, borderRadius: "50%", background: c, opacity: 0.8 }} />
-          ))}
+          {["#ef4444","#f59e0b","#22c55e"].map(c => <span key={c} style={{ width: 8, height: 8, borderRadius: "50%", background: c, opacity: 0.8 }} />)}
         </div>
-        <div style={{ flex: 1, height: 18, borderRadius: 5, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)", display: "flex", alignItems: "center", paddingLeft: 8, gap: 5 }}>
+        <div style={{ flex: 1, height: 20, borderRadius: 5, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)", display: "flex", alignItems: "center", paddingLeft: 10, gap: 6 }}>
           <span style={{ width: 5, height: 5, borderRadius: "50%", background: RED, flexShrink: 0 }} />
-          <span style={{ fontSize: 9, color: "rgba(255,255,255,0.25)", fontFamily: "monospace", whiteSpace: "nowrap" }}>raffoul-motors.vercel.app</span>
+          <span style={{ fontSize: 9, color: "rgba(255,255,255,0.28)", fontFamily: "monospace", whiteSpace: "nowrap" }}>raffoulmotors.com</span>
         </div>
       </div>
-      {/* Screenshot */}
-      <div
-        style={{
-          position: "relative",
-          overflow: "hidden",
-          width: "100%",
-          ...(height ? { height } : { aspectRatio: "16 / 9" }),
-        }}
-      >
-        <AnimatePresence custom={dir}>
+      <div style={{ position: "relative", overflow: "hidden", width: "100%", aspectRatio: "16/9" }}>
+        <AnimatePresence mode="wait" custom={dir}>
           <motion.div
             key={screen.src} custom={dir}
-            initial={{ x: dir * 40, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            exit={{ x: -dir * 40, opacity: 0 }}
-            transition={{ duration: 0.4, ease: EASE }}
+            initial={{ x: dir * 40, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -dir * 40, opacity: 0 }}
+            transition={{ duration: 0.38, ease: EASE }}
             style={{ position: "absolute", inset: 0 }}
           >
             <img src={screen.src} alt={screen.label} style={{ width: "100%", height: "100%", objectFit: "contain", objectPosition: "top center", display: "block", background: "#0a0a0a" }} />
           </motion.div>
         </AnimatePresence>
-        {autoAdvanceDur && <ProgressBar duration={autoAdvanceDur} trackKey={screen.src} />}
       </div>
-      {/* Expand overlay */}
       {onClick && (
         <motion.div
-          animate={{ opacity: hov ? 1 : 0 }}
-          transition={{ duration: 0.18 }}
+          animate={{ opacity: hov ? 1 : 0 }} transition={{ duration: 0.18 }}
           style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.32)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 25, pointerEvents: "none" }}
         >
-          <div style={{ width: 50, height: 50, borderRadius: "50%", background: "rgba(255,255,255,0.14)", border: "1px solid rgba(255,255,255,0.28)", backdropFilter: "blur(10px)", display: "flex", alignItems: "center", justifyContent: "center", color: "white" }}>
+          <div style={{ width: 52, height: 52, borderRadius: "50%", background: "rgba(255,255,255,0.14)", border: "1px solid rgba(255,255,255,0.28)", backdropFilter: "blur(10px)", display: "flex", alignItems: "center", justifyContent: "center", color: "white" }}>
             <HiArrowsPointingOut size={22} />
           </div>
         </motion.div>
@@ -297,419 +247,453 @@ const BrowserMockup = ({ screen, dir, height, autoAdvanceDur, onClick }) => {
   );
 };
 
-/* ─── Thumbnail grid ───────────────────────────────── */
-const ThumbnailGrid = ({ screens, current, onChange, aspectRatio = "16/10", cols }) => (
-  <div style={{ display: "grid", gridTemplateColumns: `repeat(${cols || Math.min(screens.length, 9)}, 1fr)`, gap: 6 }}>
+/* ─── Thumbnail strip ─────────────────────────────── */
+const Thumbs = ({ screens, current, onChange }) => (
+  <div style={{ display: "grid", gridTemplateColumns: `repeat(${screens.length}, 1fr)`, gap: 6 }}>
     {screens.map((s, i) => (
       <motion.button
-        key={i}
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        onClick={() => onChange(i)}
+        key={s.src} type="button" onClick={() => onChange(i)}
+        whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}
         style={{
-          position: "relative", overflow: "hidden",
-          borderRadius: aspectRatio === "9/18" ? 6 : 5,
-          cursor: "pointer", padding: 0, border: "none",
-          outline: current === i ? `2px solid ${RED}` : "2px solid transparent",
-          outlineOffset: 1, aspectRatio, transition: "outline-color 0.2s",
+          padding: 0, border: `1px solid ${i === current ? R(0.55) : "rgba(255,255,255,0.07)"}`,
+          borderRadius: 6, overflow: "hidden", cursor: "pointer", background: "transparent", outline: "none",
+          boxShadow: i === current ? `0 0 10px ${R(0.28)}` : "none", transition: "border-color 0.2s, box-shadow 0.2s",
         }}
       >
-        <img src={s.src} alt={s.label} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top", display: "block" }} />
-        <div style={{ position: "absolute", inset: 0, background: current === i ? R(0.18) : "rgba(0,0,0,0.28)", transition: "background 0.2s" }} />
-        <span style={{ position: "absolute", bottom: 3, left: 0, right: 0, textAlign: "center", fontFamily: "'Space Grotesk', sans-serif", fontSize: 7, letterSpacing: "0.04em", color: current === i ? RED : "rgba(255,255,255,0.4)", fontWeight: 500, padding: "0 2px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-          {s.label}
-        </span>
+        <div style={{ aspectRatio: "16/10", overflow: "hidden" }}>
+          <img src={s.src} alt={s.label} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top", display: "block" }} />
+        </div>
       </motion.button>
     ))}
   </div>
 );
 
-/* ─── Section label ────────────────────────────────── */
-const SectionLabel = ({ children, color = RED }) => (
-  <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 10, letterSpacing: "0.3em", textTransform: "uppercase", color, opacity: 0.85 }}>
-    {children}
-  </span>
-);
-
-/* ─── Tech pill ────────────────────────────────────── */
-const TechPill = ({ name, delay = 0 }) => (
-  <motion.span
-    initial={{ opacity: 0, scale: 0.8 }}
-    animate={{ opacity: 1, scale: 1 }}
-    transition={{ delay, duration: 0.24, ease: EASE }}
-    style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 10, letterSpacing: "0.06em", padding: "4px 11px", borderRadius: 999, background: R(0.08), border: `1px solid ${R(0.2)}`, color: RED, whiteSpace: "nowrap" }}
-  >
-    {name}
-  </motion.span>
+const Divider = () => (
+  <div style={{ height: 1, background: "linear-gradient(to right,transparent,rgba(255,255,255,0.05) 30%,rgba(255,255,255,0.05) 70%,transparent)" }} />
 );
 
 /* ══════════════════════════════════════════════════════
-   MAIN CASE STUDY
-═══════════════════════════════════════════════════════ */
+   MAIN COMPONENT
+══════════════════════════════════════════════════════ */
 const RaffoulMotorsCaseStudy = () => {
-  const [tab, setTab] = useState(() => (window.innerWidth < 640 ? "website" : "overview"));
-  const [webIdx, setWebIdx] = useState(0);
-  const [webDir, setWebDir] = useState(1);
-  const [mobIdx, setMobIdx] = useState(0);
-  const [mobDir, setMobDir] = useState(1);
-  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 640);
-  const [lightbox, setLightbox] = useState(null); // null | "web" | "phone"
-
-  const containerRef = useRef(null);
-  const mx = useMotionValue(0);
-  const my = useMotionValue(0);
-  const smx = useSpring(mx, { stiffness: 55, damping: 16 });
-  const smy = useSpring(my, { stiffness: 55, damping: 16 });
-  const browserRotX = useTransform(smy, [-0.5, 0.5], [4, -4]);
-  const browserRotY = useTransform(smx, [-0.5, 0.5], [6, -6]);
-  const phoneRotX   = useTransform(smy, [-0.5, 0.5], [7, -7]);
-  const phoneRotY   = useTransform(smx, [-0.5, 0.5], [-9, 9]);
-
-  const handleMouse = useCallback((e) => {
-    const el = containerRef.current;
-    if (!el) return;
-    const { left, top, width, height } = el.getBoundingClientRect();
-    mx.set((e.clientX - left) / width - 0.5);
-    my.set((e.clientY - top) / height - 0.5);
-  }, [mx, my]);
-
-  const resetMouse = useCallback(() => { mx.set(0); my.set(0); }, [mx, my]);
+  const [webIdx, setWebIdx]     = useState(0);
+  const [mobIdx, setMobIdx]     = useState(0);
+  const [webDir, setWebDir]     = useState(1);
+  const [mobDir, setMobDir]     = useState(1);
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
+  const [lightbox, setLightbox] = useState(null);
 
   const stepWeb = useCallback((dir) => {
     setWebDir(dir);
-    setWebIdx((i) => (i + dir + WEB_SCREENS.length) % WEB_SCREENS.length);
+    setWebIdx(i => (i + dir + WEB_SCREENS.length) % WEB_SCREENS.length);
   }, []);
   const stepMob = useCallback((dir) => {
     setMobDir(dir);
-    setMobIdx((i) => (i + dir + MOB_SCREENS.length) % MOB_SCREENS.length);
+    setMobIdx(i => (i + dir + MOB_SCREENS.length) % MOB_SCREENS.length);
   }, []);
 
-  /* Auto-advance */
   useEffect(() => {
     const w = setInterval(() => stepWeb(1), 4200);
-    const m = setInterval(() => stepMob(1), 3800);
+    const m = setInterval(() => stepMob(1), 3600);
     return () => { clearInterval(w); clearInterval(m); };
   }, [stepWeb, stepMob]);
 
-  /* Responsive tracker */
   useEffect(() => {
-    const fn = () => setIsMobile(window.innerWidth < 640);
+    const fn = () => setIsMobile(window.innerWidth < 768);
     window.addEventListener("resize", fn);
     return () => window.removeEventListener("resize", fn);
   }, []);
 
-  const visibleTabs = isMobile ? TABS.filter((t) => t.id !== "overview") : TABS;
-
-  useEffect(() => {
-    if (isMobile && tab === "overview") setTab("website");
-  }, [isMobile, tab]);
+  const wrap = { maxWidth: 1080, margin: "0 auto", padding: isMobile ? "0 20px" : "0 48px" };
 
   return (
     <>
-    <motion.div
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35, ease: EASE }}
-      style={{ position: "relative", width: "100%", maxWidth: "100%", overflowX: "hidden" }}
-    >
-      {/* Ambient red glow — desktop only */}
-      {!isMobile && (
-      <div style={{ position: "absolute", top: "12%", left: "50%", transform: "translate(-50%,-50%)", width: 900, height: 600, background: `radial-gradient(ellipse, ${R(0.07)} 0%, transparent 65%)`, filter: "blur(50px)", pointerEvents: "none" }} />
-      )}
+      <div style={{ position: "relative", width: "100%", maxWidth: "100%", overflowX: "hidden", background: "#080808" }}>
 
-      <div
-        ref={containerRef}
-        onMouseMove={isMobile ? undefined : handleMouse}
-        onMouseLeave={isMobile ? undefined : resetMouse}
-        style={{ position: "relative", width: "100%", maxWidth: "100%", overflowX: "hidden" }}
-      >
-        {/* ── Sticky header ── */}
-        <div style={{
-          position: "sticky", top: 0, zIndex: 30,
-          padding: isMobile ? "12px 16px 10px" : "14px 24px 12px",
-          background: "rgba(9,9,11,0.92)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)",
-          borderBottom: "1px solid rgba(255,255,255,0.05)",
-        }}>
+        {/* ══════════ HERO ══════════ */}
+        <section style={{ position: "relative", minHeight: "100vh", display: "flex", flexDirection: "column", justifyContent: "center", overflow: "hidden" }}>
+          <div style={{ position: "absolute", top: "35%", left: "50%", transform: "translate(-50%,-50%)", width: 900, height: 700, background: `radial-gradient(ellipse, ${R(0.07)} 0%, transparent 60%)`, filter: "blur(70px)", pointerEvents: "none" }} />
+
           {/* Back link */}
-          <Link
-            to="/"
-            className="projects-page__back"
-            style={{ marginBottom: isMobile ? 10 : 12 }}
-          >
-            <HiChevronLeft size={16} />
-            Back to home
-          </Link>
-
-          {/* Row 1: mark + title (+ tabs on desktop) */}
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-              <RaffoulMark size={isMobile ? 0.85 : 1} />
-              <div>
-                <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: isMobile ? 14 : 16, color: "rgba(255,255,255,0.9)", lineHeight: 1.1 }}>
-                  Raffoul Motors
-                </div>
-                <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, color: RED, marginTop: 2, letterSpacing: "0.04em" }}>
-                  Car dealership platform
-                </div>
-              </div>
-            </div>
-            {!isMobile && <TabBar active={tab} onChange={setTab} tabs={visibleTabs} />}
+          <div style={{ position: "absolute", top: 0, left: 0, right: 0, padding: isMobile ? "20px 20px" : "28px 48px", zIndex: 10 }}>
+            <Link to="/" style={{ display: "inline-flex", alignItems: "center", gap: 6, fontFamily: "'Space Grotesk', sans-serif", fontSize: 12, color: "rgba(255,255,255,0.35)", textDecoration: "none", letterSpacing: "0.02em" }}>
+              <HiChevronLeft size={14} />
+              Back to home
+            </Link>
           </div>
 
-          {/* Row 2: tabs on mobile */}
-          {isMobile && (
-            <div style={{ display: "flex", justifyContent: "center", marginTop: 10 }}>
-              <TabBar active={tab} onChange={setTab} tabs={visibleTabs} />
-            </div>
-          )}
-        </div>
+          <div style={{ ...wrap, paddingTop: isMobile ? 110 : 130, paddingBottom: 80, display: "flex", flexDirection: isMobile ? "column" : "row", alignItems: isMobile ? "flex-start" : "center", gap: isMobile ? 52 : 64, position: "relative", zIndex: 1 }}>
 
-        {/* ── Tab content ── */}
-        <AnimatePresence mode="wait">
-
-          {/* ════════ OVERVIEW ════════ */}
-          {tab === "overview" && !isMobile && (
-            <motion.div
-              key="overview"
-              initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.28, ease: EASE }}
-              style={{ padding: "28px 28px 32px" }}
-            >
-              {/* Intro */}
-              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.38, ease: EASE }} style={{ marginBottom: 28 }}>
-                <SectionLabel>Case Study · 2025</SectionLabel>
-                <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 13.5, color: "rgba(255,255,255,0.38)", lineHeight: 1.75, marginTop: 8, maxWidth: 640 }}>
-                  A bilingual web platform for a family-run pre-owned car showroom in South Lebanon.
-                  Built solo — full public site with inventory, car detail pages, and a workshop section,
-                  plus a private admin panel for managing listings, media, and site settings without code.
-                </p>
-              </motion.div>
-
-              {/* Dual mockup row */}
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1px auto", gap: "0 20px", alignItems: "start", marginBottom: 32, perspective: 1400 }}>
-
-                {/* Desktop web */}
-                <motion.div initial={{ opacity: 0, y: 22 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.18, duration: 0.5, ease: EASE }}>
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
-                    <div>
-                      <SectionLabel color="rgba(255,255,255,0.3)">Website</SectionLabel>
-                      <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 9, color: "rgba(255,255,255,0.18)", marginTop: 2, letterSpacing: "0.12em", textTransform: "uppercase" }}>React 18 · TypeScript</div>
-                    </div>
-                    <div style={{ display: "flex", gap: 5 }}>
-                      <NavArrow dir={-1} onClick={() => stepWeb(-1)} />
-                      <NavArrow dir={1}  onClick={() => stepWeb(1)}  />
-                    </div>
+            {/* LEFT — text */}
+            <div style={{ flex: 1, minWidth: 0 }}>
+              {/* Logo */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, ease: EASE }}
+                style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 36 }}
+              >
+                <motion.img
+                  src={raffoulLogo} alt="Raffoul Motors"
+                  initial={{ opacity: 0, scale: 0.92 }} animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.25, duration: 0.35, ease: EASE }}
+                  style={{ height: 44, width: "auto", objectFit: "contain", flexShrink: 0, display: "block" }}
+                />
+                <div style={{ borderLeft: `1px solid ${R(0.2)}`, paddingLeft: 14 }}>
+                  <div style={{ display: "inline-flex", alignItems: "center", gap: 10 }}>
+                    <span style={{ width: 22, height: 1, background: RED, opacity: 0.7, display: "block" }} />
+                    <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 10, letterSpacing: "0.3em", textTransform: "uppercase", color: RED, opacity: 0.85 }}>
+                      Case Study · 2024
+                    </span>
                   </div>
-                  <motion.div animate={{ y: [0, -5, 0] }} transition={{ duration: 3.8, repeat: Infinity, ease: "easeInOut" }}>
-                    <motion.div style={{ rotateX: browserRotX, rotateY: browserRotY, transformStyle: "preserve-3d" }}>
-                      <BrowserMockup screen={WEB_SCREENS[webIdx]} dir={webDir} autoAdvanceDur={4.2} onClick={() => setLightbox("web")} />
-                    </motion.div>
-                  </motion.div>
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 10, gap: 8 }}>
-                    <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 11, color: "rgba(255,255,255,0.3)" }}>{WEB_SCREENS[webIdx].label}</span>
-                    <Dots count={WEB_SCREENS.length} current={webIdx} onChange={(i) => { setWebDir(i > webIdx ? 1 : -1); setWebIdx(i); }} />
-                  </div>
-                </motion.div>
-
-                {/* Divider */}
-                <div style={{ background: "linear-gradient(to bottom, transparent 0%, rgba(255,255,255,0.06) 30%, rgba(255,255,255,0.06) 70%, transparent 100%)", alignSelf: "stretch" }} />
-
-                {/* Mobile view */}
-                <motion.div initial={{ opacity: 0, y: 22 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.28, duration: 0.5, ease: EASE }} style={{ display: "flex", flexDirection: "column", alignItems: "center", width: 210 }}>
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", marginBottom: 10 }}>
-                    <div>
-                      <SectionLabel color="rgba(255,255,255,0.3)">Mobile View</SectionLabel>
-                      <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 9, color: "rgba(255,255,255,0.18)", marginTop: 2, letterSpacing: "0.12em", textTransform: "uppercase" }}>Responsive · EN &amp; AR</div>
-                    </div>
-                    <div style={{ display: "flex", gap: 5 }}>
-                      <NavArrow dir={-1} onClick={() => stepMob(-1)} />
-                      <NavArrow dir={1}  onClick={() => stepMob(1)}  />
-                    </div>
-                  </div>
-                  <motion.div animate={{ y: [0, -6, 0] }} transition={{ duration: 3.4, repeat: Infinity, ease: "easeInOut", delay: 0.6 }}>
-                    <motion.div style={{ rotateX: phoneRotX, rotateY: phoneRotY, transformStyle: "preserve-3d" }}>
-                      <PhoneMockup screen={MOB_SCREENS[mobIdx]} dir={mobDir} width={190} autoAdvanceDur={3.8} onClick={() => setLightbox("phone")} />
-                    </motion.div>
-                  </motion.div>
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 10, width: "100%", gap: 8 }}>
-                    <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 11, color: "rgba(255,255,255,0.3)" }}>{MOB_SCREENS[mobIdx].label}</span>
-                    <Dots count={MOB_SCREENS.length} current={mobIdx} onChange={(i) => { setMobDir(i > mobIdx ? 1 : -1); setMobIdx(i); }} />
-                  </div>
-                </motion.div>
-              </div>
-
-              {/* Features */}
-              <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.36, duration: 0.4, ease: EASE }} style={{ marginBottom: 24 }}>
-                <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 10, letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)", marginBottom: 12 }}>Key Features</div>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "8px 20px" }}>
-                  {FEATURES.map((f, i) => (
-                    <motion.div key={i} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.42 + i * 0.06, duration: 0.3, ease: EASE }}
-                      style={{ display: "flex", alignItems: "flex-start", gap: 8, fontFamily: "'Inter', sans-serif", fontSize: 12, color: "rgba(255,255,255,0.42)", lineHeight: 1.55 }}>
-                      <span style={{ color: RED, flexShrink: 0, marginTop: 1, fontSize: 9 }}>▸</span>
-                      {f}
-                    </motion.div>
-                  ))}
                 </div>
               </motion.div>
 
-              {/* Tech + CTA */}
-              <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.52, duration: 0.38, ease: EASE }}
-                style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 14, paddingTop: 20, borderTop: "1px solid rgba(255,255,255,0.06)" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
-                  {ALL_TECH.map((t, i) => <TechPill key={t.name} name={t.name} delay={0.56 + i * 0.04} />)}
-                </div>
-                <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-                  <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 11, color: "rgba(255,255,255,0.18)", letterSpacing: "0.04em" }}>Solo Project · 2025</span>
-                </div>
-              </motion.div>
-            </motion.div>
-          )}
+              <motion.h1
+                initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.08, duration: 0.55, ease: EASE }}
+                style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: isMobile ? 42 : 68, lineHeight: 1.0, letterSpacing: "-0.025em", color: "rgba(255,255,255,0.95)", margin: "0 0 18px" }}
+              >
+                Raffoul Motors
+              </motion.h1>
 
-          {/* ════════ WEBSITE ════════ */}
-          {tab === "website" && (
-            <motion.div
-              key="website"
-              initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.28, ease: EASE }}
-              style={{ padding: isMobile ? "20px 16px 24px" : "28px 28px 32px" }}
-            >
-              <div style={{ marginBottom: isMobile ? 16 : 22 }}>
-                <SectionLabel>React 18 · TypeScript · Firebase</SectionLabel>
-                <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: isMobile ? 18 : 22, color: "rgba(255,255,255,0.9)", margin: "7px 0 8px", lineHeight: 1.2 }}>
-                  The Web Platform
-                </h2>
-                <p style={{ fontFamily: "'Inter', sans-serif", fontSize: isMobile ? 12.5 : 13, color: "rgba(255,255,255,0.35)", lineHeight: 1.75, maxWidth: 580 }}>
-                  A public-facing bilingual site where customers browse inventory, view car details
-                  with full specs and photo galleries, and contact the showroom via phone or WhatsApp.
-                  A private admin panel lets the dealership manage listings, images, and settings without touching code.
-                </p>
-              </div>
+              <motion.p
+                initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.14, duration: 0.5, ease: EASE }}
+                style={{ fontFamily: "'Inter', sans-serif", fontSize: isMobile ? 15 : 17, color: "rgba(255,255,255,0.36)", lineHeight: 1.7, margin: "0 0 32px", maxWidth: 500 }}
+              >
+                A bilingual automotive platform that put a premium Lebanese car dealer online — full inventory management, workshop listings, and an admin panel with zero code required.
+              </motion.p>
 
-              {/* Browser + nav */}
-              <div style={{ maxWidth: "100%", overflow: "hidden" }}>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
-                  <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 12, color: "rgba(255,255,255,0.38)" }}>{WEB_SCREENS[webIdx].label}</span>
-                  <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-                    <NavArrow dir={-1} onClick={() => stepWeb(-1)} />
-                    <NavArrow dir={1}  onClick={() => stepWeb(1)}  />
+              {/* Meta */}
+              <motion.div
+                initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2, duration: 0.45, ease: EASE }}
+                style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 36 }}
+              >
+                {[
+                  { label: "Role",     value: "Full-Stack Developer"  },
+                  { label: "Type",     value: "Web Platform"           },
+                  { label: "Stack",    value: "React · Firebase · TS"  },
+                  { label: "Language", value: "Arabic & English"        },
+                ].map(m => (
+                  <div key={m.label} style={{ padding: "8px 14px", borderRadius: 8, background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
+                    <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 9, color: "rgba(255,255,255,0.28)", letterSpacing: "0.18em", textTransform: "uppercase", marginBottom: 2 }}>{m.label}</div>
+                    <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 12, color: "rgba(255,255,255,0.7)", fontWeight: 500 }}>{m.value}</div>
                   </div>
-                </div>
-                <BrowserMockup screen={WEB_SCREENS[webIdx]} dir={webDir} onClick={() => setLightbox("web")} />
-                <div style={{ display: "flex", justifyContent: "center", marginTop: 12 }}>
-                  <Dots count={WEB_SCREENS.length} current={webIdx} onChange={(i) => { setWebDir(i > webIdx ? 1 : -1); setWebIdx(i); }} />
-                </div>
-              </div>
+                ))}
+              </motion.div>
 
-              {/* Thumbnails — desktop only */}
-              {!isMobile && (
-                <div style={{ marginTop: 16 }}>
-                  <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 10, letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.2)", marginBottom: 10 }}>All Screens</div>
-                  <ThumbnailGrid screens={WEB_SCREENS} current={webIdx} onChange={(i) => { setWebDir(i > webIdx ? 1 : -1); setWebIdx(i); }} aspectRatio="16/10" cols={WEB_SCREENS.length} />
-                </div>
-              )}
-
-              {/* Footer */}
-              <div style={{ marginTop: 18, paddingTop: 16, borderTop: "1px solid rgba(255,255,255,0.05)", display: "flex", flexDirection: isMobile ? "column" : "row", alignItems: isMobile ? "stretch" : "center", justifyContent: "space-between", gap: 12 }}>
-                <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                  {["React 18", "TypeScript", "Firebase", "Vite", "i18next"].map((t, i) => <TechPill key={t} name={t} delay={i * 0.04} />)}
-                </div>
-              </div>
-            </motion.div>
-          )}
-
-          {/* ════════ MOBILE VIEW ════════ */}
-          {tab === "mobile" && (
-            <motion.div
-              key="mobile"
-              initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.28, ease: EASE }}
-              style={{ padding: isMobile ? "20px 16px 24px" : "28px 28px 32px" }}
-            >
-              <div style={{ marginBottom: isMobile ? 16 : 22 }}>
-                <SectionLabel>Responsive · English &amp; Arabic</SectionLabel>
-                <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: isMobile ? 18 : 22, color: "rgba(255,255,255,0.9)", margin: "7px 0 8px", lineHeight: 1.2 }}>
+              <motion.div
+                initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.28, duration: 0.4, ease: EASE }}
+                style={{ display: "flex", gap: 12, flexWrap: "wrap" }}
+              >
+                <motion.button
+                  type="button"
+                  onClick={() => document.getElementById("rm-web").scrollIntoView({ behavior: "smooth" })}
+                  whileHover={{ scale: 1.04, boxShadow: `0 0 36px ${R(0.55)}` }} whileTap={{ scale: 0.97 }}
+                  style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "12px 24px", borderRadius: 10, background: RED, fontFamily: "'Space Grotesk', sans-serif", fontSize: 13, fontWeight: 700, color: "#fff", cursor: "pointer", border: "none", outline: "none", letterSpacing: "0.01em" }}
+                >
+                  View Showcase <HiArrowUpRight size={14} />
+                </motion.button>
+                <motion.button
+                  type="button"
+                  onClick={() => document.getElementById("rm-mobile").scrollIntoView({ behavior: "smooth" })}
+                  whileHover={{ scale: 1.03, borderColor: R(0.4) }} whileTap={{ scale: 0.97 }}
+                  style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "12px 24px", borderRadius: 10, background: "transparent", border: `1px solid ${R(0.22)}`, fontFamily: "'Space Grotesk', sans-serif", fontSize: 13, fontWeight: 500, color: "rgba(255,255,255,0.6)", cursor: "pointer", outline: "none", letterSpacing: "0.02em" }}
+                >
                   Mobile View
-                </h2>
-                <p style={{ fontFamily: "'Inter', sans-serif", fontSize: isMobile ? 12.5 : 13, color: "rgba(255,255,255,0.35)", lineHeight: 1.75, maxWidth: 580 }}>
-                  The platform is fully responsive — every page adapts cleanly to mobile screens.
-                  Customers on the go can browse inventory, open car details, and contact the showroom
-                  via WhatsApp with a single tap, in both English and Arabic.
-                </p>
-              </div>
+                </motion.button>
+              </motion.div>
+            </div>
 
-              {/* Phone + arrows */}
-              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 14, marginBottom: isMobile ? 20 : 28 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: isMobile ? 12 : 28, maxWidth: "100%", justifyContent: "center" }}>
-                  <NavArrow dir={-1} onClick={() => stepMob(-1)} />
+            {/* RIGHT — hero preview (desktop) */}
+            {!isMobile && (
+              <motion.div
+                initial={{ opacity: 0, x: 32, scale: 0.93 }} animate={{ opacity: 1, x: 0, scale: 1 }}
+                transition={{ delay: 0.18, duration: 0.75, ease: EASE }}
+                style={{ flexShrink: 0, width: 420, position: "relative" }}
+              >
+                <div style={{ borderRadius: 12, overflow: "hidden", border: "1px solid rgba(255,255,255,0.09)", boxShadow: `0 28px 56px rgba(0,0,0,0.65), 0 0 48px ${R(0.07)}` }}>
+                  <div style={{ height: 30, display: "flex", alignItems: "center", padding: "0 10px", gap: 6, background: "rgba(0,0,0,0.75)", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+                    {["#ef4444","#f59e0b","#22c55e"].map(c => <span key={c} style={{ width: 7, height: 7, borderRadius: "50%", background: c, opacity: 0.7 }} />)}
+                  </div>
+                  <img src={WEB_SCREENS[webIdx].src} alt="Raffoul Motors" style={{ width: "100%", display: "block", objectFit: "contain", objectPosition: "top", background: "#0a0a0a", aspectRatio: "16/10" }} />
+                </div>
+                <motion.div
+                  animate={{ y: [0, -8, 0] }}
+                  transition={{ duration: 3.6, repeat: Infinity, ease: "easeInOut" }}
+                  style={{ position: "absolute", bottom: -36, right: -24, filter: `drop-shadow(0 28px 44px rgba(0,0,0,0.75)) drop-shadow(0 0 32px ${R(0.18)})` }}
+                >
+                  <Phone screen={MOB_SCREENS[mobIdx]} dir={mobDir} width={116} autoAdvanceDur={3.6} />
+                </motion.div>
+              </motion.div>
+            )}
+          </div>
+
+          {/* Scroll indicator */}
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1 }}
+            style={{ position: "absolute", bottom: 28, left: "50%", transform: "translateX(-50%)", display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}
+          >
+            <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 9, letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)" }}>Scroll</span>
+            <motion.div animate={{ y: [0, 6, 0] }} transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut" }} style={{ width: 1, height: 28, background: `linear-gradient(to bottom, ${R(0.5)}, transparent)` }} />
+          </motion.div>
+        </section>
+
+        <Divider />
+
+        {/* ══════════ STORY ══════════ */}
+        <section style={{ padding: isMobile ? "72px 0" : "100px 0" }}>
+          <div style={wrap}>
+            <FadeUp>
+              <SectionLabel>Project Story</SectionLabel>
+              <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: isMobile ? 30 : 42, letterSpacing: "-0.02em", color: "rgba(255,255,255,0.92)", margin: "0 0 48px", lineHeight: 1.15 }}>
+                From showroom to online
+              </h2>
+            </FadeUp>
+            <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(3, 1fr)", gap: 14 }}>
+              {STORY.map((card, i) => (
+                <FadeUp key={card.num} delay={i * 0.1}>
                   <motion.div
-                    animate={isMobile ? {} : { y: [0, -6, 0] }}
-                    transition={{ duration: 3.4, repeat: Infinity, ease: "easeInOut" }}
-                    style={{ perspective: 1200 }}
+                    whileHover={{ y: -5, borderColor: R(0.3) }}
+                    style={{ padding: "28px 24px", borderRadius: 14, background: "rgba(255,255,255,0.025)", border: `1px solid ${R(0.1)}`, height: "100%", position: "relative", overflow: "hidden", transition: "border-color 0.25s" }}
                   >
-                    <motion.div style={isMobile ? {} : { rotateX: phoneRotX, rotateY: phoneRotY, transformStyle: "preserve-3d" }}>
-                      <PhoneMockup screen={MOB_SCREENS[mobIdx]} dir={mobDir} width={isMobile ? 190 : 290} autoAdvanceDur={3.8} onClick={() => setLightbox("phone")} />
-                    </motion.div>
+                    <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: `linear-gradient(to right, ${R(0.55)}, ${R(0.08)})` }} />
+                    <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 40, fontWeight: 800, color: R(0.07), letterSpacing: "-0.04em", marginBottom: 18, lineHeight: 1 }}>{card.num}</div>
+                    <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 9, letterSpacing: "0.26em", textTransform: "uppercase", color: RED, opacity: 0.75, marginBottom: 10 }}>{card.label}</div>
+                    <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: isMobile ? 15 : 16, color: "rgba(255,255,255,0.88)", margin: "0 0 10px", lineHeight: 1.35 }}>{card.heading}</h3>
+                    <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: "rgba(255,255,255,0.37)", lineHeight: 1.72, margin: 0 }}>{card.body}</p>
                   </motion.div>
-                  <NavArrow dir={1} onClick={() => stepMob(1)} />
+                </FadeUp>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <Divider />
+
+        {/* ══════════ WEB SHOWCASE ══════════ */}
+        <section id="rm-web" style={{ padding: isMobile ? "72px 0" : "100px 0" }}>
+          <div style={wrap}>
+            <FadeUp>
+              <SectionLabel>Desktop Website</SectionLabel>
+              <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 16, marginBottom: 28, flexWrap: "wrap" }}>
+                <div>
+                  <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: isMobile ? 30 : 42, letterSpacing: "-0.02em", color: "rgba(255,255,255,0.92)", margin: 0, lineHeight: 1.15 }}>
+                    The Website
+                  </h2>
+                  <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 14, color: "rgba(255,255,255,0.32)", margin: "8px 0 0", maxWidth: 480 }}>
+                    Full inventory browsing, car detail pages, workshop listings, and a zero-code admin panel — bilingual Arabic and English.
+                  </p>
                 </div>
-                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
-                  <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 12, color: "rgba(255,255,255,0.35)" }}>{MOB_SCREENS[mobIdx].label}</span>
-                  <Dots count={MOB_SCREENS.length} current={mobIdx} onChange={(i) => { setMobDir(i > mobIdx ? 1 : -1); setMobIdx(i); }} />
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 11, color: "rgba(255,255,255,0.32)" }}>
+                    {webIdx + 1} / {WEB_SCREENS.length} — {WEB_SCREENS[webIdx].label}
+                  </span>
+                  <NavBtn dir={-1} onClick={() => stepWeb(-1)} />
+                  <NavBtn dir={1}  onClick={() => stepWeb(1)}  />
                 </div>
               </div>
+            </FadeUp>
 
-              {/* Footer */}
-              <div style={{ marginTop: 18, paddingTop: 16, borderTop: "1px solid rgba(255,255,255,0.05)", display: "flex", flexDirection: isMobile ? "column" : "row", alignItems: isMobile ? "flex-start" : "center", justifyContent: "space-between", gap: 12 }}>
-                <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                  {["React 18", "i18next", "Firebase", "Figma"].map((t, i) => <TechPill key={t} name={t} delay={i * 0.04} />)}
-                </div>
-                <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 11, color: "rgba(255,255,255,0.2)", letterSpacing: "0.04em" }}>EN &amp; AR</span>
+            <FadeUp delay={0.1}>
+              <Browser screen={WEB_SCREENS[webIdx]} dir={webDir} onClick={() => setLightbox("web")} />
+            </FadeUp>
+
+            <FadeUp delay={0.14}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 14, marginBottom: !isMobile ? 20 : 0 }}>
+                <Dots count={WEB_SCREENS.length} current={webIdx} onChange={i => { setWebDir(i > webIdx ? 1 : -1); setWebIdx(i); }} />
+                <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, color: "rgba(255,255,255,0.2)" }}>Tap to expand fullscreen</span>
               </div>
-            </motion.div>
-          )}
+            </FadeUp>
 
-        </AnimatePresence>
+            {!isMobile && (
+              <FadeUp delay={0.2}>
+                <Thumbs screens={WEB_SCREENS} current={webIdx} onChange={i => { setWebDir(i > webIdx ? 1 : -1); setWebIdx(i); }} />
+              </FadeUp>
+            )}
+          </div>
+        </section>
+
+        <Divider />
+
+        {/* ══════════ MOBILE SHOWCASE ══════════ */}
+        <section id="rm-mobile" style={{ padding: isMobile ? "72px 0" : "100px 0" }}>
+          <div style={wrap}>
+            <FadeUp>
+              <SectionLabel>Responsive Design</SectionLabel>
+              <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: isMobile ? 30 : 42, letterSpacing: "-0.02em", color: "rgba(255,255,255,0.92)", margin: "0 0 52px", lineHeight: 1.15 }}>
+                Mobile Experience
+              </h2>
+            </FadeUp>
+
+            <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", alignItems: "center", gap: isMobile ? 44 : 72 }}>
+              {/* Feature list */}
+              <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 12, order: isMobile ? 2 : 1 }}>
+                {MOB_HIGHLIGHTS.map((item, i) => (
+                  <FadeUp key={item.label} delay={i * 0.07}>
+                    <motion.div
+                      whileHover={{ x: 4 }}
+                      onClick={() => { setMobDir(item.idx > mobIdx ? 1 : -1); setMobIdx(item.idx); }}
+                      style={{
+                        display: "flex", gap: 14, cursor: "pointer",
+                        padding: "16px 18px", borderRadius: 12,
+                        background: mobIdx === item.idx ? R(0.06) : "rgba(255,255,255,0.02)",
+                        border: `1px solid ${mobIdx === item.idx ? R(0.22) : "rgba(255,255,255,0.05)"}`,
+                        transition: "background 0.25s, border-color 0.25s",
+                      }}
+                    >
+                      <div style={{ width: 38, height: 38, borderRadius: 10, background: R(0.1), border: `1px solid ${R(0.22)}`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                        <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 11, fontWeight: 700, color: RED }}>{String(item.idx + 1).padStart(2, "0")}</span>
+                      </div>
+                      <div>
+                        <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 13, fontWeight: 600, color: mobIdx === item.idx ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.55)", marginBottom: 4, transition: "color 0.25s" }}>{item.label}</div>
+                        <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, color: "rgba(255,255,255,0.3)", lineHeight: 1.58 }}>{item.desc}</div>
+                      </div>
+                    </motion.div>
+                  </FadeUp>
+                ))}
+              </div>
+
+              {/* Phone */}
+              <FadeUp delay={0.15} style={{ flexShrink: 0, display: "flex", flexDirection: "column", alignItems: "center", order: isMobile ? 1 : 2 }}>
+                <motion.div animate={{ y: [0, -10, 0] }} transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }}>
+                  <Phone screen={MOB_SCREENS[mobIdx]} dir={mobDir} width={isMobile ? 210 : 270} autoAdvanceDur={3.6} onClick={() => setLightbox("mob")} />
+                </motion.div>
+                <div style={{ display: "flex", alignItems: "center", gap: 16, marginTop: 28 }}>
+                  <NavBtn dir={-1} onClick={() => stepMob(-1)} />
+                  <Dots count={MOB_SCREENS.length} current={mobIdx} onChange={i => { setMobDir(i > mobIdx ? 1 : -1); setMobIdx(i); }} />
+                  <NavBtn dir={1}  onClick={() => stepMob(1)}  />
+                </div>
+              </FadeUp>
+            </div>
+          </div>
+        </section>
+
+        <Divider />
+
+        {/* ══════════ FEATURES ══════════ */}
+        <section style={{ padding: isMobile ? "72px 0" : "100px 0" }}>
+          <div style={wrap}>
+            <FadeUp style={{ marginBottom: 44 }}>
+              <SectionLabel>Capabilities</SectionLabel>
+              <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: isMobile ? 30 : 42, letterSpacing: "-0.02em", color: "rgba(255,255,255,0.92)", margin: 0, lineHeight: 1.15 }}>
+                What it does
+              </h2>
+            </FadeUp>
+            <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr 1fr" : "repeat(3, 1fr)", gap: 12 }}>
+              {FEATURES.map((f, i) => (
+                <FadeUp key={f.title} delay={i * 0.06}>
+                  <motion.div
+                    whileHover={{ y: -4, borderColor: R(0.25) }}
+                    style={{ padding: isMobile ? "18px 14px" : "24px 20px", borderRadius: 12, background: "rgba(255,255,255,0.025)", border: "1px solid rgba(255,255,255,0.06)", height: "100%", transition: "border-color 0.25s" }}
+                  >
+                    <div style={{ width: 34, height: 34, borderRadius: 9, background: R(0.09), border: `1px solid ${R(0.18)}`, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 14 }}>
+                      <span style={{ fontSize: 13, color: RED }}>✦</span>
+                    </div>
+                    <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: isMobile ? 12 : 13, fontWeight: 600, color: "rgba(255,255,255,0.82)", marginBottom: 6, lineHeight: 1.3 }}>{f.title}</div>
+                    <div style={{ fontFamily: "'Inter', sans-serif", fontSize: isMobile ? 11 : 12, color: "rgba(255,255,255,0.3)", lineHeight: 1.65 }}>{f.desc}</div>
+                  </motion.div>
+                </FadeUp>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <Divider />
+
+        {/* ══════════ TECH ══════════ */}
+        <section style={{ padding: isMobile ? "72px 0" : "100px 0" }}>
+          <div style={wrap}>
+            <FadeUp style={{ marginBottom: 44 }}>
+              <SectionLabel>Architecture</SectionLabel>
+              <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: isMobile ? 30 : 42, letterSpacing: "-0.02em", color: "rgba(255,255,255,0.92)", margin: 0, lineHeight: 1.15 }}>Built with</h2>
+            </FadeUp>
+            <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(3, 1fr)", gap: 14 }}>
+              {TECH.map((cat, i) => (
+                <FadeUp key={cat.category} delay={i * 0.1}>
+                  <div style={{ padding: "26px", borderRadius: 14, background: "rgba(255,255,255,0.025)", border: `1px solid ${R(0.1)}`, position: "relative", overflow: "hidden" }}>
+                    <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: `linear-gradient(to right, ${R(0.55)}, transparent)` }} />
+                    <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 10, letterSpacing: "0.24em", textTransform: "uppercase", color: RED, opacity: 0.8, marginBottom: 18 }}>{cat.category}</div>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                      {cat.items.map(item => (
+                        <div key={item} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                          <div style={{ width: 5, height: 5, borderRadius: "50%", background: RED, opacity: 0.55, flexShrink: 0 }} />
+                          <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 14, color: "rgba(255,255,255,0.7)", fontWeight: 500 }}>{item}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </FadeUp>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ══════════ FOOTER ══════════ */}
+        <section style={{ padding: isMobile ? "80px 0 110px" : "100px 0 130px" }}>
+          <div style={{ ...wrap, textAlign: "center" }}>
+            <FadeUp>
+              <div style={{ display: "inline-flex", alignItems: "center", gap: 10, marginBottom: 20 }}>
+                <div style={{ width: 28, height: 1, background: R(0.5) }} />
+                <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 10, letterSpacing: "0.3em", textTransform: "uppercase", color: RED, opacity: 0.8 }}>Client Project</span>
+                <div style={{ width: 28, height: 1, background: R(0.5) }} />
+              </div>
+              <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: isMobile ? 30 : 46, letterSpacing: "-0.025em", color: "rgba(255,255,255,0.92)", margin: "0 0 14px", lineHeight: 1.1 }}>
+                Delivered &amp; live
+              </h2>
+              <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 15, color: "rgba(255,255,255,0.32)", margin: "0 auto 40px", maxWidth: 380, lineHeight: 1.7 }}>
+                Raffoul Motors is fully operational — the team manages their own inventory without touching code.
+              </p>
+              <Link
+                to="/"
+                style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "14px 24px", borderRadius: 12, border: "1px solid rgba(255,255,255,0.1)", fontFamily: "'Space Grotesk', sans-serif", fontSize: 13, color: "rgba(255,255,255,0.4)", textDecoration: "none" }}
+              >
+                <HiChevronLeft size={13} /> Back to portfolio
+              </Link>
+            </FadeUp>
+          </div>
+        </section>
+
       </div>
-    </motion.div>
 
-    {/* ── Lightbox ── */}
-    <AnimatePresence>
-      {lightbox && (
-        <CaseStudyLightbox
-          type={lightbox}
-          screens={lightbox === "phone" ? MOB_SCREENS : WEB_SCREENS}
-          idx={lightbox === "phone" ? mobIdx : webIdx}
-          dir={lightbox === "phone" ? mobDir : webDir}
-          onStep={lightbox === "phone" ? stepMob : stepWeb}
-          onJump={lightbox === "phone"
-            ? (i) => { setMobDir(i > mobIdx ? 1 : -1); setMobIdx(i); }
-            : (i) => { setWebDir(i > webIdx ? 1 : -1); setWebIdx(i); }
-          }
-          onClose={() => setLightbox(null)}
-          glowColor={R(0.07)}
-          renderSlide={(screen, dims) => (
-            lightbox === "phone" ? (
-              <PhoneMockup screen={screen} dir={mobDir} width={dims.phoneW} />
-            ) : (
-              <LandscapeWebImage screen={screen} dir={webDir} width={dims.webWidth} />
-            )
-          )}
-          renderFooter={(screen) => (
-            <>
-              <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 13, color: "rgba(255,255,255,0.45)", letterSpacing: "0.04em" }}>{screen.label}</span>
-              <Dots
-                count={(lightbox === "phone" ? MOB_SCREENS : WEB_SCREENS).length}
-                current={lightbox === "phone" ? mobIdx : webIdx}
-                onChange={lightbox === "phone"
-                  ? (i) => { setMobDir(i > mobIdx ? 1 : -1); setMobIdx(i); }
-                  : (i) => { setWebDir(i > webIdx ? 1 : -1); setWebIdx(i); }
-                }
-              />
-            </>
-          )}
-        />
-      )}
-    </AnimatePresence>
+      {/* ══════════ LIGHTBOX ══════════ */}
+      <AnimatePresence>
+        {lightbox && (
+          <CaseStudyLightbox
+            type="phone"
+            screens={lightbox === "web" ? WEB_SCREENS : MOB_SCREENS}
+            idx={lightbox === "web" ? webIdx : mobIdx}
+            dir={lightbox === "web" ? webDir : mobDir}
+            onStep={lightbox === "web" ? stepWeb : stepMob}
+            onJump={lightbox === "web"
+              ? i => { setWebDir(i > webIdx ? 1 : -1); setWebIdx(i); }
+              : i => { setMobDir(i > mobIdx ? 1 : -1); setMobIdx(i); }
+            }
+            onClose={() => setLightbox(null)}
+            glowColor={R(0.07)}
+            renderSlide={(screen, dims) => (
+              lightbox === "web"
+                ? <LandscapeWebImage screen={screen} dir={webDir} width={dims.webWidth} />
+                : <Phone screen={screen} dir={mobDir} width={dims.phoneW} />
+            )}
+            renderFooter={screen => (
+              <>
+                <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 13, color: "rgba(255,255,255,0.45)" }}>{screen.label}</span>
+                <Dots
+                  count={(lightbox === "web" ? WEB_SCREENS : MOB_SCREENS).length}
+                  current={lightbox === "web" ? webIdx : mobIdx}
+                  onChange={lightbox === "web"
+                    ? i => { setWebDir(i > webIdx ? 1 : -1); setWebIdx(i); }
+                    : i => { setMobDir(i > mobIdx ? 1 : -1); setMobIdx(i); }
+                  }
+                />
+              </>
+            )}
+          />
+        )}
+      </AnimatePresence>
     </>
   );
 };
