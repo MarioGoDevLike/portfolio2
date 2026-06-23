@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { HiChevronLeft, HiChevronRight } from "react-icons/hi";
 import { HiArrowsPointingOut } from "react-icons/hi2";
 import CaseStudyLightbox from "./CaseStudyLightbox";
+import CaseStudyMobileLayout, { MobilePreviewPhones, MobilePhoneFrame } from "./CaseStudyMobile";
 
 /* ─── Assets ─────────────────────────────────────── */
 import vendorDashboard from "../../assets/Top_speed_apps/vendor_dashboard_page.png";
@@ -276,10 +277,11 @@ const TopSpeedCaseStudy = () => {
   }, []);
 
   useEffect(() => {
+    if (isMobile) return undefined;
     const v = setInterval(() => stepVendor(1), 4000);
     const d = setInterval(() => stepDriver(1), 3700);
     return () => { clearInterval(v); clearInterval(d); };
-  }, [stepVendor, stepDriver]);
+  }, [stepVendor, stepDriver, isMobile]);
 
   useEffect(() => {
     const fn = () => setIsMobile(window.innerWidth < 768);
@@ -289,8 +291,70 @@ const TopSpeedCaseStudy = () => {
 
   const wrap = { maxWidth: 1080, margin: "0 auto", padding: isMobile ? "0 20px" : "0 48px" };
 
+  const mobileLayout = (
+    <CaseStudyMobileLayout
+      brand={{ color: RED, rgba: R }}
+      eyebrow="Case Study · 2024"
+      title="Top Speed"
+      summary="Two dedicated Flutter apps — one for vendors, one for drivers — coordinating real-time deliveries with Firebase push notifications and live GPS tracking."
+      logo={
+        <img src={topSpeedLogo} alt="Top Speed" style={{ height: 44, width: 44, objectFit: "contain", display: "block", mixBlendMode: "screen" }} />
+      }
+      meta={[
+        { label: "Role", value: "Mobile Developer" },
+        { label: "Platform", value: "Flutter · iOS & Android" },
+        { label: "Backend", value: "Firebase · PHP" },
+        { label: "Type", value: "Dual-App System" },
+      ]}
+      ctas={[
+        { label: "Vendor App", onClick: () => document.getElementById("ts-vendor")?.scrollIntoView({ behavior: "smooth" }), primary: true },
+        { label: "Driver App", onClick: () => document.getElementById("ts-driver")?.scrollIntoView({ behavior: "smooth" }) },
+      ]}
+      preview={
+        <MobilePreviewPhones
+          leftSrc={VENDOR_SCREENS[vendorIdx].src}
+          rightSrc={DRIVER_SCREENS[driverIdx].src}
+          brand={{ color: RED, rgba: R }}
+        />
+      }
+      story={STORY}
+      appShowcases={[
+        {
+          id: "ts-vendor",
+          navLabel: "Vendor",
+          title: "Vendor App",
+          subtitle: "Flutter · for business owners and dispatchers",
+          screens: VENDOR_SCREENS,
+          highlights: VENDOR_HIGHLIGHTS,
+          activeIdx: vendorIdx,
+          onIdxChange: (i) => { setVendorDir(i > vendorIdx ? 1 : -1); setVendorIdx(i); },
+          onExpand: () => setLightbox("vendor"),
+        },
+        {
+          id: "ts-driver",
+          navLabel: "Driver",
+          title: "Driver App",
+          subtitle: "Flutter · for delivery drivers on the road",
+          screens: DRIVER_SCREENS,
+          highlights: DRIVER_HIGHLIGHTS,
+          activeIdx: driverIdx,
+          onIdxChange: (i) => { setDriverDir(i > driverIdx ? 1 : -1); setDriverIdx(i); },
+          onExpand: () => setLightbox("driver"),
+        },
+      ]}
+      features={FEATURES}
+      tech={TECH}
+      cta={{
+        title: "Live & operational",
+        description: "Both apps are deployed and in active use — vendors and drivers coordinating in real time.",
+      }}
+      renderPhone={(screen) => <MobilePhoneFrame screen={screen} brand={{ color: RED, rgba: R }} width={210} />}
+    />
+  );
+
   return (
     <>
+      {isMobile ? mobileLayout : (
       <div style={{ position: "relative", width: "100%", maxWidth: "100%", overflowX: "hidden", background: "#080808" }}>
 
         {/* ══════════ HERO ══════════ */}
@@ -573,6 +637,7 @@ const TopSpeedCaseStudy = () => {
         </section>
 
       </div>
+      )}
 
       {/* ══════════ LIGHTBOX ══════════ */}
       <AnimatePresence>

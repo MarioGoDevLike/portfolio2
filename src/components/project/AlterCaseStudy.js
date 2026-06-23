@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import { HiChevronLeft } from "react-icons/hi";
 import { HiArrowUpRight, HiArrowsPointingOut } from "react-icons/hi2";
+import CaseStudyMobileLayout, { MobilePreviewVideo } from "./CaseStudyMobile";
 
 import alterWebVideo    from "../../assets/alter_images/alter_web_view.mp4";
 import alterMobileVideo from "../../assets/alter_images/alter_mobile_view.mp4";
@@ -244,8 +245,63 @@ const AlterCaseStudy = () => {
 
   const wrap = { maxWidth: 1080, margin: "0 auto", padding: isMobile ? "0 20px" : "0 48px" };
 
+  const mobileLayout = (
+    <CaseStudyMobileLayout
+      brand={{ color: GOLD, rgba: G }}
+      eyebrow="Case Study · 2024"
+      title="Alter"
+      summary="A cinematic digital presence for a leading MENA PR & marketing agency — built in React.js with live campaign statistics, a marquee artist roster, and a fully responsive layout."
+      logo={
+        <img src={alterLogo} alt="Alter" style={{ height: 28, width: "auto", objectFit: "contain", display: "block" }} />
+      }
+      meta={[
+        { label: "Role", value: "Frontend Developer" },
+        { label: "Client", value: "Alter Agency — MENA" },
+        { label: "Stack", value: "React.js · Vercel" },
+        { label: "Type", value: "Marketing Website" },
+      ]}
+      ctas={[
+        { label: "Visit Live Site", href: LIVE_URL, primary: true },
+        { label: "View Showcase", onClick: () => document.getElementById("alter-web")?.scrollIntoView({ behavior: "smooth" }) },
+      ]}
+      preview={
+        <MobilePreviewVideo src={alterWebVideo} brand={{ color: GOLD, rgba: G }} label="Live site preview" />
+      }
+      story={STORY}
+      videoWebShowcase={{
+        id: "alter-web",
+        title: "The Website",
+        subtitle: "Cinematic scroll experience with live stats, artist roster, and service pillars.",
+        videoSrc: alterWebVideo,
+        onExpand: () => setLightbox("web"),
+      }}
+      videoAppShowcase={{
+        id: "alter-mobile",
+        title: "Mobile Experience",
+        subtitle: "Every scroll interaction, stat counter, and marquee preserved at any screen size.",
+        videoSrc: alterMobileVideo,
+        onExpand: () => setLightbox("phone"),
+        highlights: [
+          { label: "Stats Hero", desc: "Live campaign and artist counts, full-width on mobile" },
+          { label: "Artist Roster", desc: "Marquee scrolls and talent cards adapt to touch" },
+          { label: "Service Grid", desc: "Six pillars stack cleanly for mobile reading" },
+          { label: "Partners Wall", desc: "Logo grid reflows to 2-column on small screens" },
+        ],
+      }}
+      features={FEATURES}
+      tech={TECH}
+      cta={{
+        title: "See the full experience",
+        description: "Alter is live. Explore the cinematic scroll experience for yourself.",
+        liveUrl: LIVE_URL,
+        liveLabel: "Open Alter",
+      }}
+    />
+  );
+
   return (
     <>
+      {isMobile ? mobileLayout : (
       <div style={{ position: "relative", width: "100%", maxWidth: "100%", overflowX: "hidden", background: "#080808" }}>
 
         {/* ══════════ HERO ══════════ */}
@@ -581,6 +637,7 @@ const AlterCaseStudy = () => {
         </section>
 
       </div>
+      )}
 
       {/* ══════════ LIGHTBOX ══════════ */}
       <AnimatePresence>

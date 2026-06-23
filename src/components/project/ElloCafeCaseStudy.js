@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { HiChevronLeft, HiChevronRight } from "react-icons/hi";
 import { HiArrowUpRight, HiArrowsPointingOut } from "react-icons/hi2";
 import CaseStudyLightbox, { LandscapeWebImage } from "./CaseStudyLightbox";
+import CaseStudyMobileLayout, { MobilePreviewDual, MobilePhoneFrame } from "./CaseStudyMobile";
 
 /* ─── Assets ─────────────────────────────────────── */
 import appWelcome   from "../../assets/ello_app_images/unlogged page.png";
@@ -329,10 +330,11 @@ const ElloCafeCaseStudy = () => {
   }, []);
 
   useEffect(() => {
+    if (isMobile) return undefined;
     const a = setInterval(() => stepApp(1), 3800);
     const w = setInterval(() => stepWeb(1), 4500);
     return () => { clearInterval(a); clearInterval(w); };
-  }, [stepApp, stepWeb]);
+  }, [stepApp, stepWeb, isMobile]);
 
   useEffect(() => {
     const fn = () => setIsMobile(window.innerWidth < 768);
@@ -342,8 +344,64 @@ const ElloCafeCaseStudy = () => {
 
   const wrap = { maxWidth: 1080, margin: "0 auto", padding: isMobile ? "0 20px" : "0 48px" };
 
+  const mobileLayout = (
+    <CaseStudyMobileLayout
+      brand={{ color: TEAL, rgba: T }}
+      eyebrow="Case Study · 2024"
+      title="Ello Café"
+      summary="A full-stack ed-tech ecosystem connecting students with verified instructors — one product across web and mobile, built solo from design to deployment."
+      logo={<ElloMark size={1.1} />}
+      meta={[
+        { label: "Role", value: "Full-Stack Developer" },
+        { label: "Type", value: "Web + Mobile" },
+        { label: "Stack", value: "React · RN · Firebase" },
+        { label: "Year", value: "2024" },
+      ]}
+      ctas={[
+        { label: "Visit Live Site", href: "https://ellos-new-website.vercel.app/", primary: true },
+        { label: "View Showcase", onClick: () => document.getElementById("ello-web")?.scrollIntoView({ behavior: "smooth" }) },
+      ]}
+      preview={
+        <MobilePreviewDual
+          webSrc={WEB_SCREENS[webIdx].src}
+          phoneSrc={APP_SCREENS[appIdx].src}
+          brand={{ color: TEAL, rgba: T }}
+          url="https://ellos-new-website.vercel.app/"
+        />
+      }
+      story={STORY}
+      webShowcase={{
+        id: "ello-web",
+        title: "The Website",
+        subtitle: "A React.js platform where students book sessions, track progress, and message instructors.",
+        screens: WEB_SCREENS,
+        onExpand: (i) => { setWebDir(i > webIdx ? 1 : -1); setWebIdx(i); setLightbox("web"); },
+      }}
+      appShowcases={[{
+        id: "ello-app",
+        title: "React Native · iOS & Android",
+        subtitle: "Cross-platform mobile app with booking, messaging, and session tracking.",
+        screens: APP_SCREENS,
+        highlights: APP_HIGHLIGHTS,
+        activeIdx: appIdx,
+        onIdxChange: (i) => { setAppDir(i > appIdx ? 1 : -1); setAppIdx(i); },
+        onExpand: () => setLightbox("phone"),
+      }]}
+      features={FEATURES}
+      tech={TECH}
+      cta={{
+        title: "See it in the wild",
+        description: "The full platform is live and running. Take a look at the real thing.",
+        liveUrl: "https://ellos-new-website.vercel.app/",
+        liveLabel: "Open Ello Café",
+      }}
+      renderPhone={(screen) => <MobilePhoneFrame screen={screen} brand={{ color: TEAL, rgba: T }} width={210} />}
+    />
+  );
+
   return (
     <>
+      {isMobile ? mobileLayout : (
       <div style={{ position: "relative", width: "100%", maxWidth: "100%", overflowX: "hidden", background: "#080808" }}>
 
         {/* ══════════ HERO ══════════ */}
@@ -711,6 +769,7 @@ const ElloCafeCaseStudy = () => {
         </section>
 
       </div>
+      )}
 
       {/* ══════════ LIGHTBOX ══════════ */}
       <AnimatePresence>

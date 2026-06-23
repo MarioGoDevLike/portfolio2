@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { HiChevronLeft, HiChevronRight } from "react-icons/hi";
 import { HiArrowUpRight, HiArrowsPointingOut } from "react-icons/hi2";
 import CaseStudyLightbox, { LandscapeWebImage } from "./CaseStudyLightbox";
+import CaseStudyMobileLayout, { MobilePreviewDual, MobilePhoneFrame } from "./CaseStudyMobile";
 
 /* ─── Assets ─────────────────────────────────────── */
 import webHome1    from "../../assets/raffoul_motors_web/home_page_1.png";
@@ -293,10 +294,11 @@ const RaffoulMotorsCaseStudy = () => {
   }, []);
 
   useEffect(() => {
+    if (isMobile) return undefined;
     const w = setInterval(() => stepWeb(1), 4200);
     const m = setInterval(() => stepMob(1), 3600);
     return () => { clearInterval(w); clearInterval(m); };
-  }, [stepWeb, stepMob]);
+  }, [stepWeb, stepMob, isMobile]);
 
   useEffect(() => {
     const fn = () => setIsMobile(window.innerWidth < 768);
@@ -306,8 +308,64 @@ const RaffoulMotorsCaseStudy = () => {
 
   const wrap = { maxWidth: 1080, margin: "0 auto", padding: isMobile ? "0 20px" : "0 48px" };
 
+  const mobileLayout = (
+    <CaseStudyMobileLayout
+      brand={{ color: RED, rgba: R }}
+      eyebrow="Case Study · 2024"
+      title="Raffoul Motors"
+      summary="A bilingual automotive platform that put a premium Lebanese car dealer online — full inventory management, workshop listings, and an admin panel with zero code required."
+      logo={
+        <img src={raffoulLogo} alt="Raffoul Motors" style={{ height: 40, width: "auto", objectFit: "contain", display: "block" }} />
+      }
+      meta={[
+        { label: "Role", value: "Full-Stack Developer" },
+        { label: "Type", value: "Web Platform" },
+        { label: "Stack", value: "React · Firebase · TS" },
+        { label: "Language", value: "Arabic & English" },
+      ]}
+      ctas={[
+        { label: "View Website", onClick: () => document.getElementById("rm-web")?.scrollIntoView({ behavior: "smooth" }), primary: true },
+        { label: "Mobile Views", onClick: () => document.getElementById("rm-mobile")?.scrollIntoView({ behavior: "smooth" }) },
+      ]}
+      preview={
+        <MobilePreviewDual
+          webSrc={WEB_SCREENS[webIdx].src}
+          phoneSrc={MOB_SCREENS[mobIdx].src}
+          brand={{ color: RED, rgba: R }}
+        />
+      }
+      story={STORY}
+      webShowcase={{
+        id: "rm-web",
+        title: "The Website",
+        subtitle: "Full inventory browsing, workshop section, and bilingual support across every screen.",
+        screens: WEB_SCREENS,
+        onExpand: (i) => { setWebDir(i > webIdx ? 1 : -1); setWebIdx(i); setLightbox("web"); },
+      }}
+      appShowcases={[{
+        id: "rm-mobile",
+        navLabel: "Mobile",
+        title: "Responsive Views",
+        subtitle: "Every page adapts perfectly — inventory, workshop, and admin on any device.",
+        screens: MOB_SCREENS,
+        highlights: MOB_HIGHLIGHTS,
+        activeIdx: mobIdx,
+        onIdxChange: (i) => { setMobDir(i > mobIdx ? 1 : -1); setMobIdx(i); },
+        onExpand: () => setLightbox("mob"),
+      }]}
+      features={FEATURES}
+      tech={TECH}
+      cta={{
+        title: "Delivered & live",
+        description: "Raffoul Motors is fully operational — the team manages their own inventory without touching code.",
+      }}
+      renderPhone={(screen) => <MobilePhoneFrame screen={screen} brand={{ color: RED, rgba: R }} width={210} />}
+    />
+  );
+
   return (
     <>
+      {isMobile ? mobileLayout : (
       <div style={{ position: "relative", width: "100%", maxWidth: "100%", overflowX: "hidden", background: "#080808" }}>
 
         {/* ══════════ HERO ══════════ */}
@@ -657,6 +715,7 @@ const RaffoulMotorsCaseStudy = () => {
         </section>
 
       </div>
+      )}
 
       {/* ══════════ LIGHTBOX ══════════ */}
       <AnimatePresence>
