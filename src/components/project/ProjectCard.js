@@ -2,6 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { BsArrowUpRight } from "react-icons/bs";
 import Tag from "../ui/Tag";
+import { saveHomeScroll } from "../../utils/homeScroll";
 
 const accentClass = {
   violet: "text-accent",
@@ -80,7 +81,7 @@ const ProjectCard = ({
 
   if (caseStudyPath) {
     return (
-      <Link to={caseStudyPath} className={cardClassName}>
+      <Link to={caseStudyPath} onClick={saveHomeScroll} className={cardClassName}>
         {cardContent}
       </Link>
     );

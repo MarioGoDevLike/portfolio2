@@ -5,6 +5,7 @@ import { HiChevronLeft, HiChevronRight } from "react-icons/hi";
 import { HiArrowUpRight, HiArrowsPointingOut } from "react-icons/hi2";
 import CaseStudyLightbox, { LandscapeWebImage } from "./CaseStudyLightbox";
 import CaseStudyMobileLayout, { MobilePreviewDual, MobilePhoneFrame } from "./CaseStudyMobile";
+import { getHomeBackLink } from "../../utils/homeScroll";
 
 /* ─── Assets ─────────────────────────────────────── */
 import appWelcome   from "../../assets/ello_app_images/unlogged page.png";
@@ -50,27 +51,6 @@ const WEB_SCREENS = [
   { src: webTeacherDash,  label: "Teacher Dashboard"  },
 ];
 
-const STORY = [
-  {
-    num: "01",
-    label: "The Problem",
-    heading: "Students had no way to find the right instructor",
-    body: "Learners struggled to discover verified, qualified instructors. Existing platforms lacked trust signals, had poor booking flows, and forced students and teachers onto disconnected tools.",
-  },
-  {
-    num: "02",
-    label: "The Approach",
-    heading: "One cohesive ecosystem — web and mobile",
-    body: "A shared Firebase backend powers a React.js web platform with dual dashboards plus a cross-platform React Native app. Built solo from Figma to deployment.",
-  },
-  {
-    num: "03",
-    label: "The Outcome",
-    heading: "Shipped solo, production-ready end-to-end",
-    body: "9 web screens, 6 mobile screens, Stripe checkout, real-time messaging, and session management — all from a single developer, zero to launch.",
-  },
-];
-
 const FEATURES = [
   { title: "Verified Profiles",    desc: "Instructors with full education & experience verification" },
   { title: "Smart Booking",        desc: "Multi-tier session scheduling with Stripe checkout"         },
@@ -105,15 +85,6 @@ const FadeUp = ({ children, delay = 0, style }) => (
   >
     {children}
   </motion.div>
-);
-
-const Eyebrow = () => (
-  <div style={{ display: "inline-flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
-    <span style={{ width: 22, height: 1, background: TEAL, opacity: 0.7, display: "block" }} />
-    <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 10, letterSpacing: "0.3em", textTransform: "uppercase", color: TEAL, opacity: 0.85 }}>
-      Case Study · 2024
-    </span>
-  </div>
 );
 
 const SectionLabel = ({ children }) => (
@@ -347,7 +318,6 @@ const ElloCafeCaseStudy = () => {
   const mobileLayout = (
     <CaseStudyMobileLayout
       brand={{ color: TEAL, rgba: T }}
-      eyebrow="Case Study · 2024"
       title="Ello Café"
       summary="A full-stack ed-tech ecosystem connecting students with verified instructors — one product across web and mobile, built solo from design to deployment."
       logo={<ElloMark size={1.1} />}
@@ -369,7 +339,6 @@ const ElloCafeCaseStudy = () => {
           url="https://ellos-new-website.vercel.app/"
         />
       }
-      story={STORY}
       webShowcase={{
         id: "ello-web",
         title: "The Website",
@@ -411,7 +380,7 @@ const ElloCafeCaseStudy = () => {
 
           {/* Back link — fixed top */}
           <div style={{ position: "absolute", top: 0, left: 0, right: 0, padding: isMobile ? "20px 20px" : "28px 48px", zIndex: 10 }}>
-            <Link to="/" style={{ display: "inline-flex", alignItems: "center", gap: 6, fontFamily: "'Space Grotesk', sans-serif", fontSize: 12, color: "rgba(255,255,255,0.35)", textDecoration: "none", letterSpacing: "0.02em" }}>
+            <Link to={getHomeBackLink()} style={{ display: "inline-flex", alignItems: "center", gap: 6, fontFamily: "'Space Grotesk', sans-serif", fontSize: 12, color: "rgba(255,255,255,0.35)", textDecoration: "none", letterSpacing: "0.02em" }}>
               <HiChevronLeft size={14} />
               Back to home
             </Link>
@@ -425,12 +394,9 @@ const ElloCafeCaseStudy = () => {
               <motion.div
                 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, ease: EASE }}
-                style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 36 }}
+                style={{ marginBottom: 36 }}
               >
                 <ElloMark size={1.1} />
-                <div style={{ borderLeft: `1px solid ${T(0.2)}`, paddingLeft: 14 }}>
-                  <Eyebrow />
-                </div>
               </motion.div>
 
               <motion.h1
@@ -526,43 +492,6 @@ const ElloCafeCaseStudy = () => {
             <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 9, letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)" }}>Scroll</span>
             <motion.div animate={{ y: [0, 6, 0] }} transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut" }} style={{ width: 1, height: 28, background: `linear-gradient(to bottom, ${T(0.5)}, transparent)` }} />
           </motion.div>
-        </section>
-
-        <Divider />
-
-        {/* ══════════ STORY ══════════ */}
-        <section style={{ padding: isMobile ? "72px 0" : "100px 0" }}>
-          <div style={wrap}>
-            <FadeUp>
-              <SectionLabel>Project Story</SectionLabel>
-              <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: isMobile ? 30 : 42, letterSpacing: "-0.02em", color: "rgba(255,255,255,0.92)", margin: "0 0 48px", lineHeight: 1.15 }}>
-                From problem to product
-              </h2>
-            </FadeUp>
-
-            <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(3, 1fr)", gap: 14 }}>
-              {STORY.map((card, i) => (
-                <FadeUp key={card.num} delay={i * 0.1}>
-                  <motion.div
-                    whileHover={{ y: -5, borderColor: T(0.3) }}
-                    style={{
-                      padding: "28px 24px", borderRadius: 14,
-                      background: "rgba(255,255,255,0.025)",
-                      border: `1px solid ${T(0.1)}`,
-                      height: "100%", position: "relative", overflow: "hidden",
-                      transition: "border-color 0.25s",
-                    }}
-                  >
-                    <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: `linear-gradient(to right, ${T(0.55)}, ${T(0.08)})` }} />
-                    <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 40, fontWeight: 800, color: T(0.07), letterSpacing: "-0.04em", marginBottom: 18, lineHeight: 1 }}>{card.num}</div>
-                    <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 9, letterSpacing: "0.26em", textTransform: "uppercase", color: TEAL, opacity: 0.75, marginBottom: 10 }}>{card.label}</div>
-                    <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: isMobile ? 15 : 16, color: "rgba(255,255,255,0.88)", margin: "0 0 10px", lineHeight: 1.35 }}>{card.heading}</h3>
-                    <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: "rgba(255,255,255,0.37)", lineHeight: 1.72, margin: 0 }}>{card.body}</p>
-                  </motion.div>
-                </FadeUp>
-              ))}
-            </div>
-          </div>
         </section>
 
         <Divider />
@@ -758,7 +687,7 @@ const ElloCafeCaseStudy = () => {
                   Open Ello Café <HiArrowUpRight size={15} />
                 </motion.a>
                 <Link
-                  to="/"
+                  to={getHomeBackLink()}
                   style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "14px 24px", borderRadius: 12, border: "1px solid rgba(255,255,255,0.1)", fontFamily: "'Space Grotesk', sans-serif", fontSize: 13, color: "rgba(255,255,255,0.4)", textDecoration: "none" }}
                 >
                   <HiChevronLeft size={13} /> Back to portfolio

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { HiChevronLeft, HiArrowUpRight } from "react-icons/hi2";
+import { getHomeBackLink } from "../../utils/homeScroll";
 
 const EASE = [0.22, 1, 0.36, 1];
 const FONT = "'Space Grotesk', sans-serif";
@@ -219,7 +220,7 @@ const MobileHero = ({ brand, eyebrow, title, summary, logo, meta, ctas, preview 
     {/* back */}
     <div style={{ position: "absolute", top: 0, left: 0, right: 0, padding: "16px 20px", zIndex: 5 }}>
       <Link
-        to="/"
+        to={getHomeBackLink()}
         style={{ display: "inline-flex", alignItems: "center", gap: 5, fontFamily: FONT, fontSize: 12, color: "rgba(255,255,255,0.4)", textDecoration: "none" }}
       >
         <HiChevronLeft size={15} /> Back
@@ -240,9 +241,11 @@ const MobileHero = ({ brand, eyebrow, title, summary, logo, meta, ctas, preview 
     <div style={{ padding: "28px 20px 36px" }}>
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08, duration: 0.45, ease: EASE }}>
         {logo}
-        <div style={{ marginTop: 16, marginBottom: 10 }}>
-          <SectionEyebrow color={brand.color}>{eyebrow}</SectionEyebrow>
-        </div>
+        {eyebrow ? (
+          <div style={{ marginTop: 16, marginBottom: 10 }}>
+            <SectionEyebrow color={brand.color}>{eyebrow}</SectionEyebrow>
+          </div>
+        ) : null}
         <h1 style={{ fontFamily: FONT, fontWeight: 700, fontSize: 36, lineHeight: 1.05, letterSpacing: "-0.03em", color: "rgba(255,255,255,0.96)", margin: "0 0 12px" }}>
           {title}
         </h1>
@@ -345,66 +348,6 @@ export const MobilePreviewImage = ({ src, brand }) => (
   </div>
 );
 
-/* ─── Story — horizontal snap cards ──────────────── */
-const MobileStory = ({ story, brand }) => {
-  const [active, setActive] = useState(0);
-  const ref = useRef(null);
-  const rafRef = useRef(null);
-
-  const onScroll = useCallback(() => {
-    if (rafRef.current) return;
-    rafRef.current = requestAnimationFrame(() => {
-      rafRef.current = null;
-      const el = ref.current;
-      if (!el?.firstChild) return;
-      const w = el.firstChild.offsetWidth + 12;
-      const idx = Math.round(el.scrollLeft / w);
-      setActive((prev) => (prev === idx ? prev : idx));
-    });
-  }, []);
-
-  return (
-    <SectionBlock id="cs-story">
-      <SectionEyebrow color={brand.color}>Project Story</SectionEyebrow>
-      <SectionTitle>From problem to product</SectionTitle>
-      <p style={{ fontFamily: BODY, fontSize: 13, color: "rgba(255,255,255,0.3)", margin: "0 0 20px", lineHeight: 1.6 }}>
-        Swipe through the journey
-      </p>
-
-      <div
-        ref={ref}
-        onScroll={onScroll}
-        className="hide-scrollbar"
-        style={{ display: "flex", gap: 12, overflowX: "auto", scrollSnapType: "x mandatory", margin: "0 -20px", padding: "0 20px 4px", WebkitOverflowScrolling: "touch" }}
-      >
-        {story.map((card) => (
-          <div
-            key={card.num}
-            style={{
-              flexShrink: 0, width: "82vw", maxWidth: 320, scrollSnapAlign: "start",
-              padding: "22px 20px", borderRadius: 16,
-              background: "rgba(255,255,255,0.03)", border: `1px solid ${brand.rgba(0.14)}`,
-              position: "relative", overflow: "hidden",
-            }}
-          >
-            <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: `linear-gradient(90deg, ${brand.color}, transparent)` }} />
-            <div style={{ fontFamily: FONT, fontSize: 32, fontWeight: 800, color: brand.rgba(0.1), marginBottom: 12, lineHeight: 1 }}>{card.num}</div>
-            <div style={{ fontFamily: FONT, fontSize: 9, letterSpacing: "0.24em", textTransform: "uppercase", color: brand.color, opacity: 0.8, marginBottom: 8 }}>{card.label}</div>
-            <h3 style={{ fontFamily: FONT, fontWeight: 600, fontSize: 16, color: "rgba(255,255,255,0.9)", margin: "0 0 10px", lineHeight: 1.35 }}>{card.heading}</h3>
-            <p style={{ fontFamily: BODY, fontSize: 13, color: "rgba(255,255,255,0.36)", lineHeight: 1.7, margin: 0 }}>{card.body}</p>
-          </div>
-        ))}
-      </div>
-
-      <div style={{ display: "flex", justifyContent: "center", gap: 5, marginTop: 16 }}>
-        {story.map((_, i) => (
-          <div key={i} style={{ width: i === active ? 16 : 5, height: 4, borderRadius: 2, background: i === active ? brand.color : "rgba(255,255,255,0.14)", transition: "all 0.25s" }} />
-        ))}
-      </div>
-    </SectionBlock>
-  );
-};
-
 /* ─── Swipeable web gallery ──────────────────────── */
 const MobileWebGallery = ({ id, title, subtitle, screens, brand, onExpand }) => {
   const [active, setActive] = useState(0);
@@ -470,6 +413,109 @@ const MobileWebGallery = ({ id, title, subtitle, screens, brand, onExpand }) => 
   );
 };
 
+/* ─── iPhone frame with video (Alter mobile showcase) ─ */
+export const MobilePhoneFrameVideo = ({ src, brand, width = 250 }) => {
+  const h = Math.round(width * 2.08);
+  const r = width * 0.19;
+
+  return (
+    <div style={{ width, height: h, position: "relative", flexShrink: 0 }}>
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          borderRadius: r,
+          background: "linear-gradient(165deg, #2a2a2a 0%, #121212 55%, #0a0a0a 100%)",
+          border: "2px solid rgba(255,255,255,0.1)",
+          boxShadow: [
+            "0 40px 80px rgba(0,0,0,0.8)",
+            `0 0 56px ${brand.rgba(0.14)}`,
+            "inset 0 1px 0 rgba(255,255,255,0.08)",
+          ].join(", "),
+          overflow: "hidden",
+        }}
+      >
+        <LazyAutoplayVideo
+          src={src}
+          className="alter-case-study-video"
+          style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top", display: "block" }}
+        />
+        {/* Dynamic Island */}
+        <div
+          style={{
+            position: "absolute",
+            top: width * 0.048,
+            left: "50%",
+            transform: "translateX(-50%)",
+            width: width * 0.34,
+            height: width * 0.1,
+            borderRadius: width * 0.05,
+            background: "#000",
+            zIndex: 10,
+            boxShadow: "0 0 0 1px rgba(255,255,255,0.04)",
+          }}
+        />
+        {/* Home indicator */}
+        <div
+          style={{
+            position: "absolute",
+            bottom: width * 0.028,
+            left: "50%",
+            transform: "translateX(-50%)",
+            width: width * 0.36,
+            height: 4,
+            borderRadius: 2,
+            background: "rgba(255,255,255,0.22)",
+            zIndex: 10,
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            borderRadius: "inherit",
+            boxShadow: "inset 0 0 28px rgba(0,0,0,0.35)",
+            pointerEvents: "none",
+            zIndex: 5,
+          }}
+        />
+      </div>
+      {/* Side buttons */}
+      {[
+        { side: "right", top: "26%", h: 52 },
+        { side: "left", top: "18%", h: 28 },
+        { side: "left", top: "30%", h: 28 },
+        { side: "left", top: "12%", h: 16 },
+      ].map((b, i) => (
+        <div
+          key={i}
+          style={{
+            position: "absolute",
+            [b.side]: -2,
+            top: b.top,
+            width: 3,
+            height: b.h,
+            borderRadius: b.side === "right" ? "0 2px 2px 0" : "2px 0 0 2px",
+            background: "#1c1c1c",
+          }}
+        />
+      ))}
+      <div
+        style={{
+          position: "absolute",
+          bottom: -20,
+          left: "8%",
+          right: "8%",
+          height: 32,
+          background: `radial-gradient(ellipse, ${brand.rgba(0.22)}, transparent 70%)`,
+          filter: "blur(12px)",
+          pointerEvents: "none",
+        }}
+      />
+    </div>
+  );
+};
+
 /* ─── Video showcase (Alter) ─────────────────────── */
 const MobileVideoShowcase = ({ id, title, subtitle, videoSrc, brand, onExpand, phone, highlights }) => (
   <SectionBlock id={id}>
@@ -481,19 +527,42 @@ const MobileVideoShowcase = ({ id, title, subtitle, videoSrc, brand, onExpand, p
       whileTap={{ scale: 0.98 }}
       onClick={onExpand}
       style={{
-        width: "100%", padding: 0, border: `1px solid ${brand.rgba(0.25)}`, borderRadius: phone ? 24 : 14,
-        overflow: "hidden", background: "#0a0a0a", cursor: "pointer", WebkitTapHighlightColor: "transparent",
-        boxShadow: `0 20px 48px rgba(0,0,0,0.55), 0 0 36px ${brand.rgba(0.1)}`,
-        display: phone ? "flex" : "block", justifyContent: phone ? "center" : undefined,
+        width: "100%",
+        padding: 0,
+        border: "none",
+        background: "transparent",
+        cursor: "pointer",
+        WebkitTapHighlightColor: "transparent",
+        display: "flex",
+        justifyContent: "center",
       }}
     >
-      <LazyAutoplayVideo
-        src={videoSrc}
-        className="alter-case-study-video"
-        style={{ width: phone ? 220 : "100%", display: "block", aspectRatio: phone ? "9/19" : "16/10", objectFit: "cover" }}
-      />
+      {phone ? (
+        <MobilePhoneFrameVideo src={videoSrc} brand={brand} width={250} />
+      ) : (
+        <div
+          style={{
+            width: "100%",
+            border: `1px solid ${brand.rgba(0.25)}`,
+            borderRadius: 14,
+            overflow: "hidden",
+            background: "#0a0a0a",
+            boxShadow: `0 20px 48px rgba(0,0,0,0.55), 0 0 36px ${brand.rgba(0.1)}`,
+          }}
+        >
+          <LazyAutoplayVideo
+            src={videoSrc}
+            className="alter-case-study-video"
+            style={{ width: "100%", display: "block", aspectRatio: "16/10", objectFit: "cover" }}
+          />
+        </div>
+      )}
     </motion.button>
-    <p style={{ textAlign: "center", marginTop: 12, fontFamily: BODY, fontSize: 11, color: "rgba(255,255,255,0.28)" }}>Tap for fullscreen</p>
+    {phone && (
+      <p style={{ textAlign: "center", marginTop: 14, fontFamily: BODY, fontSize: 11, color: "rgba(255,255,255,0.28)" }}>
+        Tap for fullscreen
+      </p>
+    )}
     {highlights?.length > 0 && (
       <div style={{ marginTop: 20, display: "flex", flexDirection: "column", gap: 8 }}>
         {highlights.map((h) => (
@@ -704,7 +773,7 @@ const MobileCTA = ({ brand, title, description, liveUrl, liveLabel }) => (
         </motion.a>
       )}
       <Link
-        to="/"
+        to={getHomeBackLink()}
         style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, minHeight: 48, borderRadius: 14, border: "1px solid rgba(255,255,255,0.1)", fontFamily: FONT, fontSize: 13, color: "rgba(255,255,255,0.4)", textDecoration: "none" }}
       >
         <HiChevronLeft size={14} /> Back to portfolio
@@ -725,7 +794,6 @@ export default function CaseStudyMobileLayout({
   meta,
   ctas,
   preview,
-  story,
   webShowcase,
   videoWebShowcase,
   appShowcases = [],
@@ -739,7 +807,6 @@ export default function CaseStudyMobileLayout({
 
   const navSections = [
     { id: "cs-hero", label: "Overview" },
-    { id: "cs-story", label: "Story" },
     ...(webShowcase ? [{ id: webShowcase.id, label: "Website" }] : []),
     ...(videoWebShowcase ? [{ id: videoWebShowcase.id, label: "Website" }] : []),
     ...appShowcases.map((a) => ({ id: a.id, label: a.navLabel || a.title })),
@@ -775,10 +842,6 @@ export default function CaseStudyMobileLayout({
           preview={preview}
         />
       </div>
-
-      <Divider rgba={brand.rgba} />
-
-      <MobileStory story={story} brand={brand} />
 
       <Divider rgba={brand.rgba} />
 

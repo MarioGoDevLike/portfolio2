@@ -1,5 +1,21 @@
 import { initializeApp } from "firebase/app";
-import { getFirestore, collection, addDoc, serverTimestamp } from "firebase/firestore";
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  getDocs,
+  doc,
+  updateDoc,
+  query,
+  orderBy,
+  serverTimestamp,
+} from "firebase/firestore";
+import {
+  getAuth,
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged,
+} from "firebase/auth";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // PASTE YOUR FIREBASE CONFIG HERE
@@ -18,6 +34,14 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
+export const auth = getAuth(app);
+
+export const subscribeToAuth = (callback) => onAuthStateChanged(auth, callback);
+
+export const adminSignIn = (email, password) =>
+  signInWithEmailAndPassword(auth, email, password);
+
+export const adminSignOut = () => signOut(auth);
 
 /**
  * Generates a short human-readable reference ID.
@@ -45,4 +69,28 @@ export const submitInquiry = async (payload) => {
   });
 
   return refId;
+};
+
+/**
+ * Fetches all inquiries, newest first.
+ * Requires Firebase Auth + Firestore rules that allow read for authenticated users.
+ */
+export const fetchInquiries = async () => {
+  const q = query(collection(db, "inquiries"), orderBy("createdAt", "desc"));
+  const snap = await getDocs(q);
+  return snap.docs.map((d) => {
+    const data = d.data();
+    return {
+      id: d.id,
+      ...data,
+      createdAt: data.createdAt?.toDate?.() ?? null,
+    };
+  });
+};
+
+/**
+ * Updates inquiry status (e.g. received → under_review → replied).
+ */
+export const updateInquiryStatus = async (id, status) => {
+  await updateDoc(doc(db, "inquiries", id), { status });
 };

@@ -1,0 +1,21 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Contact form submissions — anyone can create, only signed-in admin can read/update
+    match /inquiries/{inquiryId} {
+      allow create: if request.resource.data.keys().hasAll([
+          'name', 'email', 'projectType', 'message', 'refId', 'status', 'createdAt'
+        ])
+        && request.resource.data.name is string
+        && request.resource.data.name.size() > 0
+        && request.resource.data.email is string
+        && request.resource.data.email.matches('.*@.*\\..*')
+        && request.resource.data.message is string
+        && request.resource.data.message.size() > 0;
+
+      allow read, update: if request.auth != null;
+      allow delete: if false;
+    }
+  }
+}

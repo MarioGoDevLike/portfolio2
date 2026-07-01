@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/static/css/main.a46c4c92.css",
-    "main.js": "/static/js/main.11a83878.js",
+    "main.css": "/static/css/main.709f709c.css",
+    "main.js": "/static/js/main.4cc861e4.js",
     "static/media/alter_web_view.mp4": "/static/media/alter_web_view.1fc0a0424674e94adc25.mp4",
     "static/media/alter_mobile_view.mp4": "/static/media/alter_mobile_view.8279f085133e41afdb14.mp4",
     "static/media/avatar.png": "/static/media/avatar.0b1ff2b2db0300ca7e2d.png",
@@ -43,11 +43,11 @@
     "static/media/vendor_orders_page.png": "/static/media/vendor_orders_page.89f16deca51bc359896a.png",
     "static/media/driver_archive_page.jpeg": "/static/media/driver_archive_page.22c7dd76af1af22c8eb5.jpeg",
     "index.html": "/index.html",
-    "main.a46c4c92.css.map": "/static/css/main.a46c4c92.css.map",
-    "main.11a83878.js.map": "/static/js/main.11a83878.js.map"
+    "main.709f709c.css.map": "/static/css/main.709f709c.css.map",
+    "main.4cc861e4.js.map": "/static/js/main.4cc861e4.js.map"
   },
   "entrypoints": [
-    "static/css/main.a46c4c92.css",
-    "static/js/main.11a83878.js"
+    "static/css/main.709f709c.css",
+    "static/js/main.4cc861e4.js"
   ]
 }

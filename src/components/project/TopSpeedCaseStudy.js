@@ -5,6 +5,7 @@ import { HiChevronLeft, HiChevronRight } from "react-icons/hi";
 import { HiArrowsPointingOut } from "react-icons/hi2";
 import CaseStudyLightbox from "./CaseStudyLightbox";
 import CaseStudyMobileLayout, { MobilePreviewPhones, MobilePhoneFrame } from "./CaseStudyMobile";
+import { getHomeBackLink } from "../../utils/homeScroll";
 
 /* ─── Assets ─────────────────────────────────────── */
 import vendorDashboard from "../../assets/Top_speed_apps/vendor_dashboard_page.png";
@@ -35,27 +36,6 @@ const DRIVER_SCREENS = [
   { src: driverDashboard, label: "Dashboard" },
   { src: driverArchive,   label: "Archive"   },
   { src: driverSettings,  label: "Settings"  },
-];
-
-const STORY = [
-  {
-    num: "01",
-    label: "The Problem",
-    heading: "Two roles, two phones, zero coordination",
-    body: "Vendors needed to post deliveries and track drivers. Drivers needed to receive orders and report status. There was no shared system — both sides operated blind.",
-  },
-  {
-    num: "02",
-    label: "The Approach",
-    heading: "Two dedicated Flutter apps, one shared backend",
-    body: "A Vendor App for posting and tracking orders, and a Driver App for receiving, accepting, and completing deliveries — both connected to Firebase with real-time sync and push notifications.",
-  },
-  {
-    num: "03",
-    label: "The Outcome",
-    heading: "Real-time delivery coordination, live GPS",
-    body: "Vendors see live order statuses. Drivers get instant push notifications. GPS tracking runs while on duty. Both apps are multilingual and production-deployed.",
-  },
 ];
 
 const FEATURES = [
@@ -294,7 +274,6 @@ const TopSpeedCaseStudy = () => {
   const mobileLayout = (
     <CaseStudyMobileLayout
       brand={{ color: RED, rgba: R }}
-      eyebrow="Case Study · 2024"
       title="Top Speed"
       summary="Two dedicated Flutter apps — one for vendors, one for drivers — coordinating real-time deliveries with Firebase push notifications and live GPS tracking."
       logo={
@@ -317,7 +296,6 @@ const TopSpeedCaseStudy = () => {
           brand={{ color: RED, rgba: R }}
         />
       }
-      story={STORY}
       appShowcases={[
         {
           id: "ts-vendor",
@@ -362,7 +340,7 @@ const TopSpeedCaseStudy = () => {
           <div style={{ position: "absolute", top: "35%", left: "50%", transform: "translate(-50%,-50%)", width: 900, height: 700, background: `radial-gradient(ellipse, ${R(0.07)} 0%, transparent 60%)`, filter: "blur(70px)", pointerEvents: "none" }} />
 
           <div style={{ position: "absolute", top: 0, left: 0, right: 0, padding: isMobile ? "20px 20px" : "28px 48px", zIndex: 10 }}>
-            <Link to="/" style={{ display: "inline-flex", alignItems: "center", gap: 6, fontFamily: "'Space Grotesk', sans-serif", fontSize: 12, color: "rgba(255,255,255,0.35)", textDecoration: "none" }}>
+            <Link to={getHomeBackLink()} style={{ display: "inline-flex", alignItems: "center", gap: 6, fontFamily: "'Space Grotesk', sans-serif", fontSize: 12, color: "rgba(255,255,255,0.35)", textDecoration: "none" }}>
               <HiChevronLeft size={14} /> Back to home
             </Link>
           </div>
@@ -373,7 +351,7 @@ const TopSpeedCaseStudy = () => {
               <motion.div
                 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, ease: EASE }}
-                style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 36 }}
+                style={{ marginBottom: 36 }}
               >
                 <motion.img
                   src={topSpeedLogo} alt="Top Speed"
@@ -381,12 +359,6 @@ const TopSpeedCaseStudy = () => {
                   transition={{ delay: 0.25, duration: 0.35, ease: EASE }}
                   style={{ height: 48, width: 48, objectFit: "contain", flexShrink: 0, display: "block", mixBlendMode: "screen" }}
                 />
-                <div style={{ borderLeft: `1px solid ${R(0.2)}`, paddingLeft: 14 }}>
-                  <div style={{ display: "inline-flex", alignItems: "center", gap: 10 }}>
-                    <span style={{ width: 22, height: 1, background: RED, opacity: 0.7, display: "block" }} />
-                    <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 10, letterSpacing: "0.3em", textTransform: "uppercase", color: RED, opacity: 0.85 }}>Case Study · 2024</span>
-                  </div>
-                </div>
               </motion.div>
 
               <motion.h1
@@ -473,36 +445,6 @@ const TopSpeedCaseStudy = () => {
             <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 9, letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)" }}>Scroll</span>
             <motion.div animate={{ y: [0, 6, 0] }} transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut" }} style={{ width: 1, height: 28, background: `linear-gradient(to bottom, ${R(0.5)}, transparent)` }} />
           </motion.div>
-        </section>
-
-        <Divider />
-
-        {/* ══════════ STORY ══════════ */}
-        <section style={{ padding: isMobile ? "72px 0" : "100px 0" }}>
-          <div style={wrap}>
-            <FadeUp>
-              <SectionLabel>Project Story</SectionLabel>
-              <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: isMobile ? 30 : 42, letterSpacing: "-0.02em", color: "rgba(255,255,255,0.92)", margin: "0 0 48px", lineHeight: 1.15 }}>
-                Two apps, one system
-              </h2>
-            </FadeUp>
-            <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(3, 1fr)", gap: 14 }}>
-              {STORY.map((card, i) => (
-                <FadeUp key={card.num} delay={i * 0.1}>
-                  <motion.div
-                    whileHover={{ y: -5, borderColor: R(0.3) }}
-                    style={{ padding: "28px 24px", borderRadius: 14, background: "rgba(255,255,255,0.025)", border: `1px solid ${R(0.1)}`, height: "100%", position: "relative", overflow: "hidden", transition: "border-color 0.25s" }}
-                  >
-                    <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: `linear-gradient(to right, ${R(0.55)}, ${R(0.08)})` }} />
-                    <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 40, fontWeight: 800, color: R(0.07), letterSpacing: "-0.04em", marginBottom: 18, lineHeight: 1 }}>{card.num}</div>
-                    <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 9, letterSpacing: "0.26em", textTransform: "uppercase", color: RED, opacity: 0.75, marginBottom: 10 }}>{card.label}</div>
-                    <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: isMobile ? 15 : 16, color: "rgba(255,255,255,0.88)", margin: "0 0 10px", lineHeight: 1.35 }}>{card.heading}</h3>
-                    <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: "rgba(255,255,255,0.37)", lineHeight: 1.72, margin: 0 }}>{card.body}</p>
-                  </motion.div>
-                </FadeUp>
-              ))}
-            </div>
-          </div>
         </section>
 
         <Divider />
@@ -627,7 +569,7 @@ const TopSpeedCaseStudy = () => {
                 Both apps are deployed and in active use — vendors and drivers coordinating in real time.
               </p>
               <Link
-                to="/"
+                to={getHomeBackLink()}
                 style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "14px 24px", borderRadius: 12, border: "1px solid rgba(255,255,255,0.1)", fontFamily: "'Space Grotesk', sans-serif", fontSize: 13, color: "rgba(255,255,255,0.4)", textDecoration: "none" }}
               >
                 <HiChevronLeft size={13} /> Back to portfolio

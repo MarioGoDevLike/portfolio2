@@ -5,6 +5,7 @@ import { HiChevronLeft, HiChevronRight } from "react-icons/hi";
 import { HiArrowUpRight, HiArrowsPointingOut } from "react-icons/hi2";
 import CaseStudyLightbox, { LandscapeWebImage } from "./CaseStudyLightbox";
 import CaseStudyMobileLayout, { MobilePreviewDual, MobilePhoneFrame } from "./CaseStudyMobile";
+import { getHomeBackLink } from "../../utils/homeScroll";
 
 /* ─── Assets ─────────────────────────────────────── */
 import webHome1    from "../../assets/raffoul_motors_web/home_page_1.png";
@@ -37,27 +38,6 @@ const MOB_SCREENS = [
   { src: mobCars,     label: "Available Cars"  },
   { src: mobWorkshop, label: "Workshop"        },
   { src: mobDash,     label: "Admin View"      },
-];
-
-const STORY = [
-  {
-    num: "01",
-    label: "The Problem",
-    heading: "A premium dealer with no digital showroom",
-    body: "Raffoul Motors had an outstanding physical inventory but no online presence. Customers couldn't browse stock, get specs, or connect — business was purely walk-in.",
-  },
-  {
-    num: "02",
-    label: "The Approach",
-    heading: "A bilingual platform built for non-technical owners",
-    body: "A React 18 web platform with full Arabic & English support, filterable inventory, car detail pages, a workshop section, and a zero-code admin panel powered by Firebase.",
-  },
-  {
-    num: "03",
-    label: "The Outcome",
-    heading: "The dealer now runs their site solo",
-    body: "Owners publish, edit, and delete listings without touching code. The site is fully bilingual, mobile-responsive, and live with the full inventory browsable online.",
-  },
 ];
 
 const FEATURES = [
@@ -311,7 +291,6 @@ const RaffoulMotorsCaseStudy = () => {
   const mobileLayout = (
     <CaseStudyMobileLayout
       brand={{ color: RED, rgba: R }}
-      eyebrow="Case Study · 2024"
       title="Raffoul Motors"
       summary="A bilingual automotive platform that put a premium Lebanese car dealer online — full inventory management, workshop listings, and an admin panel with zero code required."
       logo={
@@ -334,7 +313,6 @@ const RaffoulMotorsCaseStudy = () => {
           brand={{ color: RED, rgba: R }}
         />
       }
-      story={STORY}
       webShowcase={{
         id: "rm-web",
         title: "The Website",
@@ -374,7 +352,7 @@ const RaffoulMotorsCaseStudy = () => {
 
           {/* Back link */}
           <div style={{ position: "absolute", top: 0, left: 0, right: 0, padding: isMobile ? "20px 20px" : "28px 48px", zIndex: 10 }}>
-            <Link to="/" style={{ display: "inline-flex", alignItems: "center", gap: 6, fontFamily: "'Space Grotesk', sans-serif", fontSize: 12, color: "rgba(255,255,255,0.35)", textDecoration: "none", letterSpacing: "0.02em" }}>
+            <Link to={getHomeBackLink()} style={{ display: "inline-flex", alignItems: "center", gap: 6, fontFamily: "'Space Grotesk', sans-serif", fontSize: 12, color: "rgba(255,255,255,0.35)", textDecoration: "none", letterSpacing: "0.02em" }}>
               <HiChevronLeft size={14} />
               Back to home
             </Link>
@@ -388,7 +366,7 @@ const RaffoulMotorsCaseStudy = () => {
               <motion.div
                 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, ease: EASE }}
-                style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 36 }}
+                style={{ marginBottom: 36 }}
               >
                 <motion.img
                   src={raffoulLogo} alt="Raffoul Motors"
@@ -396,14 +374,6 @@ const RaffoulMotorsCaseStudy = () => {
                   transition={{ delay: 0.25, duration: 0.35, ease: EASE }}
                   style={{ height: 44, width: "auto", objectFit: "contain", flexShrink: 0, display: "block" }}
                 />
-                <div style={{ borderLeft: `1px solid ${R(0.2)}`, paddingLeft: 14 }}>
-                  <div style={{ display: "inline-flex", alignItems: "center", gap: 10 }}>
-                    <span style={{ width: 22, height: 1, background: RED, opacity: 0.7, display: "block" }} />
-                    <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 10, letterSpacing: "0.3em", textTransform: "uppercase", color: RED, opacity: 0.85 }}>
-                      Case Study · 2024
-                    </span>
-                  </div>
-                </div>
               </motion.div>
 
               <motion.h1
@@ -497,36 +467,6 @@ const RaffoulMotorsCaseStudy = () => {
             <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 9, letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)" }}>Scroll</span>
             <motion.div animate={{ y: [0, 6, 0] }} transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut" }} style={{ width: 1, height: 28, background: `linear-gradient(to bottom, ${R(0.5)}, transparent)` }} />
           </motion.div>
-        </section>
-
-        <Divider />
-
-        {/* ══════════ STORY ══════════ */}
-        <section style={{ padding: isMobile ? "72px 0" : "100px 0" }}>
-          <div style={wrap}>
-            <FadeUp>
-              <SectionLabel>Project Story</SectionLabel>
-              <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: isMobile ? 30 : 42, letterSpacing: "-0.02em", color: "rgba(255,255,255,0.92)", margin: "0 0 48px", lineHeight: 1.15 }}>
-                From showroom to online
-              </h2>
-            </FadeUp>
-            <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(3, 1fr)", gap: 14 }}>
-              {STORY.map((card, i) => (
-                <FadeUp key={card.num} delay={i * 0.1}>
-                  <motion.div
-                    whileHover={{ y: -5, borderColor: R(0.3) }}
-                    style={{ padding: "28px 24px", borderRadius: 14, background: "rgba(255,255,255,0.025)", border: `1px solid ${R(0.1)}`, height: "100%", position: "relative", overflow: "hidden", transition: "border-color 0.25s" }}
-                  >
-                    <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: `linear-gradient(to right, ${R(0.55)}, ${R(0.08)})` }} />
-                    <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 40, fontWeight: 800, color: R(0.07), letterSpacing: "-0.04em", marginBottom: 18, lineHeight: 1 }}>{card.num}</div>
-                    <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 9, letterSpacing: "0.26em", textTransform: "uppercase", color: RED, opacity: 0.75, marginBottom: 10 }}>{card.label}</div>
-                    <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: isMobile ? 15 : 16, color: "rgba(255,255,255,0.88)", margin: "0 0 10px", lineHeight: 1.35 }}>{card.heading}</h3>
-                    <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: "rgba(255,255,255,0.37)", lineHeight: 1.72, margin: 0 }}>{card.body}</p>
-                  </motion.div>
-                </FadeUp>
-              ))}
-            </div>
-          </div>
         </section>
 
         <Divider />
@@ -705,7 +645,7 @@ const RaffoulMotorsCaseStudy = () => {
                 Raffoul Motors is fully operational — the team manages their own inventory without touching code.
               </p>
               <Link
-                to="/"
+                to={getHomeBackLink()}
                 style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "14px 24px", borderRadius: 12, border: "1px solid rgba(255,255,255,0.1)", fontFamily: "'Space Grotesk', sans-serif", fontSize: 13, color: "rgba(255,255,255,0.4)", textDecoration: "none" }}
               >
                 <HiChevronLeft size={13} /> Back to portfolio

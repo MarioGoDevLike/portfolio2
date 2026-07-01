@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { HiChevronLeft } from "react-icons/hi";
 import { HiArrowUpRight, HiArrowsPointingOut } from "react-icons/hi2";
 import CaseStudyMobileLayout, { MobilePreviewVideo } from "./CaseStudyMobile";
+import { getHomeBackLink } from "../../utils/homeScroll";
 
 import alterWebVideo    from "../../assets/alter_images/alter_web_view.mp4";
 import alterMobileVideo from "../../assets/alter_images/alter_mobile_view.mp4";
@@ -35,27 +36,6 @@ const useChromeless = (ref, src) => {
 };
 
 /* ─── Data ───────────────────────────────────────── */
-const STORY = [
-  {
-    num: "01",
-    label: "The Challenge",
-    heading: "A premium agency without a premium web presence",
-    body: "Alter manages 330+ artists and 1,651+ campaigns across MENA — but had no digital home that matched their brand prestige or communicated their scale to potential clients.",
-  },
-  {
-    num: "02",
-    label: "The Approach",
-    heading: "A cinematic React.js experience, built from scratch",
-    body: "A performance-first React.js site with a live-stat hero, scrolling marquee artist roster, influencer talent cards, six service pillars, and a trusted partners wall — all Figma-to-code.",
-  },
-  {
-    num: "03",
-    label: "The Outcome",
-    heading: "A digital home as ambitious as the agency",
-    body: "The site is live on Vercel. It opens with real campaign counts and artist numbers, scales from desktop spectacle to mobile elegance, and communicates authority at every scroll.",
-  },
-];
-
 const FEATURES = [
   { title: "Cinematic Hero",        desc: "Live agency stats — 1,651+ campaigns and 330+ artists front and center"  },
   { title: "Artist Marquee",        desc: "Scrolling roster presenting the agency's talent in premium style"          },
@@ -188,14 +168,95 @@ const VideoPhone = ({ src, width = 220, onClick }) => {
 /* ─── Video lightbox ──────────────────────────────── */
 const VideoLightbox = ({ src, type, onClose }) => {
   const videoRef = useRef(null);
+  const phoneVideoRef = useRef(null);
+  const [isMobile, setIsMobile] = useState(() => typeof window !== "undefined" && window.innerWidth < 768);
+
   useChromeless(videoRef, src);
+  useChromeless(phoneVideoRef, src);
+
   useEffect(() => {
-    const fn = e => { if (e.key === "Escape") onClose(); };
+    const fn = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", fn, { passive: true });
+    return () => window.removeEventListener("resize", fn);
+  }, []);
+
+  useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = prev; };
+  }, []);
+
+  useEffect(() => {
+    const fn = (e) => { if (e.key === "Escape") onClose(); };
     window.addEventListener("keydown", fn);
     return () => window.removeEventListener("keydown", fn);
   }, [onClose]);
 
   const isPhone = type === "phone";
+  const immersive = isPhone && isMobile;
+
+  const closeBtn = (
+    <button
+      type="button"
+      onClick={onClose}
+      aria-label="Close fullscreen"
+      style={{
+        position: "absolute",
+        top: "max(14px, env(safe-area-inset-top))",
+        right: "max(14px, env(safe-area-inset-right))",
+        width: 44,
+        height: 44,
+        borderRadius: "50%",
+        background: "rgba(0,0,0,0.55)",
+        border: "1px solid rgba(255,255,255,0.22)",
+        color: "white",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        cursor: "pointer",
+        fontSize: 18,
+        lineHeight: 1,
+        outline: "none",
+        zIndex: 10,
+        WebkitTapHighlightColor: "transparent",
+        backdropFilter: "blur(8px)",
+      }}
+    >
+      ✕
+    </button>
+  );
+
+  if (immersive) {
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.22 }}
+        style={{
+          position: "fixed",
+          inset: 0,
+          zIndex: 9999,
+          background: "#000",
+        }}
+      >
+        {closeBtn}
+        <video
+          ref={phoneVideoRef}
+          src={src}
+          {...CHROMELESS_PROPS}
+          style={{
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            objectPosition: "top",
+            display: "block",
+          }}
+        />
+      </motion.div>
+    );
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
@@ -220,12 +281,7 @@ const VideoLightbox = ({ src, type, onClose }) => {
           </div>
         )}
       </motion.div>
-      <button
-        type="button" onClick={onClose}
-        style={{ position: "absolute", top: 20, right: 20, width: 40, height: 40, borderRadius: "50%", background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.2)", color: "white", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", fontSize: 18, outline: "none" }}
-      >
-        ✕
-      </button>
+      {closeBtn}
     </motion.div>
   );
 };
@@ -248,7 +304,6 @@ const AlterCaseStudy = () => {
   const mobileLayout = (
     <CaseStudyMobileLayout
       brand={{ color: GOLD, rgba: G }}
-      eyebrow="Case Study · 2024"
       title="Alter"
       summary="A cinematic digital presence for a leading MENA PR & marketing agency — built in React.js with live campaign statistics, a marquee artist roster, and a fully responsive layout."
       logo={
@@ -267,7 +322,6 @@ const AlterCaseStudy = () => {
       preview={
         <MobilePreviewVideo src={alterWebVideo} brand={{ color: GOLD, rgba: G }} label="Live site preview" />
       }
-      story={STORY}
       videoWebShowcase={{
         id: "alter-web",
         title: "The Website",
@@ -310,7 +364,7 @@ const AlterCaseStudy = () => {
           <div style={{ position: "absolute", top: "35%", left: "50%", transform: "translate(-50%,-50%)", width: 900, height: 700, background: `radial-gradient(ellipse, ${G(0.07)} 0%, transparent 60%)`, filter: "blur(70px)", pointerEvents: "none" }} />
 
           <div style={{ position: "absolute", top: 0, left: 0, right: 0, padding: isMobile ? "20px 20px" : "28px 48px", zIndex: 10 }}>
-            <Link to="/" style={{ display: "inline-flex", alignItems: "center", gap: 6, fontFamily: "'Space Grotesk', sans-serif", fontSize: 12, color: "rgba(255,255,255,0.35)", textDecoration: "none" }}>
+            <Link to={getHomeBackLink()} style={{ display: "inline-flex", alignItems: "center", gap: 6, fontFamily: "'Space Grotesk', sans-serif", fontSize: 12, color: "rgba(255,255,255,0.35)", textDecoration: "none" }}>
               <HiChevronLeft size={14} /> Back to home
             </Link>
           </div>
@@ -322,7 +376,7 @@ const AlterCaseStudy = () => {
               <motion.div
                 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, ease: EASE }}
-                style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 36 }}
+                style={{ marginBottom: 36 }}
               >
                 <motion.img
                   src={alterLogo} alt="Alter"
@@ -330,12 +384,6 @@ const AlterCaseStudy = () => {
                   transition={{ delay: 0.25, duration: 0.35, ease: EASE }}
                   style={{ height: 28, width: "auto", objectFit: "contain", flexShrink: 0, display: "block" }}
                 />
-                <div style={{ borderLeft: `1px solid ${G(0.2)}`, paddingLeft: 14 }}>
-                  <div style={{ display: "inline-flex", alignItems: "center", gap: 10 }}>
-                    <span style={{ width: 22, height: 1, background: GOLD, opacity: 0.7, display: "block" }} />
-                    <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 10, letterSpacing: "0.3em", textTransform: "uppercase", color: GOLD, opacity: 0.85 }}>Case Study · 2024</span>
-                  </div>
-                </div>
               </motion.div>
 
               <motion.h1
@@ -426,36 +474,6 @@ const AlterCaseStudy = () => {
             <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 9, letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)" }}>Scroll</span>
             <motion.div animate={{ y: [0, 6, 0] }} transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut" }} style={{ width: 1, height: 28, background: `linear-gradient(to bottom, ${G(0.5)}, transparent)` }} />
           </motion.div>
-        </section>
-
-        <Divider />
-
-        {/* ══════════ STORY ══════════ */}
-        <section style={{ padding: isMobile ? "72px 0" : "100px 0" }}>
-          <div style={wrap}>
-            <FadeUp>
-              <SectionLabel>Project Story</SectionLabel>
-              <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: isMobile ? 30 : 42, letterSpacing: "-0.02em", color: "rgba(255,255,255,0.92)", margin: "0 0 48px", lineHeight: 1.15 }}>
-                Prestige, on screen
-              </h2>
-            </FadeUp>
-            <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(3, 1fr)", gap: 14 }}>
-              {STORY.map((card, i) => (
-                <FadeUp key={card.num} delay={i * 0.1}>
-                  <motion.div
-                    whileHover={{ y: -5, borderColor: G(0.3) }}
-                    style={{ padding: "28px 24px", borderRadius: 14, background: "rgba(255,255,255,0.025)", border: `1px solid ${G(0.1)}`, height: "100%", position: "relative", overflow: "hidden", transition: "border-color 0.25s" }}
-                  >
-                    <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: `linear-gradient(to right, ${G(0.55)}, ${G(0.08)})` }} />
-                    <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 40, fontWeight: 800, color: G(0.07), letterSpacing: "-0.04em", marginBottom: 18, lineHeight: 1 }}>{card.num}</div>
-                    <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 9, letterSpacing: "0.26em", textTransform: "uppercase", color: GOLD, opacity: 0.75, marginBottom: 10 }}>{card.label}</div>
-                    <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: isMobile ? 15 : 16, color: "rgba(255,255,255,0.88)", margin: "0 0 10px", lineHeight: 1.35 }}>{card.heading}</h3>
-                    <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: "rgba(255,255,255,0.37)", lineHeight: 1.72, margin: 0 }}>{card.body}</p>
-                  </motion.div>
-                </FadeUp>
-              ))}
-            </div>
-          </div>
         </section>
 
         <Divider />
@@ -626,7 +644,7 @@ const AlterCaseStudy = () => {
                   Open Alter <HiArrowUpRight size={15} />
                 </motion.a>
                 <Link
-                  to="/"
+                  to={getHomeBackLink()}
                   style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "14px 24px", borderRadius: 12, border: "1px solid rgba(255,255,255,0.1)", fontFamily: "'Space Grotesk', sans-serif", fontSize: 13, color: "rgba(255,255,255,0.4)", textDecoration: "none" }}
                 >
                   <HiChevronLeft size={13} /> Back to portfolio

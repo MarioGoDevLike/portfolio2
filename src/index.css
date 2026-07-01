@@ -733,6 +733,13 @@
 .hide-scrollbar::-webkit-scrollbar { display: none; }
 .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
+/* Admin inquiries dashboard — stack on mobile */
+@media (max-width: 768px) {
+  .admin-inquiries-layout {
+    grid-template-columns: 1fr !important;
+  }
+}
+
 /* Chromeless case-study videos — no native controls on hover */
 .alter-case-study-video::-webkit-media-controls {
   display: none !important;

@@ -9,6 +9,7 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import { HOME_PROJECTS } from "../../constants";
 import AnimatedSection from "../ui/AnimatedSection";
+import { saveHomeScroll } from "../../utils/homeScroll";
 
 const EASE_EXPO = [0.22, 1, 0.36, 1];
 
@@ -58,7 +59,7 @@ const BrowserChrome = ({ href, accentColor }) => (
     >
       <span style={{ width: 5, height: 5, borderRadius: "50%", background: accentColor, flexShrink: 0, opacity: 0.7 }} />
       <span style={{ fontSize: 8, color: "rgba(255,255,255,0.22)", fontFamily: "monospace", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-        {href ? href.replace("https://", "") : "project.dev"}
+        {href ? href.replace("https://", "") : "raffoul-motors.vercel.app"}
       </span>
     </div>
   </div>
@@ -216,6 +217,83 @@ const Card3D = ({ project, featured = false, index = 0, onCustomClick }) => {
    MOBILE-ONLY COMPONENTS
 ══════════════════════════════════════════ */
 
+const getMobileContainPadding = (project, height) =>
+  project.mobileImagePadding || (height >= 200 ? "24px 36px" : "18px 32px");
+
+const MobileCardMedia = ({ project, height, imageFit }) => {
+  if (project.previewVideo) {
+    return (
+      <div style={{ position: "relative", height, overflow: "hidden", background: "#050505" }}>
+        <video
+          src={project.previewVideo}
+          autoPlay
+          muted
+          loop
+          playsInline
+          style={{
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            objectPosition: "top",
+            filter: "brightness(0.75) saturate(0.88)",
+            display: "block",
+          }}
+        />
+      </div>
+    );
+  }
+
+  if (!project.image) {
+    return <div style={{ height, background: "#050505" }} aria-hidden="true" />;
+  }
+
+  if (imageFit === "contain") {
+    return (
+      <div
+        style={{
+          position: "relative",
+          height,
+          overflow: "hidden",
+          background: "#050505",
+          padding: getMobileContainPadding(project, height),
+          boxSizing: "border-box",
+        }}
+      >
+        <img
+          src={project.image}
+          alt={project.title}
+          loading="lazy"
+          style={{
+            width: "100%",
+            height: "100%",
+            objectFit: "contain",
+            objectPosition: "center",
+            display: "block",
+          }}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ position: "relative", height, overflow: "hidden", background: "#050505" }}>
+      <img
+        src={project.image}
+        alt={project.title}
+        loading="lazy"
+        style={{
+          width: "100%",
+          height: "100%",
+          objectFit: imageFit,
+          objectPosition: "center",
+          filter: "brightness(0.75) saturate(0.88)",
+          display: "block",
+        }}
+      />
+    </div>
+  );
+};
+
 /* ─── Mobile featured card ─── */
 const MobileFeaturedCard = ({ project, onCustomClick }) => {
   const meta = ACCENT[project.accent] || ACCENT.violet;
@@ -243,15 +321,8 @@ const MobileFeaturedCard = ({ project, onCustomClick }) => {
     >
       {isWeb && <BrowserChrome href={project.liveHref || project.href} accentColor={meta.color} />}
 
-      {/* Image */}
-      <div style={{ position: "relative", height: 210, overflow: "hidden", background: "#050505" }}>
-        {project.previewVideo ? (
-          <video src={project.previewVideo} autoPlay muted loop playsInline
-            style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top", filter: "brightness(0.75) saturate(0.88)", display: "block" }} />
-        ) : project.image ? (
-          <img src={project.image} alt={project.title} loading="lazy"
-            style={{ width: imageFit === "contain" ? "auto" : "100%", height: imageFit === "contain" ? "auto" : "100%", maxWidth: "100%", maxHeight: "100%", objectFit: imageFit, objectPosition: "center", filter: imageFit === "contain" ? "none" : "brightness(0.75) saturate(0.88)", display: "block", margin: imageFit === "contain" ? "auto" : undefined }} />
-        ) : null}
+      <div style={{ position: "relative" }}>
+        <MobileCardMedia project={project} height={210} imageFit={imageFit} />
 
         {imageFit !== "contain" && (
           <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(5,5,5,0.95) 0%, rgba(5,5,5,0.18) 50%, transparent 75%)", pointerEvents: "none" }} aria-hidden="true" />
@@ -273,13 +344,13 @@ const MobileFeaturedCard = ({ project, onCustomClick }) => {
         </span>
 
         {/* Case study CTA */}
-        {onCustomClick && (
+        {/* {onCustomClick && (
           <div style={{ position: "absolute", bottom: 12, left: 14, display: "flex", alignItems: "center", gap: 5 }}>
             <span style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: 10, letterSpacing: "0.18em", textTransform: "uppercase", color: meta.color, opacity: 0.9 }}>
               View Case Study →
             </span>
           </div>
-        )}
+        )} */}
       </div>
 
       {/* Footer */}
@@ -330,14 +401,8 @@ const MobileCarouselCard = ({ project, onCustomClick, isActive }) => {
     >
       {isWeb && <BrowserChrome href={project.liveHref || project.href} accentColor={meta.color} />}
 
-      <div style={{ position: "relative", height: 160, overflow: "hidden", background: "#050505" }}>
-        {project.previewVideo ? (
-          <video src={project.previewVideo} autoPlay muted loop playsInline
-            style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top", filter: "brightness(0.70)", display: "block" }} />
-        ) : project.image ? (
-          <img src={project.image} alt={project.title} loading="lazy"
-            style={{ width: imageFit === "contain" ? "auto" : "100%", height: imageFit === "contain" ? "auto" : "100%", maxWidth: "100%", maxHeight: "100%", objectFit: imageFit, objectPosition: "center", filter: imageFit === "contain" ? "none" : "brightness(0.70)", display: "block", margin: imageFit === "contain" ? "auto" : undefined }} />
-        ) : null}
+      <div style={{ position: "relative" }}>
+        <MobileCardMedia project={project} height={160} imageFit={imageFit} />
 
         {imageFit !== "contain" && (
           <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(5,5,5,0.9) 0%, transparent 60%)", pointerEvents: "none" }} aria-hidden="true" />
@@ -453,6 +518,11 @@ const WorkSection = () => {
   const navigate = useNavigate();
   const [isMobile, setIsMobile] = useState(() => typeof window !== "undefined" && window.innerWidth < 768);
 
+  const goToCaseStudy = useCallback((path) => {
+    saveHomeScroll();
+    navigate(path);
+  }, [navigate]);
+
   useEffect(() => {
     const fn = () => setIsMobile(window.innerWidth < 768);
     window.addEventListener("resize", fn, { passive: true });
@@ -496,7 +566,7 @@ const WorkSection = () => {
             <MobileFeaturedCard
               project={featured}
               onCustomClick={
-                featured.caseStudyPath ? () => navigate(featured.caseStudyPath)
+                featured.caseStudyPath ? () => goToCaseStudy(featured.caseStudyPath)
                 : featured.href ? () => window.open(featured.href, "_blank", "noopener")
                 : undefined
               }
@@ -504,7 +574,7 @@ const WorkSection = () => {
           </div>
 
           {/* Horizontal carousel for remaining projects */}
-          <MobileProjectCarousel projects={rest} navigate={navigate} />
+          <MobileProjectCarousel projects={rest} navigate={goToCaseStudy} />
 
           {/* "View all" button */}
           <div style={{ display: "flex", justifyContent: "center", marginTop: 24, paddingLeft: 20, paddingRight: 20 }}>
@@ -523,7 +593,7 @@ const WorkSection = () => {
               project={featured}
               featured
               index={0}
-              onCustomClick={featured.caseStudyPath ? () => navigate(featured.caseStudyPath) : undefined}
+              onCustomClick={featured.caseStudyPath ? () => goToCaseStudy(featured.caseStudyPath) : undefined}
             />
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5 lg:gap-6">
@@ -532,7 +602,7 @@ const WorkSection = () => {
                 key={project.id}
                 project={project}
                 index={i + 1}
-                onCustomClick={project.caseStudyPath ? () => navigate(project.caseStudyPath) : undefined}
+                onCustomClick={project.caseStudyPath ? () => goToCaseStudy(project.caseStudyPath) : undefined}
               />
             ))}
           </div>

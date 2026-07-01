@@ -94,6 +94,7 @@ export const PROJECTS_ALL = [
       "A premium React.js website for a MENA-region PR & marketing agency. Cinematic hero, live campaign stats, artist marquee, influencer showcase, and fully responsive mobile experience.",
     image: alterLogo,
     imageFit: "contain",
+    mobileImagePadding: "14px 48px",
     caseStudyPath: "/projects/alter",
     liveHref: "https://altercoms.vercel.app/",
     tag: "Web",
