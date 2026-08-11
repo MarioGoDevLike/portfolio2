@@ -26,6 +26,16 @@ const useSectionScroll = () => {
     const resolveActiveSection = () => {
       if (isScrollingRef.current) return;
 
+      // Contact is often shorter than the viewport, so its top never reaches the
+      // scroll marker. Treat "near page bottom" as the last section.
+      const nearBottom =
+        window.scrollY + window.innerHeight >=
+        document.documentElement.scrollHeight - 80;
+      if (nearBottom) {
+        setActiveSection(SECTION_IDS[SECTION_IDS.length - 1]);
+        return;
+      }
+
       const marker = window.scrollY + Math.abs(SCROLL_OFFSET) + 24;
       let current = "home";
 
