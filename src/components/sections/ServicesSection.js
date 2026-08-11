@@ -3,7 +3,7 @@ import AnimatedSection from "../ui/AnimatedSection";
 import ServiceStage3D from "../ui/ServiceStage3D";
 
 const ServicesSection = () => (
-  <section className="section" id="services">
+  <section className="section" id="services" data-tour="services">
     <div className="container">
       <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between mb-12 lg:mb-16 gap-6">
         <AnimatedSection direction="right" delay={0.2}>

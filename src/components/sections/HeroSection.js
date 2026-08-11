@@ -80,6 +80,7 @@ const HeroSection = () => {
       ref={sectionRef}
       className="hero-section"
       id="home"
+      data-tour="home"
       onMouseMove={onMouseMove}
       style={{ position: "relative" }}
     >

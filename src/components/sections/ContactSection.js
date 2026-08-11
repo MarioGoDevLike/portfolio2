@@ -515,6 +515,7 @@ const MissionConsole = () => {
     window.addEventListener("resize", fn, { passive: true });
     return () => window.removeEventListener("resize", fn);
   }, []);
+
   const [dir, setDir] = useState(1);
   const [pipelineStep, setPipelineStep] = useState(-1); // -1 = idle
   const [refId, setRefId] = useState(null);
@@ -813,7 +814,7 @@ const MissionConsole = () => {
 
 /* ─── ContactSection ─────────────────────────────────────── */
 const ContactSection = () => (
-  <section className="section pb-28 md:pb-24 lg:pb-28" id="contact">
+  <section className="section pb-28 md:pb-24 lg:pb-28" id="contact" data-tour="contact">
     <div className="container">
       <div className="divider mb-12 lg:mb-16" />
 

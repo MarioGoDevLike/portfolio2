@@ -530,7 +530,7 @@ const WorkSection = () => {
   }, []);
 
   return (
-    <section className="section" id="work" style={{ paddingBottom: isMobile ? 64 : undefined }}>
+    <section className="section" id="work" data-tour="work" style={{ paddingBottom: isMobile ? 64 : undefined }}>
 
       {/* ── Section header ── */}
       <div className="container">
@@ -562,7 +562,7 @@ const WorkSection = () => {
       {isMobile ? (
         <div>
           {/* Featured card */}
-          <div style={{ paddingLeft: 20, paddingRight: 20, marginBottom: 20 }}>
+          <div data-tour="work-featured" style={{ paddingLeft: 20, paddingRight: 20, marginBottom: 20 }}>
             <MobileFeaturedCard
               project={featured}
               onCustomClick={
@@ -588,7 +588,7 @@ const WorkSection = () => {
       ) : (
         /* ── Desktop layout (original) ── */
         <div className="container">
-          <div className="mb-5 lg:mb-6">
+          <div className="mb-5 lg:mb-6" data-tour="work-featured">
             <Card3D
               project={featured}
               featured

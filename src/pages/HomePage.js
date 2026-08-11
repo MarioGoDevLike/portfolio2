@@ -1,4 +1,5 @@
 import React from "react";
+import SiteConcierge from "../components/concierge/SiteConcierge";
 import Header from "../components/layout/Header";
 import MobileNav from "../components/layout/MobileNav";
 import PageBackground from "../components/layout/PageBackground";
@@ -23,6 +24,7 @@ const HomePage = () => (
       </main>
     </div>
 
+    <SiteConcierge />
     <MobileNav />
   </div>
 );

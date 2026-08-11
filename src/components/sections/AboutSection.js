@@ -3,7 +3,7 @@ import AnimatedSection from "../ui/AnimatedSection";
 import TagCloud3D from "../ui/TagCloud3D";
 
 const AboutSection = () => (
-    <section className="section" id="about">
+    <section className="section" id="about" data-tour="about">
       <div className="container">
         <div className="flex flex-col lg:flex-row lg:items-center gap-16 lg:gap-24">
 
