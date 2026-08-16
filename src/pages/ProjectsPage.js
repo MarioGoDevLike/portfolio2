@@ -1,10 +1,10 @@
 import React from "react";
-import { Link } from "react-router-dom";
 import { BsArrowLeft } from "react-icons/bs";
 import { PROJECTS } from "../constants";
 import PageBackground from "../components/layout/PageBackground";
 import ProjectCard from "../components/project/ProjectCard";
 import AnimatedSection from "../components/ui/AnimatedSection";
+import HomeBackLink from "../components/ui/HomeBackLink";
 
 const ProjectsPage = () => (
   <div className="relative min-h-screen dot-grid">
@@ -13,10 +13,10 @@ const ProjectsPage = () => (
     <div className="relative z-[1]">
       <header className="projects-page__header">
         <div className="container">
-          <Link to="/" className="projects-page__back">
+          <HomeBackLink className="projects-page__back">
             <BsArrowLeft size={20} />
             <span>Back to home</span>
-          </Link>
+          </HomeBackLink>
         </div>
       </header>
 

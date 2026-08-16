@@ -5,19 +5,20 @@ import { HiChevronLeft, HiChevronRight } from "react-icons/hi";
 import { HiArrowUpRight, HiArrowsPointingOut } from "react-icons/hi2";
 import CaseStudyLightbox, { LandscapeWebImage } from "./CaseStudyLightbox";
 import CaseStudyMobileLayout, { MobilePreviewDual, MobilePhoneFrame } from "./CaseStudyMobile";
-import { getHomeBackLink } from "../../utils/homeScroll";
+import { getHomeBackLink, getHomeBackState } from "../../utils/homeScroll";
+import OptimizedImage from "../ui/OptimizedImage";
 
 /* ─── Assets ─────────────────────────────────────── */
-import webHome1    from "../../assets/raffoul_motors_web/home_page_1.png";
-import webHome2    from "../../assets/raffoul_motors_web/home_page_2.png";
-import webCars     from "../../assets/raffoul_motors_web/available_cars_page.png";
-import webWorkshop from "../../assets/raffoul_motors_web/workshop_page.png";
-import webDash     from "../../assets/raffoul_motors_web/dashboard_page_1.png";
-import mobHome     from "../../assets/raffoul_motors_web/mobile_view_home_page.png";
-import mobCars     from "../../assets/raffoul_motors_web/mobile_view_available_cars.png";
-import mobWorkshop from "../../assets/raffoul_motors_web/mobile_view_workshop_cars.png";
-import mobDash     from "../../assets/raffoul_motors_web/mobile_view_dashboard.png";
-import raffoulLogo from "../../assets/raffoulmotors.png";
+import webHome1    from "../../assets/raffoul_motors_web/home_page_1.webp";
+import webHome2    from "../../assets/raffoul_motors_web/home_page_2.webp";
+import webCars     from "../../assets/raffoul_motors_web/available_cars_page.webp";
+import webWorkshop from "../../assets/raffoul_motors_web/workshop_page.webp";
+import webDash     from "../../assets/raffoul_motors_web/dashboard_page_1.webp";
+import mobHome     from "../../assets/raffoul_motors_web/mobile_view_home_page.webp";
+import mobCars     from "../../assets/raffoul_motors_web/mobile_view_available_cars.webp";
+import mobWorkshop from "../../assets/raffoul_motors_web/mobile_view_workshop_cars.webp";
+import mobDash     from "../../assets/raffoul_motors_web/mobile_view_dashboard.webp";
+import raffoulLogo from "../../assets/raffoulmotors.webp";
 
 /* ─── Brand ──────────────────────────────────────── */
 const RED  = "#E31E24";
@@ -40,14 +41,6 @@ const MOB_SCREENS = [
   { src: mobDash,     label: "Admin View"      },
 ];
 
-const FEATURES = [
-  { title: "Bilingual UI",         desc: "Full Arabic & English with live language picker and RTL support"  },
-  { title: "Inventory Filters",    desc: "Browse by make, year, price range, and availability"               },
-  { title: "Car Detail Pages",     desc: "Gallery, specs, features list, and direct WhatsApp contact"       },
-  { title: "Workshop Section",     desc: "Separate section for cars currently in refurbishment"             },
-  { title: "Admin Panel",          desc: "Publish, edit, and delete listings with zero code required"       },
-  { title: "Image Management",     desc: "Upload optimisation with 360° spin frame support"                  },
-];
 
 const MOB_HIGHLIGHTS = [
   { idx: 0, label: "Mobile Home",  desc: "Full hero experience adapts perfectly on every device"             },
@@ -152,7 +145,7 @@ const Phone = ({ screen, dir, width = 220, autoAdvanceDur, onClick }) => {
             transition={{ duration: 0.36, ease: EASE }}
             style={{ position: "absolute", inset: 0 }}
           >
-            <img src={screen.src} alt={screen.label} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top", display: "block" }} />
+            <OptimizedImage src={screen.src} alt={screen.label} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top", display: "block" }} />
           </motion.div>
         </AnimatePresence>
         <div style={{ position: "absolute", top: width * 0.056, left: "50%", transform: "translateX(-50%)", width: width * 0.38, height: width * 0.11, borderRadius: width * 0.06, background: "#111", zIndex: 10 }} />
@@ -210,7 +203,7 @@ const Browser = ({ screen, dir, onClick }) => {
             transition={{ duration: 0.38, ease: EASE }}
             style={{ position: "absolute", inset: 0 }}
           >
-            <img src={screen.src} alt={screen.label} style={{ width: "100%", height: "100%", objectFit: "contain", objectPosition: "top center", display: "block", background: "#0a0a0a" }} />
+            <OptimizedImage src={screen.src} alt={screen.label} style={{ width: "100%", height: "100%", objectFit: "contain", objectPosition: "top center", display: "block", background: "#0a0a0a" }} />
           </motion.div>
         </AnimatePresence>
       </div>
@@ -242,7 +235,7 @@ const Thumbs = ({ screens, current, onChange }) => (
         }}
       >
         <div style={{ aspectRatio: "16/10", overflow: "hidden" }}>
-          <img src={s.src} alt={s.label} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top", display: "block" }} />
+          <OptimizedImage src={s.src} alt={s.label} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top", display: "block" }} />
         </div>
       </motion.button>
     ))}
@@ -294,7 +287,7 @@ const RaffoulMotorsCaseStudy = () => {
       title="Raffoul Motors"
       summary="A bilingual automotive platform that put a premium Lebanese car dealer online — full inventory management, workshop listings, and an admin panel with zero code required."
       logo={
-        <img src={raffoulLogo} alt="Raffoul Motors" style={{ height: 40, width: "auto", objectFit: "contain", display: "block" }} />
+        <OptimizedImage src={raffoulLogo} alt="Raffoul Motors" style={{ height: 40, width: "auto", objectFit: "contain", display: "block" }} />
       }
       meta={[
         { label: "Role", value: "Full-Stack Developer" },
@@ -331,12 +324,7 @@ const RaffoulMotorsCaseStudy = () => {
         onIdxChange: (i) => { setMobDir(i > mobIdx ? 1 : -1); setMobIdx(i); },
         onExpand: () => setLightbox("mob"),
       }]}
-      features={FEATURES}
       tech={TECH}
-      cta={{
-        title: "Delivered & live",
-        description: "Raffoul Motors is fully operational — the team manages their own inventory without touching code.",
-      }}
       renderPhone={(screen) => <MobilePhoneFrame screen={screen} brand={{ color: RED, rgba: R }} width={210} />}
     />
   );
@@ -352,7 +340,7 @@ const RaffoulMotorsCaseStudy = () => {
 
           {/* Back link */}
           <div style={{ position: "absolute", top: 0, left: 0, right: 0, padding: isMobile ? "20px 20px" : "28px 48px", zIndex: 10 }}>
-            <Link to={getHomeBackLink()} style={{ display: "inline-flex", alignItems: "center", gap: 6, fontFamily: "'Space Grotesk', sans-serif", fontSize: 12, color: "rgba(255,255,255,0.35)", textDecoration: "none", letterSpacing: "0.02em" }}>
+            <Link to={getHomeBackLink()} state={getHomeBackState()} style={{ display: "inline-flex", alignItems: "center", gap: 6, fontFamily: "'Space Grotesk', sans-serif", fontSize: 12, color: "rgba(255,255,255,0.35)", textDecoration: "none", letterSpacing: "0.02em" }}>
               <HiChevronLeft size={14} />
               Back to home
             </Link>
@@ -370,6 +358,9 @@ const RaffoulMotorsCaseStudy = () => {
               >
                 <motion.img
                   src={raffoulLogo} alt="Raffoul Motors"
+                  loading="eager"
+                  decoding="async"
+                  fetchPriority="high"
                   initial={{ opacity: 0, scale: 0.92 }} animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 0.25, duration: 0.35, ease: EASE }}
                   style={{ height: 44, width: "auto", objectFit: "contain", flexShrink: 0, display: "block" }}
@@ -446,7 +437,7 @@ const RaffoulMotorsCaseStudy = () => {
                   <div style={{ height: 30, display: "flex", alignItems: "center", padding: "0 10px", gap: 6, background: "rgba(0,0,0,0.75)", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
                     {["#ef4444","#f59e0b","#22c55e"].map(c => <span key={c} style={{ width: 7, height: 7, borderRadius: "50%", background: c, opacity: 0.7 }} />)}
                   </div>
-                  <img src={WEB_SCREENS[webIdx].src} alt="Raffoul Motors" style={{ width: "100%", display: "block", objectFit: "contain", objectPosition: "top", background: "#0a0a0a", aspectRatio: "16/10" }} />
+                  <OptimizedImage src={WEB_SCREENS[webIdx].src} alt="Raffoul Motors" style={{ width: "100%", display: "block", objectFit: "contain", objectPosition: "top", background: "#0a0a0a", aspectRatio: "16/10" }} />
                 </div>
                 <motion.div
                   animate={{ y: [0, -8, 0] }}
@@ -569,35 +560,7 @@ const RaffoulMotorsCaseStudy = () => {
           </div>
         </section>
 
-        <Divider />
-
-        {/* ══════════ FEATURES ══════════ */}
-        <section style={{ padding: isMobile ? "72px 0" : "100px 0" }}>
-          <div style={wrap}>
-            <FadeUp style={{ marginBottom: 44 }}>
-              <SectionLabel>Capabilities</SectionLabel>
-              <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: isMobile ? 30 : 42, letterSpacing: "-0.02em", color: "rgba(255,255,255,0.92)", margin: 0, lineHeight: 1.15 }}>
-                What it does
-              </h2>
-            </FadeUp>
-            <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr 1fr" : "repeat(3, 1fr)", gap: 12 }}>
-              {FEATURES.map((f, i) => (
-                <FadeUp key={f.title} delay={i * 0.06}>
-                  <motion.div
-                    whileHover={{ y: -4, borderColor: R(0.25) }}
-                    style={{ padding: isMobile ? "18px 14px" : "24px 20px", borderRadius: 12, background: "rgba(255,255,255,0.025)", border: "1px solid rgba(255,255,255,0.06)", height: "100%", transition: "border-color 0.25s" }}
-                  >
-                    <div style={{ width: 34, height: 34, borderRadius: 9, background: R(0.09), border: `1px solid ${R(0.18)}`, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 14 }}>
-                      <span style={{ fontSize: 13, color: RED }}>✦</span>
-                    </div>
-                    <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: isMobile ? 12 : 13, fontWeight: 600, color: "rgba(255,255,255,0.82)", marginBottom: 6, lineHeight: 1.3 }}>{f.title}</div>
-                    <div style={{ fontFamily: "'Inter', sans-serif", fontSize: isMobile ? 11 : 12, color: "rgba(255,255,255,0.3)", lineHeight: 1.65 }}>{f.desc}</div>
-                  </motion.div>
-                </FadeUp>
-              ))}
-            </div>
-          </div>
-        </section>
+        
 
         <Divider />
 
@@ -626,31 +589,6 @@ const RaffoulMotorsCaseStudy = () => {
                 </FadeUp>
               ))}
             </div>
-          </div>
-        </section>
-
-        {/* ══════════ FOOTER ══════════ */}
-        <section style={{ padding: isMobile ? "80px 0 110px" : "100px 0 130px" }}>
-          <div style={{ ...wrap, textAlign: "center" }}>
-            <FadeUp>
-              <div style={{ display: "inline-flex", alignItems: "center", gap: 10, marginBottom: 20 }}>
-                <div style={{ width: 28, height: 1, background: R(0.5) }} />
-                <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 10, letterSpacing: "0.3em", textTransform: "uppercase", color: RED, opacity: 0.8 }}>Client Project</span>
-                <div style={{ width: 28, height: 1, background: R(0.5) }} />
-              </div>
-              <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: isMobile ? 30 : 46, letterSpacing: "-0.025em", color: "rgba(255,255,255,0.92)", margin: "0 0 14px", lineHeight: 1.1 }}>
-                Delivered &amp; live
-              </h2>
-              <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 15, color: "rgba(255,255,255,0.32)", margin: "0 auto 40px", maxWidth: 380, lineHeight: 1.7 }}>
-                Raffoul Motors is fully operational — the team manages their own inventory without touching code.
-              </p>
-              <Link
-                to={getHomeBackLink()}
-                style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "14px 24px", borderRadius: 12, border: "1px solid rgba(255,255,255,0.1)", fontFamily: "'Space Grotesk', sans-serif", fontSize: 13, color: "rgba(255,255,255,0.4)", textDecoration: "none" }}
-              >
-                <HiChevronLeft size={13} /> Back to portfolio
-              </Link>
-            </FadeUp>
           </div>
         </section>
 

@@ -251,7 +251,7 @@ const FloatingSkills = () => {
             <AnimatePresence>
               {isHovered && (
                 <motion.span
-                  className="absolute left-1/2 whitespace-nowrap font-primary font-semibold text-[11px] px-3 py-[5px] rounded-full z-30 pointer-events-none select-none"
+                  className="absolute left-1/2 whitespace-nowrap font-primary font-semibold text-[11px] px-3 py-[5px] z-30 pointer-events-none select-none"
                   style={{
                     bottom: `calc(100% + 9px)`,
                     transform: "translateX(-50%)",
@@ -259,6 +259,7 @@ const FloatingSkills = () => {
                     border: "1px solid rgba(255,255,255,0.10)",
                     color: skill.color,
                     boxShadow: `0 4px 18px ${skill.glow}`,
+                    borderRadius: 10,
                   }}
                   initial={{ opacity: 0, y: 6, scale: 0.88 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -318,11 +319,12 @@ const ROW2 = SKILLS.slice(6, 12);
 
 const SkillChip = ({ skill }) => (
   <div
-    className="flex items-center gap-2.5 flex-shrink-0 px-4 py-[10px] rounded-full"
+    className="flex items-center gap-2.5 flex-shrink-0 px-4 py-[10px]"
     style={{
       background: "rgba(255,255,255,0.045)",
       border: "1px solid rgba(255,255,255,0.09)",
       boxShadow: "inset 0 1px 0 rgba(255,255,255,0.06)",
+      borderRadius: 10,
     }}
   >
     <skill.Icon
@@ -340,14 +342,14 @@ const SkillChip = ({ skill }) => (
 
 export const MobileSkills = () => {
   const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "0px 0px -60px 0px" });
+  const inView = useInView(ref, { once: false, margin: "0px 0px -60px 0px" });
 
   return (
     <motion.div
       ref={ref}
       className="block lg:hidden overflow-hidden"
       initial={{ opacity: 0, y: 22 }}
-      animate={inView ? { opacity: 1, y: 0 } : {}}
+      animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 22 }}
       transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
     >
       {/* Label */}

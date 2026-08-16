@@ -1,14 +1,6 @@
 import React, { useRef, useState, useCallback } from "react";
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { HiArrowUpRight } from "react-icons/hi2";
-import {
-  SiFlutter,
-  SiReact,
-  SiWordpress,
-  SiTailwindcss,
-  SiAndroid,
-} from "react-icons/si";
-import { FaMobileAlt } from "react-icons/fa";
 import { SERVICES } from "../../constants";
 
 const EASE_EXPO = [0.22, 1, 0.36, 1];
@@ -20,7 +12,6 @@ const SERVICE_META = {
     bg: "rgba(84,197,248,0.06)",
     border: "rgba(84,197,248,0.22)",
     gradient: "linear-gradient(145deg, rgba(129,140,248,0.14) 0%, rgba(84,197,248,0.08) 100%)",
-    orbitIcons: [SiFlutter, SiReact, FaMobileAlt, SiAndroid],
   },
   web: {
     accent: "#818CF8",
@@ -28,16 +19,8 @@ const SERVICE_META = {
     bg: "rgba(129,140,248,0.06)",
     border: "rgba(129,140,248,0.22)",
     gradient: "linear-gradient(145deg, rgba(129,140,248,0.14) 0%, rgba(34,211,238,0.08) 100%)",
-    orbitIcons: [SiReact, SiWordpress, SiTailwindcss],
   },
 };
-
-const ORBIT_POSITIONS = [
-  { x: -42, y: -28, delay: 0 },
-  { x: 48, y: -36, delay: 0.4 },
-  { x: -38, y: 42, delay: 0.8 },
-  { x: 52, y: 38, delay: 1.2 },
-];
 
 /* ─── single 3D service monolith ─── */
 const ServiceMonolith = ({ service, index, baseRotateY = 0 }) => {
@@ -88,7 +71,7 @@ const ServiceMonolith = ({ service, index, baseRotateY = 0 }) => {
       }}
       initial={{ opacity: 0, y: 48, rotateX: 12 }}
       whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
-      viewport={{ once: true, margin: "-60px" }}
+      viewport={{ once: false, margin: "-60px" }}
       transition={{ duration: 0.85, ease: EASE_EXPO, delay: 0.15 + index * 0.14 }}
       onPointerMove={onPointerMove}
       onPointerEnter={() => setHovered(true)}
@@ -147,22 +130,6 @@ const ServiceMonolith = ({ service, index, baseRotateY = 0 }) => {
           }}
         />
 
-        {/* watermark number */}
-        <span
-          className="absolute font-primary font-bold leading-none pointer-events-none select-none"
-          style={{
-            right: 20,
-            top: 12,
-            fontSize: "clamp(72px, 14vw, 120px)",
-            color: "rgba(255,255,255,0.025)",
-            transform: "translateZ(-20px)",
-            letterSpacing: "-0.04em",
-          }}
-          aria-hidden="true"
-        >
-          {service.number}
-        </span>
-
         {/* HUD corners */}
         {["tl", "tr", "bl", "br"].map((corner) => (
           <span
@@ -185,70 +152,10 @@ const ServiceMonolith = ({ service, index, baseRotateY = 0 }) => {
           />
         ))}
 
-        {/* orbiting icons */}
-        <div
-          className="absolute pointer-events-none"
-          style={{
-            width: 120,
-            height: 120,
-            right: 24,
-            top: "38%",
-            transform: "translateZ(40px)",
-          }}
-          aria-hidden="true"
-        >
-          {meta.orbitIcons.map((Icon, i) => {
-            const pos = ORBIT_POSITIONS[i % ORBIT_POSITIONS.length];
-            return (
-              <motion.div
-                key={i}
-                className="absolute flex items-center justify-center rounded-full"
-                style={{
-                  width: 36,
-                  height: 36,
-                  left: "50%",
-                  top: "50%",
-                  marginLeft: -18,
-                  marginTop: -18,
-                  background: "rgba(255,255,255,0.04)",
-                  border: "1px solid rgba(255,255,255,0.08)",
-                  boxShadow: `0 0 20px ${meta.glow}`,
-                }}
-                animate={{
-                  x: [pos.x, pos.x * 1.15, pos.x],
-                  y: [pos.y, pos.y - 8, pos.y],
-                  rotate: [0, 8, 0],
-                }}
-                transition={{
-                  duration: 4 + i * 0.6,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                  delay: pos.delay,
-                }}
-              >
-                <Icon size={15} style={{ color: meta.accent, opacity: 0.85 }} />
-              </motion.div>
-            );
-          })}
-        </div>
-
         {/* content */}
         <div className="relative z-10 p-7 md:p-9 flex flex-col h-full min-h-[340px]">
-          <div className="flex items-center gap-3 mb-6">
-            <span
-              className="font-primary text-[10px] uppercase tracking-[4px]"
-              style={{ color: meta.accent }}
-            >
-              {service.number}
-            </span>
-            <span
-              className="h-px flex-1 max-w-[48px]"
-              style={{ background: `linear-gradient(90deg, ${meta.accent}, transparent)` }}
-            />
-          </div>
-
           <h3
-            className="font-primary font-semibold text-white/90 mb-4 pr-16"
+            className="font-primary font-semibold text-white/90 mb-4"
             style={{ fontSize: "clamp(20px, 2.8vw, 28px)" }}
           >
             {service.name}
@@ -262,16 +169,17 @@ const ServiceMonolith = ({ service, index, baseRotateY = 0 }) => {
             {service.tags.map((tag, i) => (
               <motion.span
                 key={tag}
-                className="font-primary rounded-full text-[10px] tracking-[2px] uppercase px-3 py-[6px]"
+                className="font-primary text-[10px] tracking-[2px] uppercase px-3 py-[6px]"
                 style={{
                   color: hovered ? meta.accent : "rgba(255,255,255,0.35)",
                   background: hovered ? meta.bg : "rgba(255,255,255,0.03)",
                   border: `1px solid ${hovered ? meta.border : "rgba(255,255,255,0.07)"}`,
                   transition: "all 0.25s ease",
+                  borderRadius: 10,
                 }}
                 initial={{ opacity: 0, y: 8 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
+                viewport={{ once: false }}
                 transition={{ delay: 0.4 + index * 0.1 + i * 0.06 }}
               >
                 {tag}
@@ -295,10 +203,11 @@ const ServiceMonolith = ({ service, index, baseRotateY = 0 }) => {
 
         {/* arrow affordance */}
         <motion.div
-          className="absolute bottom-7 right-7 flex items-center justify-center rounded-full"
+          className="absolute bottom-7 right-7 flex items-center justify-center"
           style={{
             width: 40,
             height: 40,
+            borderRadius: 10,
             background: hovered ? meta.bg : "rgba(255,255,255,0.04)",
             border: `1px solid ${hovered ? meta.border : "rgba(255,255,255,0.08)"}`,
             transform: "translateZ(50px)",

@@ -1,47 +1,18 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
 import { HiChevronLeft, HiArrowUpRight } from "react-icons/hi2";
-import { getHomeBackLink } from "../../utils/homeScroll";
+import HomeBackLink from "../ui/HomeBackLink";
+import LazyVideo from "../ui/LazyVideo";
+import OptimizedImage from "../ui/OptimizedImage";
 
 const EASE = [0.22, 1, 0.36, 1];
 const FONT = "'Space Grotesk', sans-serif";
 const BODY = "'Inter', sans-serif";
 
 /* ─── Lazy autoplay video — only plays when visible ─ */
-const LazyAutoplayVideo = ({ src, style, className }) => {
-  const ref = useRef(null);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return undefined;
-    const obs = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          el.play().catch(() => {});
-        } else {
-          el.pause();
-        }
-      },
-      { threshold: 0.15 }
-    );
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, []);
-
-  return (
-    <video
-      ref={ref}
-      src={src}
-      muted
-      loop
-      playsInline
-      preload="metadata"
-      className={className}
-      style={style}
-    />
-  );
-};
+const LazyAutoplayVideo = ({ src, poster, style, className }) => (
+  <LazyVideo src={src} poster={poster} style={style} className={className} />
+);
 
 /* ─── Hook ───────────────────────────────────────── */
 export function useIsMobileCaseStudy(breakpoint = 768) {
@@ -219,12 +190,11 @@ const MobileHero = ({ brand, eyebrow, title, summary, logo, meta, ctas, preview 
   <section style={{ position: "relative", overflow: "hidden" }}>
     {/* back */}
     <div style={{ position: "absolute", top: 0, left: 0, right: 0, padding: "16px 20px", zIndex: 5 }}>
-      <Link
-        to={getHomeBackLink()}
+      <HomeBackLink
         style={{ display: "inline-flex", alignItems: "center", gap: 5, fontFamily: FONT, fontSize: 12, color: "rgba(255,255,255,0.4)", textDecoration: "none" }}
       >
         <HiChevronLeft size={15} /> Back
-      </Link>
+      </HomeBackLink>
     </div>
 
     {/* preview — visual first */}
@@ -268,7 +238,7 @@ const MobileHero = ({ brand, eyebrow, title, summary, logo, meta, ctas, preview 
           {ctas.map((cta) => {
             const base = {
               display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-              minHeight: 50, borderRadius: 14, fontFamily: FONT, fontSize: 14, fontWeight: 700,
+              minHeight: 50, borderRadius: 10, fontFamily: FONT, fontSize: 14, fontWeight: 700,
               textDecoration: "none", cursor: "pointer", WebkitTapHighlightColor: "transparent",
             };
             if (cta.primary) {
@@ -312,10 +282,10 @@ export const MobilePreviewDual = ({ webSrc, phoneSrc, brand, url }) => (
         {["#ef4444", "#f59e0b", "#22c55e"].map((c) => <span key={c} style={{ width: 7, height: 7, borderRadius: "50%", background: c, opacity: 0.75 }} />)}
         {url && <span style={{ marginLeft: 6, fontSize: 8, color: "rgba(255,255,255,0.25)", fontFamily: "monospace", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{url.replace("https://", "")}</span>}
       </div>
-      <img src={webSrc} alt="Preview" style={{ width: "100%", display: "block", aspectRatio: "16/10", objectFit: "cover", objectPosition: "top", background: "#0a0a0a" }} />
+      <OptimizedImage src={webSrc} alt="Preview" style={{ width: "100%", display: "block", aspectRatio: "16/10", objectFit: "cover", objectPosition: "top", background: "#0a0a0a" }} />
     </div>
     <div style={{ position: "absolute", bottom: -28, right: 28, width: 88, borderRadius: 18, overflow: "hidden", border: "2px solid rgba(255,255,255,0.1)", boxShadow: `0 20px 40px rgba(0,0,0,0.7), 0 0 24px ${brand.rgba(0.2)}` }}>
-      <img src={phoneSrc} alt="App" style={{ width: "100%", display: "block", aspectRatio: "9/19", objectFit: "cover", objectPosition: "top" }} />
+      <OptimizedImage src={phoneSrc} alt="App" style={{ width: "100%", display: "block", aspectRatio: "9/19", objectFit: "cover", objectPosition: "top" }} />
     </div>
     <div style={{ height: 36 }} />
   </div>
@@ -325,16 +295,16 @@ export const MobilePreviewPhones = ({ leftSrc, rightSrc, brand }) => (
   <div style={{ display: "flex", justifyContent: "center", gap: 14, padding: "0 20px" }}>
     {[leftSrc, rightSrc].map((src, i) => (
       <div key={i} style={{ width: "42%", borderRadius: 20, overflow: "hidden", border: "1.5px solid rgba(255,255,255,0.08)", boxShadow: `0 20px 48px rgba(0,0,0,0.6), 0 0 32px ${brand.rgba(0.12)}` }}>
-        <img src={src} alt="" style={{ width: "100%", display: "block", aspectRatio: "9/19", objectFit: "cover", objectPosition: "top" }} />
+        <OptimizedImage src={src} alt="" style={{ width: "100%", display: "block", aspectRatio: "9/19", objectFit: "cover", objectPosition: "top" }} />
       </div>
     ))}
   </div>
 );
 
-export const MobilePreviewVideo = ({ src, brand, label }) => (
+export const MobilePreviewVideo = ({ src, poster, brand, label }) => (
   <div style={{ padding: "0 20px" }}>
     <div style={{ borderRadius: 16, overflow: "hidden", border: "1px solid rgba(255,255,255,0.08)", boxShadow: `0 24px 56px rgba(0,0,0,0.55), 0 0 40px ${brand.rgba(0.1)}` }}>
-      <LazyAutoplayVideo src={src} className="alter-case-study-video" style={{ width: "100%", display: "block", aspectRatio: "16/10", objectFit: "cover" }} />
+      <LazyAutoplayVideo src={src} poster={poster} className="alter-case-study-video" style={{ width: "100%", display: "block", aspectRatio: "16/10", objectFit: "cover" }} />
     </div>
     {label && <p style={{ textAlign: "center", marginTop: 10, fontFamily: FONT, fontSize: 10, letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>{label}</p>}
   </div>
@@ -343,7 +313,7 @@ export const MobilePreviewVideo = ({ src, brand, label }) => (
 export const MobilePreviewImage = ({ src, brand }) => (
   <div style={{ padding: "0 20px" }}>
     <div style={{ borderRadius: 16, overflow: "hidden", border: "1px solid rgba(255,255,255,0.08)", boxShadow: `0 24px 56px rgba(0,0,0,0.55), 0 0 40px ${brand.rgba(0.1)}` }}>
-      <img src={src} alt="Preview" style={{ width: "100%", display: "block", aspectRatio: "16/10", objectFit: "cover", objectPosition: "top" }} />
+      <OptimizedImage src={src} alt="Preview" style={{ width: "100%", display: "block", aspectRatio: "16/10", objectFit: "cover", objectPosition: "top" }} />
     </div>
   </div>
 );
@@ -395,7 +365,7 @@ const MobileWebGallery = ({ id, title, subtitle, screens, brand, onExpand }) => 
             <div style={{ height: 26, display: "flex", alignItems: "center", padding: "0 10px", gap: 5, background: "rgba(0,0,0,0.65)", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
               {["#ef4444", "#f59e0b", "#22c55e"].map((c) => <span key={c} style={{ width: 6, height: 6, borderRadius: "50%", background: c, opacity: 0.8 }} />)}
             </div>
-            <img src={s.src} alt={s.label} style={{ width: "100%", display: "block", aspectRatio: "16/10", objectFit: "cover", objectPosition: "top" }} />
+            <OptimizedImage src={s.src} alt={s.label} style={{ width: "100%", display: "block", aspectRatio: "16/10", objectFit: "cover", objectPosition: "top" }} />
             <div style={{ padding: "12px 14px", background: "rgba(0,0,0,0.5)" }}>
               <span style={{ fontFamily: FONT, fontSize: 12, fontWeight: 600, color: "rgba(255,255,255,0.8)" }}>{s.label}</span>
               <span style={{ display: "block", fontFamily: BODY, fontSize: 10, color: "rgba(255,255,255,0.28)", marginTop: 2 }}>Tap to expand</span>
@@ -414,7 +384,7 @@ const MobileWebGallery = ({ id, title, subtitle, screens, brand, onExpand }) => 
 };
 
 /* ─── iPhone frame with video (Alter mobile showcase) ─ */
-export const MobilePhoneFrameVideo = ({ src, brand, width = 250 }) => {
+export const MobilePhoneFrameVideo = ({ src, poster, brand, width = 250 }) => {
   const h = Math.round(width * 2.08);
   const r = width * 0.19;
 
@@ -437,6 +407,7 @@ export const MobilePhoneFrameVideo = ({ src, brand, width = 250 }) => {
       >
         <LazyAutoplayVideo
           src={src}
+          poster={poster}
           className="alter-case-study-video"
           style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top", display: "block" }}
         />
@@ -517,7 +488,7 @@ export const MobilePhoneFrameVideo = ({ src, brand, width = 250 }) => {
 };
 
 /* ─── Video showcase (Alter) ─────────────────────── */
-const MobileVideoShowcase = ({ id, title, subtitle, videoSrc, brand, onExpand, phone, highlights }) => (
+const MobileVideoShowcase = ({ id, title, subtitle, videoSrc, poster, brand, onExpand, phone, highlights }) => (
   <SectionBlock id={id}>
     <SectionEyebrow color={brand.color}>{phone ? "Mobile" : "Web Platform"}</SectionEyebrow>
     <SectionTitle>{title}</SectionTitle>
@@ -538,7 +509,7 @@ const MobileVideoShowcase = ({ id, title, subtitle, videoSrc, brand, onExpand, p
       }}
     >
       {phone ? (
-        <MobilePhoneFrameVideo src={videoSrc} brand={brand} width={250} />
+        <MobilePhoneFrameVideo src={videoSrc} poster={poster} brand={brand} width={250} />
       ) : (
         <div
           style={{
@@ -552,6 +523,7 @@ const MobileVideoShowcase = ({ id, title, subtitle, videoSrc, brand, onExpand, p
         >
           <LazyAutoplayVideo
             src={videoSrc}
+            poster={poster}
             className="alter-case-study-video"
             style={{ width: "100%", display: "block", aspectRatio: "16/10", objectFit: "cover" }}
           />
@@ -587,7 +559,7 @@ export const MobilePhoneFrame = ({ screen, brand, width = 200 }) => {
         border: "1.5px solid rgba(255,255,255,0.08)", overflow: "hidden",
         boxShadow: [`0 32px 64px rgba(0,0,0,0.75)`, `0 0 48px ${brand.rgba(0.18)}`].join(", "),
       }}>
-        <img src={screen.src} alt={screen.label} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top", display: "block" }} />
+        <OptimizedImage src={screen.src} alt={screen.label} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top", display: "block" }} />
         <div style={{ position: "absolute", top: width * 0.056, left: "50%", transform: "translateX(-50%)", width: width * 0.38, height: width * 0.11, borderRadius: width * 0.06, background: "#111", zIndex: 10 }} />
         <div style={{ position: "absolute", bottom: 7, left: "50%", transform: "translateX(-50%)", width: width * 0.44, height: 4, borderRadius: 2, background: "rgba(255,255,255,0.2)", zIndex: 10 }} />
       </div>
@@ -663,7 +635,7 @@ const MobileAppShowcase = ({
               boxShadow: i === activeIdx ? `0 0 16px ${brand.rgba(0.25)}` : "none",
             }}
           >
-            <img src={s.src} alt={s.label} style={{ width: "100%", aspectRatio: "9/16", objectFit: "cover", objectPosition: "top", display: "block" }} />
+            <OptimizedImage src={s.src} alt={s.label} style={{ width: "100%", aspectRatio: "9/16", objectFit: "cover", objectPosition: "top", display: "block" }} />
           </button>
         ))}
       </div>
@@ -739,7 +711,7 @@ const MobileTech = ({ tech, brand }) => (
           <div style={{ fontFamily: FONT, fontSize: 9, letterSpacing: "0.22em", textTransform: "uppercase", color: brand.color, opacity: 0.8, marginBottom: 12 }}>{cat.category}</div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
             {cat.items.map((item) => (
-              <span key={item} style={{ padding: "7px 12px", borderRadius: 999, background: brand.rgba(0.08), border: `1px solid ${brand.rgba(0.18)}`, fontFamily: FONT, fontSize: 12, color: "rgba(255,255,255,0.72)", fontWeight: 500 }}>
+              <span key={item} style={{ padding: "7px 12px", borderRadius: 10, background: brand.rgba(0.08), border: `1px solid ${brand.rgba(0.18)}`, fontFamily: FONT, fontSize: 12, color: "rgba(255,255,255,0.72)", fontWeight: 500 }}>
                 {item}
               </span>
             ))}
@@ -767,17 +739,16 @@ const MobileCTA = ({ brand, title, description, liveUrl, liveLabel }) => (
           target="_blank"
           rel="noopener noreferrer"
           whileTap={{ scale: 0.98 }}
-          style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, minHeight: 50, borderRadius: 14, background: brand.color, fontFamily: FONT, fontSize: 14, fontWeight: 700, color: "#080808", textDecoration: "none" }}
+          style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, minHeight: 50, borderRadius: 10, background: brand.color, fontFamily: FONT, fontSize: 14, fontWeight: 700, color: "#080808", textDecoration: "none" }}
         >
           {liveLabel || "Visit Live Site"} <HiArrowUpRight size={15} />
         </motion.a>
       )}
-      <Link
-        to={getHomeBackLink()}
-        style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, minHeight: 48, borderRadius: 14, border: "1px solid rgba(255,255,255,0.1)", fontFamily: FONT, fontSize: 13, color: "rgba(255,255,255,0.4)", textDecoration: "none" }}
+      <HomeBackLink
+        style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, minHeight: 48, borderRadius: 10, border: "1px solid rgba(255,255,255,0.1)", fontFamily: FONT, fontSize: 13, color: "rgba(255,255,255,0.4)", textDecoration: "none" }}
       >
         <HiChevronLeft size={14} /> Back to portfolio
-      </Link>
+      </HomeBackLink>
     </div>
   </section>
 );
@@ -811,7 +782,7 @@ export default function CaseStudyMobileLayout({
     ...(videoWebShowcase ? [{ id: videoWebShowcase.id, label: "Website" }] : []),
     ...appShowcases.map((a) => ({ id: a.id, label: a.navLabel || a.title })),
     ...(videoAppShowcase ? [{ id: videoAppShowcase.id, label: "Mobile" }] : []),
-    { id: "cs-features", label: "Features" },
+    ...(features?.length ? [{ id: "cs-features", label: "Features" }] : []),
     { id: "cs-tech", label: "Tech" },
   ];
 
@@ -873,13 +844,16 @@ export default function CaseStudyMobileLayout({
         </>
       )}
 
-      <MobileFeatures features={features} brand={brand} />
-
-      <Divider rgba={brand.rgba} />
+      {features?.length > 0 && (
+        <>
+          <MobileFeatures features={features} brand={brand} />
+          <Divider rgba={brand.rgba} />
+        </>
+      )}
 
       <MobileTech tech={tech} brand={brand} />
 
-      <MobileCTA brand={brand} {...cta} />
+      {cta && <MobileCTA brand={brand} {...cta} />}
     </div>
   );
 }

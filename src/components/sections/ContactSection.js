@@ -1,7 +1,8 @@
 import React, { useState, useRef, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { BsArrowRight, BsCheckLg, BsPhone, BsGlobe, BsLayers } from "react-icons/bs";
-import { HiArrowLeft } from "react-icons/hi2";
+import { FaWhatsapp } from "react-icons/fa";
+import { HiArrowLeft, HiArrowUpRight } from "react-icons/hi2";
 import { SITE } from "../../constants";
 import AnimatedSection from "../ui/AnimatedSection";
 import SocialLinks from "../ui/SocialLinks";
@@ -215,8 +216,7 @@ const Chip = ({ label, selected, onSelect }) => (
     style={{
       background: selected ? "rgba(129,140,248,0.16)" : "rgba(255,255,255,0.04)",
       border: selected ? "1px solid rgba(129,140,248,0.40)" : "1px solid rgba(255,255,255,0.07)",
-      borderRadius: 999,
-      padding: "7px 15px",
+      borderRadius: 10,
       cursor: "pointer",
       fontFamily: "'Space Grotesk', sans-serif",
       fontSize: 12,
@@ -482,7 +482,7 @@ const SuccessScreen = ({ refId, projectType, onReset }) => {
         style={{
           background: "rgba(255,255,255,0.04)",
           border: "1px solid rgba(255,255,255,0.08)",
-          borderRadius: 999,
+          borderRadius: 10,
           padding: "9px 22px",
           cursor: "pointer",
           fontFamily: "'Space Grotesk', sans-serif",
@@ -780,7 +780,7 @@ const MissionConsole = () => {
               style={{
                 display: "inline-flex", alignItems: "center", gap: 8,
                 background: "linear-gradient(135deg, #818cf8 0%, #22d3ee 100%)",
-                border: "none", borderRadius: 999, padding: "10px 22px",
+                border: "none", borderRadius: 10, padding: "10px 22px",
                 fontFamily: "'Space Grotesk', sans-serif", fontSize: 13, fontWeight: 600, color: "#000",
                 cursor: "pointer",
                 boxShadow: "0 6px 24px rgba(129,140,248,0.28)",
@@ -797,7 +797,7 @@ const MissionConsole = () => {
               style={{
                 display: "inline-flex", alignItems: "center", gap: 8,
                 background: "linear-gradient(135deg, #818cf8 0%, #22d3ee 100%)",
-                border: "none", borderRadius: 999, padding: "10px 22px",
+                border: "none", borderRadius: 10, padding: "10px 22px",
                 fontFamily: "'Space Grotesk', sans-serif", fontSize: 13, fontWeight: 600, color: "#000",
                 cursor: "pointer",
                 boxShadow: "0 6px 24px rgba(129,140,248,0.28)",
@@ -811,6 +811,65 @@ const MissionConsole = () => {
     </div>
   );
 };
+
+/* ─── WhatsAppChannel — live direct line ─────────────────── */
+const WhatsAppChannel = () => (
+  <motion.a
+    href={SITE.whatsappHref}
+    target="_blank"
+    rel="noopener noreferrer"
+    className="wa-channel"
+    aria-label={`Open WhatsApp chat with Mario at ${SITE.whatsapp}`}
+    whileHover="hover"
+    initial="rest"
+    animate="rest"
+  >
+    <span className="wa-channel__scan" aria-hidden="true" />
+
+    <div className="wa-channel__top">
+      <span className="wa-channel__live">
+        <span className="wa-channel__pulse" aria-hidden="true" />
+        Line open
+      </span>
+      <span className="wa-channel__freq" aria-hidden="true">
+        CH · WA
+        <span className="wa-channel__bars">
+          <i /><i /><i /><i />
+        </span>
+      </span>
+    </div>
+
+    <div className="wa-channel__preview" aria-hidden="true">
+      <motion.span
+        className="wa-channel__bubble"
+        variants={{
+          rest: { y: 0, opacity: 0.72 },
+          hover: { y: -2, opacity: 1 },
+        }}
+        transition={{ duration: 0.35, ease: EASE }}
+      >
+        Hey Mario — got a minute?
+      </motion.span>
+      <span className="wa-channel__typing">
+        <i /><i /><i />
+      </span>
+    </div>
+
+    <div className="wa-channel__main">
+      <span className="wa-channel__icon" aria-hidden="true">
+        <FaWhatsapp size={20} />
+      </span>
+      <span className="wa-channel__copy">
+        <span className="wa-channel__title">Direct line</span>
+        <span className="wa-channel__number">{SITE.whatsapp}</span>
+      </span>
+      <span className="wa-channel__cta">
+        Open chat
+        <HiArrowUpRight size={14} aria-hidden="true" />
+      </span>
+    </div>
+  </motion.a>
+);
 
 /* ─── ContactSection ─────────────────────────────────────── */
 const ContactSection = () => (
@@ -829,12 +888,23 @@ const ContactSection = () => (
             <span className="text-gradient">something great.</span>
           </h2>
 
-          <p className="text-body text-white/40 mb-5 max-w-[340px]">
+          <p className="text-body text-white/40 mb-8 max-w-[340px]">
             Select your project type, describe your scope, and transmit — I'll
             be back within 24 hours.
           </p>
 
-          <SocialLinks email={SITE.email} className="mb-0" />
+          <div className="wa-route">
+            <div className="wa-route__header">
+              <span className="wa-route__label">Faster path</span>
+              <span className="wa-route__rule" aria-hidden="true" />
+            </div>
+            <p className="wa-route__hint">
+              Skip the brief — ping me live on WhatsApp.
+            </p>
+            <WhatsAppChannel />
+          </div>
+
+          <SocialLinks email={SITE.email} className="mt-8 mb-0" />
         </AnimatedSection>
 
         {/* right column — console */}

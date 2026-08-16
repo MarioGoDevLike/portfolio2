@@ -9,6 +9,7 @@ module.exports = {
     location: "Lebanon / Remote-friendly",
     availability: "Available for work",
     email: "marionassar57@gmail.com",
+    whatsapp: "+96181389885",
     summary:
       "Developer focused on shipping polished React web apps and Flutter / React Native mobile products. Strong at client work, bilingual UX, Firebase backends, and case-study-level product thinking.",
     skills: [
@@ -62,6 +63,49 @@ module.exports = {
         "Admin + public site split",
       ],
       caseStudyPath: "/projects/raffoul-motors",
+    },
+    {
+      id: "arabfiles",
+      title: "ArabFiles News",
+      category: "News · Flutter mobile app",
+      stack: [
+        "Flutter",
+        "Riverpod",
+        "GoRouter",
+        "Dio",
+        "Firebase Messaging",
+        "RTL / bilingual",
+      ],
+      impact:
+        "Shipped a production Flutter news client for a Lebanese/Arab media brand: RTL-first reading, bilingual UI, push deep links, and in-article YouTube playback against the live Arabfiles REST API.",
+      proofPoints: [
+        "Home feeds, categories, articles, and video section",
+        "FCM breaking-news alerts with article deep links",
+        "Clean architecture with Riverpod, GoRouter, and Dio",
+      ],
+      caseStudyPath: "/projects/arabfiles",
+    },
+    {
+      id: "martix",
+      title: "Martix",
+      category: "Marketplace · Flutter customer app",
+      stack: [
+        "Flutter",
+        "Firebase chat",
+        "FCM",
+        "Dio",
+        "GetIt",
+        "Drift cache",
+      ],
+      impact:
+        "Shipped the live Martix customer app: multi-vendor shopping, checkout, orders, and realtime seller chat on Android (iOS-ready), integrated with martixstores.com.",
+      proofPoints: [
+        "Full shopping journey (browse → checkout → orders)",
+        "Realtime customer–seller chat with read receipts",
+        "Push, deep links, version gating, offline-friendly cache",
+      ],
+      caseStudyPath: "/projects/martix",
+      liveHref: "https://martixstores.com/",
     },
     {
       id: "top-speed",

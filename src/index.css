@@ -63,14 +63,43 @@
     font-size: 14px;
   }
 
+  .hero-role {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    column-gap: 0.3em;
+    row-gap: 0;
+    margin: 0;
+    line-height: 1.35;
+  }
+
   .text-role-prefix {
     @apply font-secondary font-light text-white/30;
     font-size: clamp(15px, 3vw, 22px);
+    line-height: inherit;
   }
 
   .text-role {
     @apply font-primary font-medium text-gradient;
     font-size: clamp(15px, 3vw, 22px);
+    line-height: inherit;
+    display: inline-block;
+  }
+
+  @media (max-width: 639px) {
+    .hero-role {
+      flex-wrap: nowrap;
+      column-gap: 0.28em;
+    }
+
+    .text-role-prefix {
+      flex-shrink: 0;
+    }
+
+    .text-role {
+      min-width: 0;
+      white-space: nowrap;
+    }
   }
 
   .label {
@@ -104,7 +133,8 @@
   }
 
   .btn {
-    @apply inline-flex items-center gap-2 font-primary font-semibold rounded-full transition-all duration-300 cursor-pointer select-none;
+    @apply inline-flex items-center gap-2 font-primary font-semibold transition-all duration-300 cursor-pointer select-none;
+    border-radius: 10px;
   }
 
   .btn-primary {
@@ -177,6 +207,232 @@
 
   .contact-input:focus {
     border-color: rgba(129, 140, 248, 0.45);
+  }
+
+  /* WhatsApp live channel — companion to Mission Console */
+  .wa-route {
+    @apply max-w-[360px];
+  }
+
+  .wa-route__header {
+    @apply flex items-center gap-3 mb-2;
+  }
+
+  .wa-route__label {
+    @apply font-primary text-[10px] uppercase tracking-[4px] text-white/25 shrink-0;
+  }
+
+  .wa-route__rule {
+    @apply flex-1 h-px;
+    background: linear-gradient(to right, rgba(255, 255, 255, 0.15), transparent);
+  }
+
+  .wa-route__hint {
+    @apply font-secondary text-[13px] text-white/30 mb-4 leading-relaxed;
+  }
+
+  .wa-channel {
+    @apply relative block w-full overflow-hidden text-left no-underline;
+    border-radius: 18px;
+    padding: 16px 16px 14px;
+    background:
+      linear-gradient(145deg, rgba(18, 22, 20, 0.92) 0%, rgba(8, 10, 12, 0.88) 100%);
+    border: 1px solid rgba(37, 211, 102, 0.18);
+    box-shadow:
+      0 18px 48px rgba(0, 0, 0, 0.45),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    transition:
+      border-color 0.35s ease,
+      box-shadow 0.35s ease,
+      transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .wa-channel:hover {
+    border-color: rgba(37, 211, 102, 0.38);
+    box-shadow:
+      0 22px 56px rgba(0, 0, 0, 0.5),
+      0 0 0 1px rgba(37, 211, 102, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 0.07);
+    transform: translateY(-2px);
+  }
+
+  .wa-channel:focus-visible {
+    outline: 2px solid rgba(37, 211, 102, 0.55);
+    outline-offset: 3px;
+  }
+
+  .wa-channel__scan {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(
+      105deg,
+      transparent 40%,
+      rgba(37, 211, 102, 0.06) 50%,
+      transparent 60%
+    );
+    background-size: 220% 100%;
+    opacity: 0;
+    transition: opacity 0.35s ease;
+  }
+
+  .wa-channel:hover .wa-channel__scan {
+    opacity: 1;
+    animation: wa-scan 1.4s ease-in-out infinite;
+  }
+
+  .wa-channel__top {
+    @apply relative z-[1] flex items-center justify-between gap-3 mb-3;
+  }
+
+  .wa-channel__live {
+    @apply inline-flex items-center gap-2 font-primary text-[10px] uppercase tracking-[3px];
+    color: rgba(37, 211, 102, 0.9);
+  }
+
+  .wa-channel__pulse {
+    @apply relative inline-block w-1.5 h-1.5 rounded-full shrink-0;
+    background: #25d366;
+  }
+
+  .wa-channel__pulse::after {
+    content: "";
+    position: absolute;
+    inset: -3px;
+    border-radius: 999px;
+    border: 1px solid rgba(37, 211, 102, 0.55);
+    animation: wa-pulse 1.8s ease-out infinite;
+  }
+
+  .wa-channel__freq {
+    @apply inline-flex items-center gap-2 font-primary text-[9px] uppercase tracking-[2.5px] text-white/20;
+  }
+
+  .wa-channel__bars {
+    @apply inline-flex items-end gap-[2px] h-2.5;
+  }
+
+  .wa-channel__bars i {
+    @apply block w-[2px] rounded-full bg-white/20;
+    animation: wa-bar 1.1s ease-in-out infinite;
+  }
+
+  .wa-channel__bars i:nth-child(1) { height: 4px; animation-delay: 0s; }
+  .wa-channel__bars i:nth-child(2) { height: 7px; animation-delay: 0.15s; }
+  .wa-channel__bars i:nth-child(3) { height: 5px; animation-delay: 0.3s; }
+  .wa-channel__bars i:nth-child(4) { height: 9px; animation-delay: 0.45s; }
+
+  .wa-channel:hover .wa-channel__bars i {
+    background: rgba(37, 211, 102, 0.55);
+  }
+
+  .wa-channel__preview {
+    @apply relative z-[1] flex items-end gap-2 mb-3.5 min-h-[36px];
+  }
+
+  .wa-channel__bubble {
+    @apply inline-block max-w-[85%] px-3 py-2 font-secondary text-[12px] text-white/70 leading-snug;
+    border-radius: 12px 12px 12px 4px;
+    background: rgba(37, 211, 102, 0.1);
+    border: 1px solid rgba(37, 211, 102, 0.16);
+  }
+
+  .wa-channel__typing {
+    @apply inline-flex items-center gap-1 pb-1.5;
+  }
+
+  .wa-channel__typing i {
+    @apply block w-1 h-1 rounded-full bg-white/25;
+    animation: wa-typing 1.2s ease-in-out infinite;
+  }
+
+  .wa-channel__typing i:nth-child(2) { animation-delay: 0.15s; }
+  .wa-channel__typing i:nth-child(3) { animation-delay: 0.3s; }
+
+  .wa-channel__main {
+    @apply relative z-[1] flex items-center gap-3;
+  }
+
+  .wa-channel__icon {
+    @apply flex items-center justify-center shrink-0 w-11 h-11;
+    color: #25d366;
+    border-radius: 12px;
+    background:
+      radial-gradient(circle at 30% 25%, rgba(37, 211, 102, 0.28), transparent 55%),
+      rgba(37, 211, 102, 0.08);
+    border: 1px solid rgba(37, 211, 102, 0.22);
+    box-shadow: 0 0 24px rgba(37, 211, 102, 0.12);
+    transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s ease;
+  }
+
+  .wa-channel:hover .wa-channel__icon {
+    transform: scale(1.05);
+    box-shadow: 0 0 32px rgba(37, 211, 102, 0.22);
+  }
+
+  .wa-channel__copy {
+    @apply flex flex-col gap-0.5 min-w-0 flex-1;
+  }
+
+  .wa-channel__title {
+    @apply font-primary font-semibold text-[14px] text-white/90 tracking-tight;
+  }
+
+  .wa-channel__number {
+    @apply font-secondary text-[12px] text-white/30 tracking-wide;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .wa-channel__cta {
+    @apply inline-flex items-center gap-1.5 shrink-0 font-primary text-[11px] uppercase tracking-[2px] text-white/40;
+    transition: color 0.3s ease, gap 0.3s ease;
+  }
+
+  .wa-channel:hover .wa-channel__cta {
+    color: rgba(37, 211, 102, 0.9);
+    gap: 0.5rem;
+  }
+
+  @keyframes wa-pulse {
+    0% { transform: scale(0.85); opacity: 0.8; }
+    70% { transform: scale(1.65); opacity: 0; }
+    100% { transform: scale(1.65); opacity: 0; }
+  }
+
+  @keyframes wa-bar {
+    0%, 100% { opacity: 0.35; transform: scaleY(0.7); }
+    50% { opacity: 1; transform: scaleY(1); }
+  }
+
+  @keyframes wa-typing {
+    0%, 60%, 100% { opacity: 0.25; transform: translateY(0); }
+    30% { opacity: 0.85; transform: translateY(-2px); }
+  }
+
+  @keyframes wa-scan {
+    0% { background-position: 120% 0; }
+    100% { background-position: -20% 0; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .wa-channel__pulse::after,
+    .wa-channel__bars i,
+    .wa-channel__typing i,
+    .wa-channel:hover .wa-channel__scan {
+      animation: none !important;
+    }
+
+    .wa-channel,
+    .wa-channel__icon,
+    .wa-channel__cta {
+      transition: none !important;
+    }
+
+    .wa-channel:hover {
+      transform: none;
+    }
   }
 
   .nav-link {
@@ -379,7 +635,8 @@
   }
 
   .tag {
-    @apply font-primary rounded-full text-white/30 group-hover:text-white/40 transition-colors text-[10px] tracking-[2.5px] uppercase px-3 py-[5px] border border-white/[0.07];
+    @apply font-primary text-white/30 group-hover:text-white/40 transition-colors text-[10px] tracking-[2.5px] uppercase px-3 py-[5px] border border-white/[0.07];
+    border-radius: 10px;
   }
 
   .project-card {
@@ -595,7 +852,8 @@
   }
 
   .desktop-header__cta {
-    @apply inline-flex items-center gap-2.5 font-primary font-semibold text-[13px] rounded-full select-none;
+    @apply inline-flex items-center gap-2.5 font-primary font-semibold text-[13px] select-none;
+    border-radius: 10px;
     padding: 9px 10px 9px 18px;
     color: #ffffff;
     background: linear-gradient(135deg, #6366f1 0%, #60a5fa 55%, #22d3ee 100%);
@@ -835,7 +1093,7 @@
 .concierge-welcome__btn {
   width: 100%;
   min-height: 46px;
-  border-radius: 999px;
+  border-radius: 10px;
   font-family: "Space Grotesk", sans-serif;
   font-size: 14px;
   font-weight: 600;
@@ -884,7 +1142,7 @@
   gap: 8px;
   min-height: 44px;
   padding: 8px 14px 8px 10px;
-  border-radius: 999px;
+  border-radius: 10px;
   border: 1px solid rgba(255, 255, 255, 0.12);
   background: rgba(12, 12, 18, 0.88);
   color: rgba(255, 255, 255, 0.9);
@@ -905,7 +1163,7 @@
 .concierge-launcher__core {
   width: 28px;
   height: 28px;
-  border-radius: 50%;
+  border-radius: 8px;
   display: grid;
   place-items: center;
   background: linear-gradient(135deg, #818cf8, #22d3ee);
@@ -1105,7 +1363,7 @@
 .voice-ask__mic {
   width: 64px;
   height: 64px;
-  border-radius: 50%;
+  border-radius: 10px;
   border: 1px solid rgba(255, 255, 255, 0.12);
   background: linear-gradient(135deg, #818cf8, #22d3ee);
   color: #050505;
@@ -1191,7 +1449,7 @@
 }
 
 .voice-ask__chip {
-  border-radius: 999px;
+  border-radius: 10px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   background: rgba(255, 255, 255, 0.03);
   color: rgba(255, 255, 255, 0.55);
@@ -1238,7 +1496,7 @@
 
 .voice-ask__send {
   border: none;
-  border-radius: 12px;
+  border-radius: 10px;
   padding: 0 14px;
   min-height: 44px;
   font-family: "Space Grotesk", sans-serif;
@@ -1278,7 +1536,7 @@
 .concierge-panel__close {
   width: 40px;
   height: 40px;
-  border-radius: 50%;
+  border-radius: 10px;
   border: 1px solid rgba(255, 255, 255, 0.08);
   background: rgba(255, 255, 255, 0.03);
   color: rgba(255, 255, 255, 0.55);
@@ -1308,7 +1566,7 @@
   text-align: left;
   min-height: 56px;
   padding: 10px 11px;
-  border-radius: 14px;
+  border-radius: 10px;
   border: 1px solid rgba(255, 255, 255, 0.07);
   background: rgba(255, 255, 255, 0.02);
   cursor: pointer;
@@ -1392,7 +1650,7 @@
   border: 1px solid rgba(255, 255, 255, 0.08);
   background: transparent;
   color: rgba(255, 255, 255, 0.45);
-  border-radius: 999px;
+  border-radius: 10px;
   padding: 8px 11px;
   font-size: 12px;
   font-family: "Space Grotesk", sans-serif;
@@ -1410,7 +1668,7 @@
   flex: 1 1 auto;
   min-height: 44px;
   border: none;
-  border-radius: 999px;
+  border-radius: 10px;
   padding: 10px 16px;
   font-size: 13px;
   font-weight: 600;
@@ -1670,7 +1928,7 @@
   justify-content: center;
   gap: 6px;
   min-height: 40px;
-  border-radius: 999px;
+  border-radius: 10px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   background: rgba(255, 255, 255, 0.04);
   color: rgba(255, 255, 255, 0.8);

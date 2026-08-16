@@ -9,6 +9,8 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import { HOME_PROJECTS } from "../../constants";
 import AnimatedSection from "../ui/AnimatedSection";
+import OptimizedImage from "../ui/OptimizedImage";
+import LazyVideo from "../ui/LazyVideo";
 import { saveHomeScroll } from "../../utils/homeScroll";
 
 const EASE_EXPO = [0.22, 1, 0.36, 1];
@@ -128,7 +130,7 @@ const Card3D = ({ project, featured = false, index = 0, onCustomClick }) => {
     <motion.div
       initial={{ opacity: 0, y: 50, x: enterDir }}
       whileInView={{ opacity: 1, y: 0, x: 0 }}
-      viewport={{ once: true, margin: "-50px" }}
+      viewport={{ once: false, margin: "-50px" }}
       transition={{ duration: 0.8, ease: EASE_EXPO, delay: featured ? 0.1 : 0.2 + index * 0.12 }}
       style={{ perspective: 1400 }}
       className="relative"
@@ -162,14 +164,13 @@ const Card3D = ({ project, featured = false, index = 0, onCustomClick }) => {
         <div style={{ position: "relative", height: imageHeight, overflow: "hidden", background: "#050505" }}>
           {project.previewVideo ? (
             <motion.div style={{ position: "absolute", inset: 0, x: imgX, y: imgY }}>
-              <video src={project.previewVideo} autoPlay muted loop playsInline
+              <LazyVideo src={project.previewVideo}
                 style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top", filter: `brightness(${hovered ? 0.82 : 0.72}) saturate(0.9)`, transition: "filter 0.35s ease", display: "block" }} />
             </motion.div>
           ) : project.image && (
             <motion.div style={{ position: "absolute", inset: imageFit === "contain" ? 0 : "-5% -3%", x: imageFit === "contain" ? 0 : imgX, y: imageFit === "contain" ? 0 : imgY, display: "flex", alignItems: "center", justifyContent: "center", padding: imageFit === "contain" ? "28px 40px" : 0 }}>
-              <img src={project.image} alt={project.title}
-                style={{ width: imageFit === "contain" ? "auto" : "100%", height: imageFit === "contain" ? "auto" : "100%", maxWidth: "100%", maxHeight: "100%", objectFit: imageFit, objectPosition: "center", filter: imageFit === "contain" ? "none" : `brightness(${hovered ? 0.82 : 0.72}) saturate(0.9)`, transition: "filter 0.35s ease", display: "block" }}
-                loading="lazy" />
+              <OptimizedImage src={project.image} alt={project.title}
+                style={{ width: imageFit === "contain" ? "auto" : "100%", height: imageFit === "contain" ? "auto" : "100%", maxWidth: "100%", maxHeight: "100%", objectFit: imageFit, objectPosition: "center", filter: imageFit === "contain" ? "none" : `brightness(${hovered ? 0.82 : 0.72}) saturate(0.9)`, transition: "filter 0.35s ease", display: "block" }} />
             </motion.div>
           )}
           <div style={{ position: "absolute", inset: 0, background: imageFit === "contain" && !project.previewVideo ? "none" : "linear-gradient(to top, rgba(5,5,5,0.96) 0%, rgba(5,5,5,0.3) 42%, transparent 70%)", pointerEvents: "none" }} aria-hidden="true" />
@@ -180,9 +181,6 @@ const Card3D = ({ project, featured = false, index = 0, onCustomClick }) => {
             transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: index * 0.7 }}
             aria-hidden="true"
           />
-          <span style={{ position: "absolute", left: 16, bottom: 14, fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: featured ? 100 : 72, lineHeight: 1, color: "rgba(255,255,255,0.04)", pointerEvents: "none", userSelect: "none", letterSpacing: "-0.05em" }} aria-hidden="true">
-            {String(index + 1).padStart(2, "0")}
-          </span>
           {project.tag && (
             <span style={{ position: "absolute", top: 14, right: 14, fontFamily: "'Space Grotesk', sans-serif", fontSize: 9, letterSpacing: "0.28em", textTransform: "uppercase", padding: "5px 11px", borderRadius: 999, background: "rgba(0,0,0,0.6)", border: `1px solid ${meta.border}`, color: meta.color, backdropFilter: "blur(8px)", zIndex: 5 }}>
               {project.tag}
@@ -224,12 +222,8 @@ const MobileCardMedia = ({ project, height, imageFit }) => {
   if (project.previewVideo) {
     return (
       <div style={{ position: "relative", height, overflow: "hidden", background: "#050505" }}>
-        <video
+        <LazyVideo
           src={project.previewVideo}
-          autoPlay
-          muted
-          loop
-          playsInline
           style={{
             width: "100%",
             height: "100%",
@@ -259,10 +253,9 @@ const MobileCardMedia = ({ project, height, imageFit }) => {
           boxSizing: "border-box",
         }}
       >
-        <img
+        <OptimizedImage
           src={project.image}
           alt={project.title}
-          loading="lazy"
           style={{
             width: "100%",
             height: "100%",
@@ -277,10 +270,9 @@ const MobileCardMedia = ({ project, height, imageFit }) => {
 
   return (
     <div style={{ position: "relative", height, overflow: "hidden", background: "#050505" }}>
-      <img
+      <OptimizedImage
         src={project.image}
         alt={project.title}
-        loading="lazy"
         style={{
           width: "100%",
           height: "100%",
@@ -304,7 +296,7 @@ const MobileFeaturedCard = ({ project, onCustomClick }) => {
     <motion.div
       initial={{ opacity: 0, y: 28 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-40px" }}
+      viewport={{ once: false, margin: "-40px" }}
       transition={{ duration: 0.65, ease: EASE_EXPO }}
       whileTap={{ scale: 0.985 }}
       onClick={onCustomClick}
@@ -450,7 +442,7 @@ const MobileProjectCarousel = ({ projects, navigate }) => {
     <motion.div
       initial={{ opacity: 0, y: 24 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-40px" }}
+      viewport={{ once: false, margin: "-40px" }}
       transition={{ duration: 0.6, ease: EASE_EXPO, delay: 0.1 }}
     >
       {/* Swipe hint */}

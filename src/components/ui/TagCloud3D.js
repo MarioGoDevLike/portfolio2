@@ -64,7 +64,7 @@ const BASE_POINTS = genSpherePoints(SKILLS.length);
 /* ─── component ───────────────────────────────── */
 const TagCloud3D = ({ width = 380, height = 460, radius = 152 }) => {
   const wrapRef    = useRef(null);
-  const inView     = useInView(wrapRef, { once: true, margin: "0px 0px -60px 0px" });
+  const inView     = useInView(wrapRef, { once: false, margin: "0px 0px -60px 0px" });
   const rotRef     = useRef({ x: 0.22, y: 0 });
   const dragRef    = useRef({ on: false, lastX: 0, lastY: 0 });
   const pausedRef  = useRef(false);
@@ -73,12 +73,13 @@ const TagCloud3D = ({ width = 380, height = 460, radius = 152 }) => {
   const [hovered, setHovered]   = useState(null);
   const [visible, setVisible]   = useState(false);
 
-  /* entrance reveal */
+  /* entrance reveal — hide again when leaving so it can replay */
   useEffect(() => {
     if (inView) {
       const t = setTimeout(() => setVisible(true), 80);
       return () => clearTimeout(t);
     }
+    setVisible(false);
   }, [inView]);
 
   /* auto-rotation RAF loop */

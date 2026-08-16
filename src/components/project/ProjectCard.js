@@ -2,6 +2,8 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { BsArrowUpRight } from "react-icons/bs";
 import Tag from "../ui/Tag";
+import OptimizedImage from "../ui/OptimizedImage";
+import LazyVideo from "../ui/LazyVideo";
 import { saveHomeScroll } from "../../utils/homeScroll";
 
 const accentClass = {
@@ -32,22 +34,17 @@ const ProjectCard = ({
     <>
       <div className={`project-card__media ${featured ? "project-card__media--featured" : ""}`}>
         {mediaVideo ? (
-          <video
+          <LazyVideo
             className="project-card__image"
-            autoPlay
-            muted
-            loop
-            playsInline
             src={mediaVideo}
           />
         ) : image && (
-            <img
+            <OptimizedImage
               src={image}
               alt={title}
               className={`project-card__image ${
                 imageFit === "contain" ? "project-card__image--contain" : ""
               }`}
-              loading="lazy"
             />
         )}
         <div className="project-card__overlay" />

@@ -1,14 +1,18 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import { HiChevronLeft } from "react-icons/hi";
 import { HiArrowUpRight, HiArrowsPointingOut } from "react-icons/hi2";
 import CaseStudyMobileLayout, { MobilePreviewVideo } from "./CaseStudyMobile";
-import { getHomeBackLink } from "../../utils/homeScroll";
+import { getHomeBackLink, getHomeBackState } from "../../utils/homeScroll";
+import LazyVideo from "../ui/LazyVideo";
+import OptimizedImage from "../ui/OptimizedImage";
 
 import alterWebVideo    from "../../assets/alter_images/alter_web_view.mp4";
 import alterMobileVideo from "../../assets/alter_images/alter_mobile_view.mp4";
-import alterLogo        from "../../assets/alter_images/alter logo white .png";
+import alterWebPoster    from "../../assets/alter_images/alter_web_view.poster.webp";
+import alterMobilePoster from "../../assets/alter_images/alter_mobile_view.poster.webp";
+import alterLogo        from "../../assets/alter_images/alter logo white .webp";
 
 /* ─── Brand ──────────────────────────────────────── */
 const GOLD = "#C4A574";
@@ -16,34 +20,7 @@ const G    = (a) => `rgba(196,165,116,${a})`;
 const EASE = [0.22, 1, 0.36, 1];
 const LIVE_URL = "https://altercoms.vercel.app/";
 
-/* ─── Chromeless video helpers ───────────────────── */
-const CHROMELESS_PROPS = {
-  autoPlay: true, loop: true, muted: true, playsInline: true,
-  disablePictureInPicture: true, disableRemotePlayback: true,
-  controls: false, controlsList: "nodownload noplaybackrate noremoteplayback nofullscreen",
-  onContextMenu: e => e.preventDefault(),
-};
-
-const useChromeless = (ref, src) => {
-  useEffect(() => {
-    const v = ref.current;
-    if (!v) return;
-    const resume = () => { if (v.paused) v.play().catch(() => {}); };
-    v.play().catch(() => {});
-    v.addEventListener("pause", resume);
-    return () => v.removeEventListener("pause", resume);
-  }, [ref, src]);
-};
-
 /* ─── Data ───────────────────────────────────────── */
-const FEATURES = [
-  { title: "Cinematic Hero",        desc: "Live agency stats — 1,651+ campaigns and 330+ artists front and center"  },
-  { title: "Artist Marquee",        desc: "Scrolling roster presenting the agency's talent in premium style"          },
-  { title: "Influencer Showcase",   desc: "Talent cards with social proof and network scale"                          },
-  { title: "Service Pillars",       desc: "Six core offerings — digital, influencer, content, music, PR, branding"    },
-  { title: "Partners Wall",         desc: "Trusted brands section with polished logo presentation"                    },
-  { title: "Mobile-First Responsive", desc: "Desktop spectacle that collapses into a clean, thumb-friendly mobile experience" },
-];
 
 const TECH = [
   { category: "Frontend",  items: ["React.js", "JavaScript", "CSS3 Animations"] },
@@ -79,10 +56,8 @@ const Divider = () => (
 );
 
 /* ─── Video browser mockup ────────────────────────── */
-const VideoBrowser = ({ src, onClick }) => {
-  const videoRef = useRef(null);
+const VideoBrowser = ({ src, poster, onClick }) => {
   const [hov, setHov] = useState(false);
-  useChromeless(videoRef, src);
   return (
     <div
       onClick={onClick}
@@ -105,7 +80,7 @@ const VideoBrowser = ({ src, onClick }) => {
         </div>
       </div>
       <div style={{ width: "100%", aspectRatio: "16/9", overflow: "hidden", background: "#000" }}>
-        <video ref={videoRef} src={src} {...CHROMELESS_PROPS}
+        <LazyVideo src={src} poster={poster}
           style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", pointerEvents: "none" }} />
       </div>
       {onClick && (
@@ -123,11 +98,9 @@ const VideoBrowser = ({ src, onClick }) => {
 };
 
 /* ─── Video phone mockup ──────────────────────────── */
-const VideoPhone = ({ src, width = 220, onClick }) => {
-  const videoRef = useRef(null);
+const VideoPhone = ({ src, poster, width = 220, onClick }) => {
   const [hov, setHov] = useState(false);
   const h = Math.round(width * 2.08);
-  useChromeless(videoRef, src);
   return (
     <div
       style={{ width, height: h, position: "relative", flexShrink: 0, cursor: onClick ? "zoom-in" : "default" }}
@@ -141,7 +114,7 @@ const VideoPhone = ({ src, width = 220, onClick }) => {
         border: "1.5px solid rgba(255,255,255,0.08)", overflow: "hidden",
         boxShadow: [`0 44px 88px rgba(0,0,0,0.8)`, `0 0 64px ${G(0.16)}`, "inset 0 1px 0 rgba(255,255,255,0.06)"].join(", "),
       }}>
-        <video ref={videoRef} src={src} {...CHROMELESS_PROPS}
+        <LazyVideo src={src} poster={poster}
           style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top", display: "block", pointerEvents: "none" }} />
         <div style={{ position: "absolute", top: width * 0.056, left: "50%", transform: "translateX(-50%)", width: width * 0.38, height: width * 0.11, borderRadius: width * 0.06, background: "#111", zIndex: 10 }} />
         <div style={{ position: "absolute", bottom: 7, left: "50%", transform: "translateX(-50%)", width: width * 0.44, height: 4, borderRadius: 2, background: "rgba(255,255,255,0.2)", zIndex: 10 }} />
@@ -166,13 +139,8 @@ const VideoPhone = ({ src, width = 220, onClick }) => {
 };
 
 /* ─── Video lightbox ──────────────────────────────── */
-const VideoLightbox = ({ src, type, onClose }) => {
-  const videoRef = useRef(null);
-  const phoneVideoRef = useRef(null);
+const VideoLightbox = ({ src, poster, type, onClose }) => {
   const [isMobile, setIsMobile] = useState(() => typeof window !== "undefined" && window.innerWidth < 768);
-
-  useChromeless(videoRef, src);
-  useChromeless(phoneVideoRef, src);
 
   useEffect(() => {
     const fn = () => setIsMobile(window.innerWidth < 768);
@@ -241,10 +209,10 @@ const VideoLightbox = ({ src, type, onClose }) => {
         }}
       >
         {closeBtn}
-        <video
-          ref={phoneVideoRef}
+        <LazyVideo
           src={src}
-          {...CHROMELESS_PROPS}
+          poster={poster}
+          eager
           style={{
             width: "100%",
             height: "100%",
@@ -270,13 +238,13 @@ const VideoLightbox = ({ src, type, onClose }) => {
         style={{ width: isPhone ? "min(320px, 85vw)" : "min(900px, 92vw)", maxHeight: "90vh", borderRadius: 16, overflow: "hidden" }}
       >
         {isPhone ? (
-          <VideoPhone src={src} width={Math.min(320, window.innerWidth * 0.85)} />
+          <VideoPhone src={src} poster={poster} width={Math.min(320, window.innerWidth * 0.85)} />
         ) : (
           <div style={{ borderRadius: 14, overflow: "hidden", background: "#0d0d0d", border: "1px solid rgba(255,255,255,0.1)" }}>
             <div style={{ height: 32, display: "flex", alignItems: "center", padding: "0 12px", gap: 8, background: "rgba(0,0,0,0.7)", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
               {["#ef4444","#f59e0b","#22c55e"].map(c => <span key={c} style={{ width: 8, height: 8, borderRadius: "50%", background: c, opacity: 0.8 }} />)}
             </div>
-            <video ref={videoRef} src={src} {...CHROMELESS_PROPS}
+            <LazyVideo src={src} poster={poster} eager
               style={{ width: "100%", display: "block", aspectRatio: "16/9", objectFit: "cover", pointerEvents: "none" }} />
           </div>
         )}
@@ -307,7 +275,7 @@ const AlterCaseStudy = () => {
       title="Alter"
       summary="A cinematic digital presence for a leading MENA PR & marketing agency — built in React.js with live campaign statistics, a marquee artist roster, and a fully responsive layout."
       logo={
-        <img src={alterLogo} alt="Alter" style={{ height: 28, width: "auto", objectFit: "contain", display: "block" }} />
+        <OptimizedImage src={alterLogo} alt="Alter" style={{ height: 28, width: "auto", objectFit: "contain", display: "block" }} />
       }
       meta={[
         { label: "Role", value: "Frontend Developer" },
@@ -320,13 +288,14 @@ const AlterCaseStudy = () => {
         { label: "View Showcase", onClick: () => document.getElementById("alter-web")?.scrollIntoView({ behavior: "smooth" }) },
       ]}
       preview={
-        <MobilePreviewVideo src={alterWebVideo} brand={{ color: GOLD, rgba: G }} label="Live site preview" />
+        <MobilePreviewVideo src={alterWebVideo} poster={alterWebPoster} brand={{ color: GOLD, rgba: G }} label="Live site preview" />
       }
       videoWebShowcase={{
         id: "alter-web",
         title: "The Website",
         subtitle: "Cinematic scroll experience with live stats, artist roster, and service pillars.",
         videoSrc: alterWebVideo,
+        poster: alterWebPoster,
         onExpand: () => setLightbox("web"),
       }}
       videoAppShowcase={{
@@ -334,6 +303,7 @@ const AlterCaseStudy = () => {
         title: "Mobile Experience",
         subtitle: "Every scroll interaction, stat counter, and marquee preserved at any screen size.",
         videoSrc: alterMobileVideo,
+        poster: alterMobilePoster,
         onExpand: () => setLightbox("phone"),
         highlights: [
           { label: "Stats Hero", desc: "Live campaign and artist counts, full-width on mobile" },
@@ -342,14 +312,7 @@ const AlterCaseStudy = () => {
           { label: "Partners Wall", desc: "Logo grid reflows to 2-column on small screens" },
         ],
       }}
-      features={FEATURES}
       tech={TECH}
-      cta={{
-        title: "See the full experience",
-        description: "Alter is live. Explore the cinematic scroll experience for yourself.",
-        liveUrl: LIVE_URL,
-        liveLabel: "Open Alter",
-      }}
     />
   );
 
@@ -364,7 +327,7 @@ const AlterCaseStudy = () => {
           <div style={{ position: "absolute", top: "35%", left: "50%", transform: "translate(-50%,-50%)", width: 900, height: 700, background: `radial-gradient(ellipse, ${G(0.07)} 0%, transparent 60%)`, filter: "blur(70px)", pointerEvents: "none" }} />
 
           <div style={{ position: "absolute", top: 0, left: 0, right: 0, padding: isMobile ? "20px 20px" : "28px 48px", zIndex: 10 }}>
-            <Link to={getHomeBackLink()} style={{ display: "inline-flex", alignItems: "center", gap: 6, fontFamily: "'Space Grotesk', sans-serif", fontSize: 12, color: "rgba(255,255,255,0.35)", textDecoration: "none" }}>
+            <Link to={getHomeBackLink()} state={getHomeBackState()} style={{ display: "inline-flex", alignItems: "center", gap: 6, fontFamily: "'Space Grotesk', sans-serif", fontSize: 12, color: "rgba(255,255,255,0.35)", textDecoration: "none" }}>
               <HiChevronLeft size={14} /> Back to home
             </Link>
           </div>
@@ -380,6 +343,9 @@ const AlterCaseStudy = () => {
               >
                 <motion.img
                   src={alterLogo} alt="Alter"
+                  loading="eager"
+                  decoding="async"
+                  fetchPriority="high"
                   initial={{ opacity: 0, scale: 0.92 }} animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 0.25, duration: 0.35, ease: EASE }}
                   style={{ height: 28, width: "auto", objectFit: "contain", flexShrink: 0, display: "block" }}
@@ -454,14 +420,14 @@ const AlterCaseStudy = () => {
                   <div style={{ height: 30, display: "flex", alignItems: "center", padding: "0 10px", gap: 6, background: "rgba(0,0,0,0.75)", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
                     {["#ef4444","#f59e0b","#22c55e"].map(c => <span key={c} style={{ width: 7, height: 7, borderRadius: "50%", background: c, opacity: 0.7 }} />)}
                   </div>
-                  <HeroVideoPreview src={alterWebVideo} />
+                  <HeroVideoPreview src={alterWebVideo} poster={alterWebPoster} />
                 </div>
                 <motion.div
                   animate={{ y: [0, -8, 0] }}
                   transition={{ duration: 3.6, repeat: Infinity, ease: "easeInOut" }}
                   style={{ position: "absolute", bottom: -36, right: -24, filter: `drop-shadow(0 28px 44px rgba(0,0,0,0.75)) drop-shadow(0 0 32px ${G(0.18)})` }}
                 >
-                  <VideoPhone src={alterMobileVideo} width={110} />
+                  <VideoPhone src={alterMobileVideo} poster={alterMobilePoster} width={110} />
                 </motion.div>
               </motion.div>
             )}
@@ -502,7 +468,7 @@ const AlterCaseStudy = () => {
               </div>
             </FadeUp>
             <FadeUp delay={0.1}>
-              <VideoBrowser src={alterWebVideo} onClick={() => setLightbox("web")} />
+              <VideoBrowser src={alterWebVideo} poster={alterWebPoster} onClick={() => setLightbox("web")} />
             </FadeUp>
             <FadeUp delay={0.14}>
               <div style={{ marginTop: 14, textAlign: "right" }}>
@@ -555,40 +521,14 @@ const AlterCaseStudy = () => {
               {/* Phone */}
               <FadeUp delay={0.15} style={{ flexShrink: 0, display: "flex", justifyContent: "center", order: isMobile ? 1 : 2 }}>
                 <motion.div animate={{ y: [0, -10, 0] }} transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }}>
-                  <VideoPhone src={alterMobileVideo} width={isMobile ? 210 : 270} onClick={() => setLightbox("phone")} />
+                  <VideoPhone src={alterMobileVideo} poster={alterMobilePoster} width={isMobile ? 210 : 270} onClick={() => setLightbox("phone")} />
                 </motion.div>
               </FadeUp>
             </div>
           </div>
         </section>
 
-        <Divider />
-
-        {/* ══════════ FEATURES ══════════ */}
-        <section style={{ padding: isMobile ? "72px 0" : "100px 0" }}>
-          <div style={wrap}>
-            <FadeUp style={{ marginBottom: 44 }}>
-              <SectionLabel>Capabilities</SectionLabel>
-              <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: isMobile ? 30 : 42, letterSpacing: "-0.02em", color: "rgba(255,255,255,0.92)", margin: 0, lineHeight: 1.15 }}>What it does</h2>
-            </FadeUp>
-            <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr 1fr" : "repeat(3, 1fr)", gap: 12 }}>
-              {FEATURES.map((f, i) => (
-                <FadeUp key={f.title} delay={i * 0.06}>
-                  <motion.div
-                    whileHover={{ y: -4, borderColor: G(0.25) }}
-                    style={{ padding: isMobile ? "18px 14px" : "24px 20px", borderRadius: 12, background: "rgba(255,255,255,0.025)", border: "1px solid rgba(255,255,255,0.06)", height: "100%", transition: "border-color 0.25s" }}
-                  >
-                    <div style={{ width: 34, height: 34, borderRadius: 9, background: G(0.09), border: `1px solid ${G(0.18)}`, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 14 }}>
-                      <span style={{ fontSize: 13, color: GOLD }}>✦</span>
-                    </div>
-                    <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: isMobile ? 12 : 13, fontWeight: 600, color: "rgba(255,255,255,0.82)", marginBottom: 6, lineHeight: 1.3 }}>{f.title}</div>
-                    <div style={{ fontFamily: "'Inter', sans-serif", fontSize: isMobile ? 11 : 12, color: "rgba(255,255,255,0.3)", lineHeight: 1.65 }}>{f.desc}</div>
-                  </motion.div>
-                </FadeUp>
-              ))}
-            </div>
-          </div>
-        </section>
+        
 
         <Divider />
 
@@ -620,40 +560,6 @@ const AlterCaseStudy = () => {
           </div>
         </section>
 
-        {/* ══════════ FOOTER ══════════ */}
-        <section style={{ padding: isMobile ? "80px 0 110px" : "100px 0 130px" }}>
-          <div style={{ ...wrap, textAlign: "center" }}>
-            <FadeUp>
-              <div style={{ display: "inline-flex", alignItems: "center", gap: 10, marginBottom: 20 }}>
-                <div style={{ width: 28, height: 1, background: G(0.5) }} />
-                <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 10, letterSpacing: "0.3em", textTransform: "uppercase", color: GOLD, opacity: 0.8 }}>Live</span>
-                <div style={{ width: 28, height: 1, background: G(0.5) }} />
-              </div>
-              <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: isMobile ? 30 : 46, letterSpacing: "-0.025em", color: "rgba(255,255,255,0.92)", margin: "0 0 14px", lineHeight: 1.1 }}>
-                See the full experience
-              </h2>
-              <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 15, color: "rgba(255,255,255,0.32)", margin: "0 auto 40px", maxWidth: 380, lineHeight: 1.7 }}>
-                Alter is live. Explore the cinematic scroll experience for yourself.
-              </p>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 14, flexWrap: "wrap" }}>
-                <motion.a
-                  href={LIVE_URL} target="_blank" rel="noopener noreferrer"
-                  whileHover={{ scale: 1.04, boxShadow: `0 0 44px ${G(0.58)}` }} whileTap={{ scale: 0.97 }}
-                  style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "14px 30px", borderRadius: 12, background: GOLD, fontFamily: "'Space Grotesk', sans-serif", fontSize: 14, fontWeight: 700, color: "#080808", textDecoration: "none" }}
-                >
-                  Open Alter <HiArrowUpRight size={15} />
-                </motion.a>
-                <Link
-                  to={getHomeBackLink()}
-                  style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "14px 24px", borderRadius: 12, border: "1px solid rgba(255,255,255,0.1)", fontFamily: "'Space Grotesk', sans-serif", fontSize: 13, color: "rgba(255,255,255,0.4)", textDecoration: "none" }}
-                >
-                  <HiChevronLeft size={13} /> Back to portfolio
-                </Link>
-              </div>
-            </FadeUp>
-          </div>
-        </section>
-
       </div>
       )}
 
@@ -662,6 +568,7 @@ const AlterCaseStudy = () => {
         {lightbox && (
           <VideoLightbox
             src={lightbox === "web" ? alterWebVideo : alterMobileVideo}
+            poster={lightbox === "web" ? alterWebPoster : alterMobilePoster}
             type={lightbox}
             onClose={() => setLightbox(null)}
           />
@@ -672,13 +579,9 @@ const AlterCaseStudy = () => {
 };
 
 /* ─── Small hero preview video (no sound, shrunk) ── */
-const HeroVideoPreview = ({ src }) => {
-  const ref = useRef(null);
-  useChromeless(ref, src);
-  return (
-    <video ref={ref} src={src} {...CHROMELESS_PROPS}
-      style={{ width: "100%", display: "block", aspectRatio: "16/10", objectFit: "cover", pointerEvents: "none" }} />
-  );
-};
+const HeroVideoPreview = ({ src, poster }) => (
+  <LazyVideo src={src} poster={poster}
+    style={{ width: "100%", display: "block", aspectRatio: "16/10", objectFit: "cover", pointerEvents: "none" }} />
+);
 
 export default AlterCaseStudy;

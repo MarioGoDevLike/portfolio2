@@ -34,9 +34,9 @@ function offlineAnswer(question) {
     };
   }
 
-  if (/contact|hire|available|email|reach|get in touch|talk to|message/.test(q)) {
+  if (/contact|hire|available|email|reach|get in touch|talk to|message|whatsapp/.test(q)) {
     return {
-      answer: `Sure — I’ll take you to the contact section. You can also email Mario at ${candidate.email}.`,
+      answer: `Sure — I’ll take you to the contact section. You can email Mario at ${candidate.email} or WhatsApp him at ${candidate.whatsapp}.`,
       topic: "contact",
       navigateTo: "contact",
     };

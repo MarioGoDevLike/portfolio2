@@ -33,7 +33,7 @@ module.exports = [
     fallbackSelector: "#work",
     label: "Work",
     line:
-      "These projects show what he can do for real businesses — from delivery apps to polished websites. Each one is built thoughtfully, not just for show.",
+      "These projects show what he can do for real businesses — from marketplace, news, and delivery apps to polished websites. Each one is built thoughtfully, not just for show.",
   },
   {
     id: "work-featured",

@@ -1,10 +1,11 @@
 import React, { useRef, useCallback, useState } from "react";
-import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
+import { motion, useMotionValue, useSpring, useTransform, useInView } from "framer-motion";
 import { TypeAnimation } from "react-type-animation";
 import { Link } from "react-scroll";
 import { BsArrowDown } from "react-icons/bs";
-import avatar from "../../assets/avatar.png";
+import avatar from "../../assets/avatar.webp";
 import { SITE } from "../../constants";
+import OptimizedImage from "../ui/OptimizedImage";
 import SocialLinks from "../ui/SocialLinks";
 import PortfolioModal from "../ui/PortfolioModal";
 
@@ -13,14 +14,22 @@ const AVATAR_SIZE = 288;
 const RING_PAD = 22;
 
 /* ─── per-letter blur reveal ──────────────────── */
-const LetterReveal = ({ text, baseDelay = 0 }) =>
+const LetterReveal = ({ text, baseDelay = 0, active }) =>
   text.split("").map((char, i) => (
     <motion.span
       key={i}
       style={{ display: "inline-block" }}
       initial={{ opacity: 0, y: 32, filter: "blur(10px)" }}
-      animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-      transition={{ duration: 0.65, ease: EASE_EXPO, delay: baseDelay + i * 0.045 }}
+      animate={
+        active
+          ? { opacity: 1, y: 0, filter: "blur(0px)" }
+          : { opacity: 0, y: 32, filter: "blur(10px)" }
+      }
+      transition={{
+        duration: active ? 0.65 : 0.3,
+        ease: EASE_EXPO,
+        delay: active ? baseDelay + i * 0.045 : 0,
+      }}
     >
       {char}
     </motion.span>
@@ -51,6 +60,7 @@ const OrbitalRing = ({ size, dashArray, stroke, duration, reverse = false }) => 
 const HeroSection = () => {
   const [portfolioOpen, setPortfolioOpen] = useState(false);
   const sectionRef = useRef(null);
+  const inView = useInView(sectionRef, { once: false, amount: 0.35 });
   const mX = useMotionValue(0.5);
   const mY = useMotionValue(0.5);
   const spX = useSpring(mX, { stiffness: 45, damping: 20 });
@@ -143,8 +153,16 @@ const HeroSection = () => {
         <motion.div
           className="flex flex-col items-center mb-8 lg:hidden"
           initial={{ opacity: 0, scale: 0.88, y: 12 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          transition={{ duration: 0.75, ease: EASE_EXPO, delay: 0.15 }}
+          animate={
+            inView
+              ? { opacity: 1, scale: 1, y: 0 }
+              : { opacity: 0, scale: 0.88, y: 12 }
+          }
+          transition={{
+            duration: inView ? 0.75 : 0.3,
+            ease: EASE_EXPO,
+            delay: inView ? 0.15 : 0,
+          }}
         >
           {/* Avatar */}
           <div style={{ position: "relative", width: 172, height: 172 }}>
@@ -182,9 +200,10 @@ const HeroSection = () => {
                 background: "rgba(0,0,0,0.35)",
               }}
             >
-              <img
+              <OptimizedImage
                 src={avatar}
                 alt={SITE.name}
+                priority
                 style={{
                   width: "100%", height: "100%",
                   display: "block", objectFit: "cover", objectPosition: "center center",
@@ -218,8 +237,12 @@ const HeroSection = () => {
               boxShadow: "0 8px 24px rgba(0,0,0,0.4)",
             }}
             initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: EASE_EXPO, delay: 0.55 }}
+            animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 8 }}
+            transition={{
+              duration: inView ? 0.5 : 0.3,
+              ease: EASE_EXPO,
+              delay: inView ? 0.55 : 0,
+            }}
           >
             <span
               style={{
@@ -247,16 +270,6 @@ const HeroSection = () => {
           {/* ══ LEFT — text ══ */}
           <div className="flex-1 min-w-0">
 
-            {/* availability label */}
-            {/* <motion.span
-              className="label"
-              initial={{ opacity: 0, x: -18 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, ease: EASE_EXPO, delay: 0.18 }}
-            >
-              {SITE.availability} ✦
-            </motion.span> */}
-
             {/* NAME — letter-by-letter reveal */}
             <h1
               className="text-display"
@@ -264,7 +277,7 @@ const HeroSection = () => {
             >
               {/* "Mario" — white letters */}
               <span style={{ display: "block" }}>
-                <LetterReveal text="Mario" baseDelay={0.32} />
+                <LetterReveal text="Mario" baseDelay={0.32} active={inView} />
               </span>
 
               {/* "Nassar" — gradient, whole-word reveal */}
@@ -272,21 +285,29 @@ const HeroSection = () => {
                 className="text-gradient"
                 style={{ display: "block" }}
                 initial={{ opacity: 0, y: 40, filter: "blur(12px)" }}
-                animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                transition={{ duration: 0.75, ease: EASE_EXPO, delay: 0.72 }}
+                animate={
+                  inView
+                    ? { opacity: 1, y: 0, filter: "blur(0px)" }
+                    : { opacity: 0, y: 40, filter: "blur(12px)" }
+                }
+                transition={{
+                  duration: inView ? 0.75 : 0.3,
+                  ease: EASE_EXPO,
+                  delay: inView ? 0.72 : 0,
+                }}
               >
                 Nassar
               </motion.span>
             </h1>
 
             {/* role */}
-            <motion.div
-              className="flex items-center flex-wrap gap-x-3 gap-y-1 mb-6"
+            <motion.p
+              className="hero-role mb-6"
               initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.5, delay: 1.0 }}
+              animate={{ opacity: inView ? 1 : 0 }}
+              transition={{ duration: inView ? 0.5 : 0.3, delay: inView ? 1.0 : 0 }}
             >
-              <span className="text-role-prefix">I'm a</span>
+              <span className="text-role-prefix">I&apos;m a</span>
               <TypeAnimation
                 sequence={SITE.roles.flatMap((r) => [r, 2200])}
                 speed={55}
@@ -294,14 +315,18 @@ const HeroSection = () => {
                 repeat={Infinity}
                 className="text-role"
               />
-            </motion.div>
+            </motion.p>
 
             {/* tagline */}
             <motion.p
               className="text-body text-white/40 mb-8 max-w-[420px]"
               initial={{ opacity: 0, y: 14 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, ease: EASE_EXPO, delay: 1.1 }}
+              animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 14 }}
+              transition={{
+                duration: inView ? 0.6 : 0.3,
+                ease: EASE_EXPO,
+                delay: inView ? 1.1 : 0,
+              }}
             >
               {SITE.tagline}
             </motion.p>
@@ -310,8 +335,12 @@ const HeroSection = () => {
             <motion.div
               className="flex flex-col sm:flex-row sm:items-center gap-3 mb-8"
               initial={{ opacity: 0, y: 14 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, ease: EASE_EXPO, delay: 1.2 }}
+              animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 14 }}
+              transition={{
+                duration: inView ? 0.6 : 0.3,
+                ease: EASE_EXPO,
+                delay: inView ? 1.2 : 0,
+              }}
             >
               <Link to="contact" smooth className="cursor-pointer w-full sm:w-auto">
                 <button type="button" className="btn btn-primary w-full sm:w-auto justify-center" style={{ minHeight: 48, fontSize: 14 }}>
@@ -331,8 +360,8 @@ const HeroSection = () => {
             {/* socials */}
             <motion.div
               initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.5, delay: 1.35 }}
+              animate={{ opacity: inView ? 1 : 0 }}
+              transition={{ duration: inView ? 0.5 : 0.3, delay: inView ? 1.35 : 0 }}
             >
               <SocialLinks />
             </motion.div>
@@ -343,8 +372,16 @@ const HeroSection = () => {
             className="hidden lg:block flex-shrink-0"
             style={{ width: 400, position: "relative", x: avX, y: avY }}
             initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.9, ease: EASE_EXPO, delay: 0.45 }}
+            animate={
+              inView
+                ? { opacity: 1, scale: 1 }
+                : { opacity: 0, scale: 0.9 }
+            }
+            transition={{
+              duration: inView ? 0.9 : 0.3,
+              ease: EASE_EXPO,
+              delay: inView ? 0.45 : 0,
+            }}
           >
             {/* center the avatar in the 400px column */}
             <div
@@ -398,9 +435,10 @@ const HeroSection = () => {
                   zIndex: 1,
                 }}
               >
-                <img
+                <OptimizedImage
                   src={avatar}
                   alt={SITE.name}
+                  priority
                   style={{
                     width: "100%",
                     height: "100%",
@@ -444,8 +482,12 @@ const HeroSection = () => {
                   whiteSpace: "nowrap",
                 }}
                 initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.55, ease: EASE_EXPO, delay: 1.25 }}
+                animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
+                transition={{
+                  duration: inView ? 0.55 : 0.3,
+                  ease: EASE_EXPO,
+                  delay: inView ? 1.25 : 0,
+                }}
               >
                 <span
                   style={{
@@ -477,8 +519,8 @@ const HeroSection = () => {
         <motion.div
           className="flex items-center gap-3 mt-6 lg:mt-10 justify-center lg:justify-start"
           initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5, delay: 1.6 }}
+          animate={{ opacity: inView ? 1 : 0 }}
+          transition={{ duration: inView ? 0.5 : 0.3, delay: inView ? 1.6 : 0 }}
         >
           <motion.div
             animate={{ y: [0, 6, 0] }}

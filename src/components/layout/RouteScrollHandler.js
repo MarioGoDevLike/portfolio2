@@ -6,11 +6,13 @@ import {
   consumeHomeScroll,
   markExpectHomeRestore,
   restoreScrollPosition,
+  scrollToWorkSection,
 } from "../../utils/homeScroll";
 
 /**
  * - Project routes: always open at the top.
- * - Home return via back link or browser back: restore saved scroll.
+ * - Home return via back link or browser back: restore saved scroll,
+ *   otherwise land on the Work section.
  */
 const RouteScrollHandler = () => {
   const location = useLocation();
@@ -24,6 +26,9 @@ const RouteScrollHandler = () => {
     }
 
     if (location.pathname === "/") {
+      const wantsWork =
+        location.state?.scrollTo === "work" || location.hash === "#work";
+
       const shouldRestore = canRestoreHomeScroll(
         navigationType,
         location.state?.restoreHomeScroll
@@ -38,8 +43,12 @@ const RouteScrollHandler = () => {
       }
 
       clearHomeScroll();
+
+      if (wantsWork) {
+        scrollToWorkSection();
+      }
     }
-  }, [location.pathname, location.key, location.state, navigationType]);
+  }, [location.pathname, location.key, location.state, location.hash, navigationType]);
 
   return null;
 };

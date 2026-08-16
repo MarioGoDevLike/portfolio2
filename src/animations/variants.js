@@ -1,12 +1,18 @@
 export const EASE_OUT_EXPO = [0.22, 1, 0.36, 1];
 
-export const DEFAULT_VIEWPORT = { once: true, amount: 0.3 };
+/** Replay entrance animations whenever a section re-enters the viewport. */
+export const DEFAULT_VIEWPORT = { once: false, amount: 0.28 };
 
 export const fadeIn = (direction, delay = 0) => ({
   hidden: {
     y: direction === "up" ? 50 : direction === "down" ? -50 : 0,
     opacity: 0,
     x: direction === "left" ? 50 : direction === "right" ? -50 : 0,
+    transition: {
+      type: "tween",
+      duration: 0.35,
+      ease: EASE_OUT_EXPO,
+    },
   },
   show: {
     y: 0,

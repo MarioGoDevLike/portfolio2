@@ -8,6 +8,8 @@ import ElloCafePage from "./pages/ElloCafePage";
 import RaffoulMotorsPage from "./pages/RaffoulMotorsPage";
 import TopSpeedPage from "./pages/TopSpeedPage";
 import AlterPage from "./pages/AlterPage";
+import MartixPage from "./pages/MartixPage";
+import ArabFilesPage from "./pages/ArabFilesPage";
 import MaintenancePage from "./pages/MaintenancePage";
 import AdminDashboardPage from "./pages/AdminDashboardPage";
 
@@ -40,6 +42,8 @@ const AppRoutes = () => {
           <Route path="/projects/raffoul-motors" element={<RaffoulMotorsPage />} />
           <Route path="/projects/top-speed" element={<TopSpeedPage />} />
           <Route path="/projects/alter" element={<AlterPage />} />
+          <Route path="/projects/martix" element={<MartixPage />} />
+          <Route path="/projects/arabfiles" element={<ArabFilesPage />} />
         </Routes>
         </>
       )}

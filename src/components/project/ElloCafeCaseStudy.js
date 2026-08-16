@@ -5,24 +5,25 @@ import { HiChevronLeft, HiChevronRight } from "react-icons/hi";
 import { HiArrowUpRight, HiArrowsPointingOut } from "react-icons/hi2";
 import CaseStudyLightbox, { LandscapeWebImage } from "./CaseStudyLightbox";
 import CaseStudyMobileLayout, { MobilePreviewDual, MobilePhoneFrame } from "./CaseStudyMobile";
-import { getHomeBackLink } from "../../utils/homeScroll";
+import { getHomeBackLink, getHomeBackState } from "../../utils/homeScroll";
+import OptimizedImage from "../ui/OptimizedImage";
 
 /* ─── Assets ─────────────────────────────────────── */
-import appWelcome   from "../../assets/ello_app_images/unlogged page.png";
-import appHome      from "../../assets/ello_app_images/Home page.png";
-import appSignUp    from "../../assets/ello_app_images/sign up page.png";
-import appCourse    from "../../assets/ello_app_images/Course page.png";
-import appInstructor from "../../assets/ello_app_images/instructor page.png";
-import appSessions  from "../../assets/ello_app_images/my sessions page.png";
-import webHome      from "../../assets/ello_website_images/home page.png";
-import webTeachers  from "../../assets/ello_website_images/teachers page.png";
-import webCourses   from "../../assets/ello_website_images/courses page.png";
-import webProfile1  from "../../assets/ello_website_images/teacher profile 1.png";
-import webProfile2  from "../../assets/ello_website_images/teacher profile 2.png";
-import webBook      from "../../assets/ello_website_images/book page.png";
-import webStudentDash from "../../assets/ello_website_images/student dashboard.png";
-import webTeacherDash from "../../assets/ello_website_images/teachers dashboard.png";
-import webCourseDetail from "../../assets/ello_website_images/course details 1.png";
+import appWelcome   from "../../assets/ello_app_images/unlogged page.webp";
+import appHome      from "../../assets/ello_app_images/Home page.webp";
+import appSignUp    from "../../assets/ello_app_images/sign up page.webp";
+import appCourse    from "../../assets/ello_app_images/Course page.webp";
+import appInstructor from "../../assets/ello_app_images/instructor page.webp";
+import appSessions  from "../../assets/ello_app_images/my sessions page.webp";
+import webHome      from "../../assets/ello_website_images/home page.webp";
+import webTeachers  from "../../assets/ello_website_images/teachers page.webp";
+import webCourses   from "../../assets/ello_website_images/courses page.webp";
+import webProfile1  from "../../assets/ello_website_images/teacher profile 1.webp";
+import webProfile2  from "../../assets/ello_website_images/teacher profile 2.webp";
+import webBook      from "../../assets/ello_website_images/book page.webp";
+import webStudentDash from "../../assets/ello_website_images/student dashboard.webp";
+import webTeacherDash from "../../assets/ello_website_images/teachers dashboard.webp";
+import webCourseDetail from "../../assets/ello_website_images/course details 1.webp";
 
 /* ─── Brand ──────────────────────────────────────── */
 const TEAL  = "#5ECFB1";
@@ -51,14 +52,6 @@ const WEB_SCREENS = [
   { src: webTeacherDash,  label: "Teacher Dashboard"  },
 ];
 
-const FEATURES = [
-  { title: "Verified Profiles",    desc: "Instructors with full education & experience verification" },
-  { title: "Smart Booking",        desc: "Multi-tier session scheduling with Stripe checkout"         },
-  { title: "Real-Time Messaging",  desc: "Live chat between students and instructors"                 },
-  { title: "Dual Dashboards",      desc: "Separate student & teacher management experiences"          },
-  { title: "Cross-Platform App",   desc: "iOS & Android from one React Native codebase"               },
-  { title: "Course Management",    desc: "Full course creation, discovery, and enrolment flow"        },
-];
 
 const APP_HIGHLIGHTS = [
   { idx: 0, label: "Onboarding",       desc: "Smooth first-launch experience with role selection"       },
@@ -163,7 +156,7 @@ const Phone = ({ screen, dir, width = 220, autoAdvanceDur, onClick }) => {
             transition={{ duration: 0.36, ease: EASE }}
             style={{ position: "absolute", inset: 0 }}
           >
-            <img src={screen.src} alt={screen.label} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top", display: "block" }} />
+            <OptimizedImage src={screen.src} alt={screen.label} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top", display: "block" }} />
           </motion.div>
         </AnimatePresence>
         <div style={{ position: "absolute", top: width * 0.056, left: "50%", transform: "translateX(-50%)", width: width * 0.38, height: width * 0.11, borderRadius: width * 0.06, background: "#111", zIndex: 10 }} />
@@ -221,7 +214,7 @@ const Browser = ({ screen, dir, onClick }) => {
             transition={{ duration: 0.38, ease: EASE }}
             style={{ position: "absolute", inset: 0 }}
           >
-            <img src={screen.src} alt={screen.label} style={{ width: "100%", height: "100%", objectFit: "contain", objectPosition: "top center", display: "block", background: "#0a0a0a" }} />
+            <OptimizedImage src={screen.src} alt={screen.label} style={{ width: "100%", height: "100%", objectFit: "contain", objectPosition: "top center", display: "block", background: "#0a0a0a" }} />
           </motion.div>
         </AnimatePresence>
       </div>
@@ -253,7 +246,7 @@ const Thumbs = ({ screens, current, onChange }) => (
         }}
       >
         <div style={{ aspectRatio: "16/10", overflow: "hidden" }}>
-          <img src={s.src} alt={s.label} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top", display: "block" }} />
+          <OptimizedImage src={s.src} alt={s.label} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top", display: "block" }} />
         </div>
       </motion.button>
     ))}
@@ -356,14 +349,7 @@ const ElloCafeCaseStudy = () => {
         onIdxChange: (i) => { setAppDir(i > appIdx ? 1 : -1); setAppIdx(i); },
         onExpand: () => setLightbox("phone"),
       }]}
-      features={FEATURES}
       tech={TECH}
-      cta={{
-        title: "See it in the wild",
-        description: "The full platform is live and running. Take a look at the real thing.",
-        liveUrl: "https://ellos-new-website.vercel.app/",
-        liveLabel: "Open Ello Café",
-      }}
       renderPhone={(screen) => <MobilePhoneFrame screen={screen} brand={{ color: TEAL, rgba: T }} width={210} />}
     />
   );
@@ -380,7 +366,7 @@ const ElloCafeCaseStudy = () => {
 
           {/* Back link — fixed top */}
           <div style={{ position: "absolute", top: 0, left: 0, right: 0, padding: isMobile ? "20px 20px" : "28px 48px", zIndex: 10 }}>
-            <Link to={getHomeBackLink()} style={{ display: "inline-flex", alignItems: "center", gap: 6, fontFamily: "'Space Grotesk', sans-serif", fontSize: 12, color: "rgba(255,255,255,0.35)", textDecoration: "none", letterSpacing: "0.02em" }}>
+            <Link to={getHomeBackLink()} state={getHomeBackState()} style={{ display: "inline-flex", alignItems: "center", gap: 6, fontFamily: "'Space Grotesk', sans-serif", fontSize: 12, color: "rgba(255,255,255,0.35)", textDecoration: "none", letterSpacing: "0.02em" }}>
               <HiChevronLeft size={14} />
               Back to home
             </Link>
@@ -470,7 +456,7 @@ const ElloCafeCaseStudy = () => {
                   <div style={{ height: 30, display: "flex", alignItems: "center", padding: "0 10px", gap: 6, background: "rgba(0,0,0,0.75)", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
                     {["#ef4444","#f59e0b","#22c55e"].map(c => <span key={c} style={{ width: 7, height: 7, borderRadius: "50%", background: c, opacity: 0.7 }} />)}
                   </div>
-                  <img src={WEB_SCREENS[webIdx].src} alt="Ello" style={{ width: "100%", display: "block", objectFit: "contain", objectPosition: "top", background: "#0a0a0a", aspectRatio: "16/10" }} />
+                  <OptimizedImage src={WEB_SCREENS[webIdx].src} alt="Ello" style={{ width: "100%", display: "block", objectFit: "contain", objectPosition: "top", background: "#0a0a0a", aspectRatio: "16/10" }} />
                 </div>
                 {/* Floating phone */}
                 <motion.div
@@ -595,40 +581,7 @@ const ElloCafeCaseStudy = () => {
           </div>
         </section>
 
-        <Divider />
-
-        {/* ══════════ FEATURES ══════════ */}
-        <section style={{ padding: isMobile ? "72px 0" : "100px 0" }}>
-          <div style={wrap}>
-            <FadeUp style={{ marginBottom: 44 }}>
-              <SectionLabel>Capabilities</SectionLabel>
-              <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: isMobile ? 30 : 42, letterSpacing: "-0.02em", color: "rgba(255,255,255,0.92)", margin: 0, lineHeight: 1.15 }}>
-                What it does
-              </h2>
-            </FadeUp>
-
-            <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr 1fr" : "repeat(3, 1fr)", gap: 12 }}>
-              {FEATURES.map((f, i) => (
-                <FadeUp key={f.title} delay={i * 0.06}>
-                  <motion.div
-                    whileHover={{ y: -4, borderColor: T(0.25) }}
-                    style={{
-                      padding: isMobile ? "18px 14px" : "24px 20px", borderRadius: 12,
-                      background: "rgba(255,255,255,0.025)", border: "1px solid rgba(255,255,255,0.06)",
-                      height: "100%", transition: "border-color 0.25s",
-                    }}
-                  >
-                    <div style={{ width: 34, height: 34, borderRadius: 9, background: T(0.09), border: `1px solid ${T(0.18)}`, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 14 }}>
-                      <span style={{ fontSize: 13, color: TEAL }}>✦</span>
-                    </div>
-                    <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: isMobile ? 12 : 13, fontWeight: 600, color: "rgba(255,255,255,0.82)", marginBottom: 6, lineHeight: 1.3 }}>{f.title}</div>
-                    <div style={{ fontFamily: "'Inter', sans-serif", fontSize: isMobile ? 11 : 12, color: "rgba(255,255,255,0.3)", lineHeight: 1.65 }}>{f.desc}</div>
-                  </motion.div>
-                </FadeUp>
-              ))}
-            </div>
-          </div>
-        </section>
+        
 
         <Divider />
 
@@ -660,40 +613,6 @@ const ElloCafeCaseStudy = () => {
                 </FadeUp>
               ))}
             </div>
-          </div>
-        </section>
-
-        {/* ══════════ CTA FOOTER ══════════ */}
-        <section style={{ padding: isMobile ? "80px 0 110px" : "100px 0 130px" }}>
-          <div style={{ ...wrap, textAlign: "center" }}>
-            <FadeUp>
-              <div style={{ display: "inline-flex", alignItems: "center", gap: 10, marginBottom: 20 }}>
-                <div style={{ width: 28, height: 1, background: T(0.5) }} />
-                <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 10, letterSpacing: "0.3em", textTransform: "uppercase", color: TEAL, opacity: 0.8 }}>Live</span>
-                <div style={{ width: 28, height: 1, background: T(0.5) }} />
-              </div>
-              <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: isMobile ? 30 : 46, letterSpacing: "-0.025em", color: "rgba(255,255,255,0.92)", margin: "0 0 14px", lineHeight: 1.1 }}>
-                See it in the wild
-              </h2>
-              <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 15, color: "rgba(255,255,255,0.32)", margin: "0 auto 40px", maxWidth: 380, lineHeight: 1.7 }}>
-                The full platform is live and running. Take a look at the real thing.
-              </p>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 14, flexWrap: "wrap" }}>
-                <motion.a
-                  href="https://ellos-new-website.vercel.app/" target="_blank" rel="noopener noreferrer"
-                  whileHover={{ scale: 1.04, boxShadow: `0 0 44px ${T(0.58)}` }} whileTap={{ scale: 0.97 }}
-                  style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "14px 30px", borderRadius: 12, background: TEAL, fontFamily: "'Space Grotesk', sans-serif", fontSize: 14, fontWeight: 700, color: "#080808", textDecoration: "none" }}
-                >
-                  Open Ello Café <HiArrowUpRight size={15} />
-                </motion.a>
-                <Link
-                  to={getHomeBackLink()}
-                  style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "14px 24px", borderRadius: 12, border: "1px solid rgba(255,255,255,0.1)", fontFamily: "'Space Grotesk', sans-serif", fontSize: 13, color: "rgba(255,255,255,0.4)", textDecoration: "none" }}
-                >
-                  <HiChevronLeft size={13} /> Back to portfolio
-                </Link>
-              </div>
-            </FadeUp>
           </div>
         </section>
 

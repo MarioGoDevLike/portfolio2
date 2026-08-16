@@ -5,18 +5,19 @@ import { HiChevronLeft, HiChevronRight } from "react-icons/hi";
 import { HiArrowsPointingOut } from "react-icons/hi2";
 import CaseStudyLightbox from "./CaseStudyLightbox";
 import CaseStudyMobileLayout, { MobilePreviewPhones, MobilePhoneFrame } from "./CaseStudyMobile";
-import { getHomeBackLink } from "../../utils/homeScroll";
+import { getHomeBackLink, getHomeBackState } from "../../utils/homeScroll";
+import OptimizedImage from "../ui/OptimizedImage";
 
 /* ─── Assets ─────────────────────────────────────── */
-import vendorDashboard from "../../assets/Top_speed_apps/vendor_dashboard_page.png";
-import vendorAddOrder  from "../../assets/Top_speed_apps/vendor_addorder_page.png";
-import vendorOrders    from "../../assets/Top_speed_apps/vendor_orders_page.png";
-import vendorSettings  from "../../assets/Top_speed_apps/vendor_settings_page.png";
-import driverLogin     from "../../assets/Top_speed_apps/driver_login_page.png";
-import driverDashboard from "../../assets/Top_speed_apps/driver_dashboard_page.png";
-import driverArchive   from "../../assets/Top_speed_apps/driver_archive_page.jpeg";
-import driverSettings  from "../../assets/Top_speed_apps/driver_settings_page.png";
-import topSpeedLogo    from "../../assets/Top_speed_apps/topspeedlogo.png";
+import vendorDashboard from "../../assets/Top_speed_apps/vendor_dashboard_page.webp";
+import vendorAddOrder  from "../../assets/Top_speed_apps/vendor_addorder_page.webp";
+import vendorOrders    from "../../assets/Top_speed_apps/vendor_orders_page.webp";
+import vendorSettings  from "../../assets/Top_speed_apps/vendor_settings_page.webp";
+import driverLogin     from "../../assets/Top_speed_apps/driver_login_page.webp";
+import driverDashboard from "../../assets/Top_speed_apps/driver_dashboard_page.webp";
+import driverArchive   from "../../assets/Top_speed_apps/driver_archive_page.webp";
+import driverSettings  from "../../assets/Top_speed_apps/driver_settings_page.webp";
+import topSpeedLogo    from "../../assets/Top_speed_apps/topspeedlogo.webp";
 
 /* ─── Brand ──────────────────────────────────────── */
 const RED  = "#DC1F26";
@@ -38,14 +39,6 @@ const DRIVER_SCREENS = [
   { src: driverSettings,  label: "Settings"  },
 ];
 
-const FEATURES = [
-  { title: "Order Management",     desc: "Vendors post deliveries and track every status in real time"              },
-  { title: "Vendor Dashboard",     desc: "Pending, active, and delivered order counts at a glance"                  },
-  { title: "Push Notifications",   desc: "Drivers receive instant Firebase alerts for every new order"              },
-  { title: "Live GPS Tracking",    desc: "Location tracking active while drivers are on duty"                       },
-  { title: "Order Archive",        desc: "Full delivery history accessible for both vendors and drivers"            },
-  { title: "Multi-Language",       desc: "Full localisation across both vendor and driver apps"                     },
-];
 
 const VENDOR_HIGHLIGHTS = [
   { idx: 0, label: "Dashboard",  desc: "Order summary with live pending, active, delivered counters" },
@@ -150,7 +143,7 @@ const Phone = ({ screen, dir, width = 220, autoAdvanceDur, onClick }) => {
             initial={{ x: dir * 28, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -dir * 28, opacity: 0 }}
             transition={{ duration: 0.36, ease: EASE }} style={{ position: "absolute", inset: 0 }}
           >
-            <img src={screen.src} alt={screen.label} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top", display: "block" }} />
+            <OptimizedImage src={screen.src} alt={screen.label} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top", display: "block" }} />
           </motion.div>
         </AnimatePresence>
         <div style={{ position: "absolute", top: width * 0.056, left: "50%", transform: "translateX(-50%)", width: width * 0.38, height: width * 0.11, borderRadius: width * 0.06, background: "#111", zIndex: 10 }} />
@@ -277,7 +270,7 @@ const TopSpeedCaseStudy = () => {
       title="Top Speed"
       summary="Two dedicated Flutter apps — one for vendors, one for drivers — coordinating real-time deliveries with Firebase push notifications and live GPS tracking."
       logo={
-        <img src={topSpeedLogo} alt="Top Speed" style={{ height: 44, width: 44, objectFit: "contain", display: "block", mixBlendMode: "screen" }} />
+        <OptimizedImage src={topSpeedLogo} alt="Top Speed" style={{ height: 44, width: 44, objectFit: "contain", display: "block", mixBlendMode: "screen" }} />
       }
       meta={[
         { label: "Role", value: "Mobile Developer" },
@@ -320,12 +313,7 @@ const TopSpeedCaseStudy = () => {
           onExpand: () => setLightbox("driver"),
         },
       ]}
-      features={FEATURES}
       tech={TECH}
-      cta={{
-        title: "Live & operational",
-        description: "Both apps are deployed and in active use — vendors and drivers coordinating in real time.",
-      }}
       renderPhone={(screen) => <MobilePhoneFrame screen={screen} brand={{ color: RED, rgba: R }} width={210} />}
     />
   );
@@ -340,7 +328,7 @@ const TopSpeedCaseStudy = () => {
           <div style={{ position: "absolute", top: "35%", left: "50%", transform: "translate(-50%,-50%)", width: 900, height: 700, background: `radial-gradient(ellipse, ${R(0.07)} 0%, transparent 60%)`, filter: "blur(70px)", pointerEvents: "none" }} />
 
           <div style={{ position: "absolute", top: 0, left: 0, right: 0, padding: isMobile ? "20px 20px" : "28px 48px", zIndex: 10 }}>
-            <Link to={getHomeBackLink()} style={{ display: "inline-flex", alignItems: "center", gap: 6, fontFamily: "'Space Grotesk', sans-serif", fontSize: 12, color: "rgba(255,255,255,0.35)", textDecoration: "none" }}>
+            <Link to={getHomeBackLink()} state={getHomeBackState()} style={{ display: "inline-flex", alignItems: "center", gap: 6, fontFamily: "'Space Grotesk', sans-serif", fontSize: 12, color: "rgba(255,255,255,0.35)", textDecoration: "none" }}>
               <HiChevronLeft size={14} /> Back to home
             </Link>
           </div>
@@ -355,6 +343,9 @@ const TopSpeedCaseStudy = () => {
               >
                 <motion.img
                   src={topSpeedLogo} alt="Top Speed"
+                  loading="eager"
+                  decoding="async"
+                  fetchPriority="high"
                   initial={{ opacity: 0, scale: 0.92 }} animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 0.25, duration: 0.35, ease: EASE }}
                   style={{ height: 48, width: 48, objectFit: "contain", flexShrink: 0, display: "block", mixBlendMode: "screen" }}
@@ -495,33 +486,7 @@ const TopSpeedCaseStudy = () => {
           </div>
         </section>
 
-        <Divider />
-
-        {/* ══════════ FEATURES ══════════ */}
-        <section style={{ padding: isMobile ? "72px 0" : "100px 0" }}>
-          <div style={wrap}>
-            <FadeUp style={{ marginBottom: 44 }}>
-              <SectionLabel>Capabilities</SectionLabel>
-              <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: isMobile ? 30 : 42, letterSpacing: "-0.02em", color: "rgba(255,255,255,0.92)", margin: 0, lineHeight: 1.15 }}>What it does</h2>
-            </FadeUp>
-            <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr 1fr" : "repeat(3, 1fr)", gap: 12 }}>
-              {FEATURES.map((f, i) => (
-                <FadeUp key={f.title} delay={i * 0.06}>
-                  <motion.div
-                    whileHover={{ y: -4, borderColor: R(0.25) }}
-                    style={{ padding: isMobile ? "18px 14px" : "24px 20px", borderRadius: 12, background: "rgba(255,255,255,0.025)", border: "1px solid rgba(255,255,255,0.06)", height: "100%", transition: "border-color 0.25s" }}
-                  >
-                    <div style={{ width: 34, height: 34, borderRadius: 9, background: R(0.09), border: `1px solid ${R(0.18)}`, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 14 }}>
-                      <span style={{ fontSize: 13, color: RED }}>✦</span>
-                    </div>
-                    <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: isMobile ? 12 : 13, fontWeight: 600, color: "rgba(255,255,255,0.82)", marginBottom: 6, lineHeight: 1.3 }}>{f.title}</div>
-                    <div style={{ fontFamily: "'Inter', sans-serif", fontSize: isMobile ? 11 : 12, color: "rgba(255,255,255,0.3)", lineHeight: 1.65 }}>{f.desc}</div>
-                  </motion.div>
-                </FadeUp>
-              ))}
-            </div>
-          </div>
-        </section>
+        
 
         <Divider />
 
@@ -550,31 +515,6 @@ const TopSpeedCaseStudy = () => {
                 </FadeUp>
               ))}
             </div>
-          </div>
-        </section>
-
-        {/* ══════════ FOOTER ══════════ */}
-        <section style={{ padding: isMobile ? "80px 0 110px" : "100px 0 130px" }}>
-          <div style={{ ...wrap, textAlign: "center" }}>
-            <FadeUp>
-              <div style={{ display: "inline-flex", alignItems: "center", gap: 10, marginBottom: 20 }}>
-                <div style={{ width: 28, height: 1, background: R(0.5) }} />
-                <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 10, letterSpacing: "0.3em", textTransform: "uppercase", color: RED, opacity: 0.8 }}>Deployed</span>
-                <div style={{ width: 28, height: 1, background: R(0.5) }} />
-              </div>
-              <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: isMobile ? 30 : 46, letterSpacing: "-0.025em", color: "rgba(255,255,255,0.92)", margin: "0 0 14px", lineHeight: 1.1 }}>
-                Live &amp; operational
-              </h2>
-              <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 15, color: "rgba(255,255,255,0.32)", margin: "0 auto 40px", maxWidth: 380, lineHeight: 1.7 }}>
-                Both apps are deployed and in active use — vendors and drivers coordinating in real time.
-              </p>
-              <Link
-                to={getHomeBackLink()}
-                style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "14px 24px", borderRadius: 12, border: "1px solid rgba(255,255,255,0.1)", fontFamily: "'Space Grotesk', sans-serif", fontSize: 13, color: "rgba(255,255,255,0.4)", textDecoration: "none" }}
-              >
-                <HiChevronLeft size={13} /> Back to portfolio
-              </Link>
-            </FadeUp>
           </div>
         </section>
 

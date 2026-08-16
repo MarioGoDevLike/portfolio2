@@ -335,7 +335,7 @@ const inputStyle = {
 
 const chipStyle = {
   padding: "7px 12px",
-  borderRadius: 999,
+  borderRadius: 10,
   border: "1px solid",
   fontFamily: "'Space Grotesk', sans-serif",
   fontSize: 11,

@@ -69,6 +69,9 @@ export const LandscapeWebImage = ({ screen, dir, width }) => (
         custom={dir}
         src={screen.src}
         alt={screen.label}
+        loading="lazy"
+        decoding="async"
+        fetchPriority="low"
         initial={{ x: dir * 56, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
         exit={{ x: -dir * 56, opacity: 0 }}
