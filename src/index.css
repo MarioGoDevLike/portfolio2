@@ -705,60 +705,296 @@
     @apply mx-4 text-[10px] flex-shrink-0 text-accent/30;
   }
 
-  .preloader {
-    @apply fixed inset-0 z-[9999] flex items-center justify-center overflow-hidden bg-primary;
+  /* ── Portfolio boot sequence (preloader) ───────── */
+  .boot {
+    @apply fixed inset-0 z-[9999] overflow-hidden;
+    background:
+      radial-gradient(ellipse 70% 55% at 50% 40%, rgba(18, 20, 32, 0.95) 0%, #050505 72%),
+      #050505;
+    color: #f1f5f9;
   }
 
-  .preloader__orb {
-    @apply absolute rounded-full pointer-events-none;
-    filter: blur(80px);
+  .boot__atmosphere {
+    @apply absolute inset-0 pointer-events-none overflow-hidden;
   }
 
-  .preloader__orb--violet {
-    width: 500px;
-    height: 500px;
-    top: -150px;
-    right: -100px;
-    background: radial-gradient(circle, rgba(129, 140, 248, 0.12) 0%, transparent 70%);
+  .boot__grain {
+    @apply absolute inset-0 opacity-[0.18];
+    background-image:
+      repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(255, 255, 255, 0.015) 2px,
+        rgba(255, 255, 255, 0.015) 3px
+      );
+    mix-blend-mode: overlay;
   }
 
-  .preloader__orb--cyan {
-    width: 400px;
-    height: 400px;
-    bottom: -100px;
-    left: -80px;
-    background: radial-gradient(circle, rgba(34, 211, 238, 0.08) 0%, transparent 70%);
+  .boot__beam {
+    @apply absolute left-1/2 top-[-18%] -translate-x-1/2 pointer-events-none;
+    width: min(70vw, 520px);
+    height: 55vh;
+    background: radial-gradient(
+      ellipse at center,
+      rgba(129, 140, 248, 0.16) 0%,
+      transparent 68%
+    );
+    filter: blur(28px);
   }
 
-  .preloader__counter {
-    @apply font-primary font-bold select-none leading-none text-gradient opacity-90;
-    font-size: clamp(110px, 20vw, 230px);
+  .boot__scan {
+    @apply absolute inset-x-0 h-24 pointer-events-none opacity-40;
+    top: -20%;
+    background: linear-gradient(
+      to bottom,
+      transparent,
+      rgba(34, 211, 238, 0.07),
+      transparent
+    );
+    animation: boot-scan 3.2s ease-in-out infinite;
   }
 
-  .preloader__footer {
-    @apply absolute bottom-0 left-0 right-0;
-    padding: clamp(24px, 4vw, 64px);
+  .boot__hud {
+    @apply absolute inset-0 pointer-events-none;
+    padding: clamp(16px, 3vw, 28px);
   }
 
-  .preloader__label {
-    @apply font-primary text-[10px] uppercase tracking-[6px] text-white/20;
+  .boot__corner {
+    @apply absolute block w-5 h-5;
+    border-color: rgba(255, 255, 255, 0.28);
+    border-style: solid;
   }
 
-  .preloader__percent {
-    @apply font-primary text-[11px] text-white/25;
+  .boot__corner--tl {
+    top: clamp(16px, 3vw, 28px);
+    left: clamp(16px, 3vw, 28px);
+    border-width: 1.5px 0 0 1.5px;
   }
 
-  .preloader__track {
-    @apply rounded-full overflow-hidden h-px bg-white/[0.06];
+  .boot__corner--tr {
+    top: clamp(16px, 3vw, 28px);
+    right: clamp(16px, 3vw, 28px);
+    border-width: 1.5px 1.5px 0 0;
   }
 
-  .preloader__bar {
-    @apply h-full;
+  .boot__corner--bl {
+    bottom: clamp(16px, 3vw, 28px);
+    left: clamp(16px, 3vw, 28px);
+    border-width: 0 0 1.5px 1.5px;
+  }
+
+  .boot__corner--br {
+    bottom: clamp(16px, 3vw, 28px);
+    right: clamp(16px, 3vw, 28px);
+    border-width: 0 1.5px 1.5px 0;
+  }
+
+  .boot__meta {
+    @apply absolute top-0 left-0 right-0 z-[2] flex items-center gap-3;
+    padding: clamp(28px, 5vw, 48px) clamp(28px, 5vw, 52px) 0;
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 10px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+  }
+
+  .boot__meta-id {
+    color: rgba(255, 255, 255, 0.28);
+  }
+
+  .boot__meta-sep {
+    @apply flex-1 h-px;
+    background: linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.14),
+      transparent 80%
+    );
+  }
+
+  .boot__meta-status {
+    color: #a5b4fc;
+  }
+
+  .boot__meta-clock {
+    @apply tabular-nums;
+    color: rgba(255, 255, 255, 0.55);
+    letter-spacing: 0.18em;
+    min-width: 3.2em;
+    text-align: right;
+  }
+
+  .boot__stage {
+    @apply absolute inset-0 z-[1] flex items-center justify-center;
+    padding-bottom: 4vh;
+  }
+
+  .boot__scope {
+    @apply absolute;
+    width: min(72vw, 340px);
+    height: min(72vw, 340px);
+  }
+
+  .boot__ring {
+    @apply absolute inset-0 w-full h-full;
+    transform: rotate(-90deg);
+  }
+
+  .boot__ring circle {
+    fill: none;
+    stroke-width: 0.7;
+  }
+
+  .boot__ring--track circle {
+    stroke: rgba(255, 255, 255, 0.07);
+  }
+
+  .boot__ring--progress circle {
+    stroke: #818cf8;
+    stroke-linecap: round;
+    stroke-dasharray: 276;
+    transition: stroke-dashoffset 0.08s linear;
+    filter: drop-shadow(0 0 8px rgba(129, 140, 248, 0.35));
+  }
+
+  .boot__orbit {
+    @apply absolute inset-[8%] rounded-full pointer-events-none;
+    border: 1px dashed rgba(129, 140, 248, 0.22);
+  }
+
+  .boot__orbit--inner {
+    inset: 18%;
+    border-color: rgba(34, 211, 238, 0.16);
+    border-style: dotted;
+  }
+
+  .boot__glyph {
+    @apply relative z-[2] flex flex-col items-center gap-4;
+  }
+
+  .boot__monogram {
+    width: min(42vw, 168px);
+    height: auto;
+    color: #f8fafc;
+    filter: drop-shadow(0 0 24px rgba(129, 140, 248, 0.25));
+  }
+
+  .boot__glyph-sub {
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 10px;
+    letter-spacing: 0.42em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.28);
+  }
+
+  .boot__log {
+    @apply absolute z-[2] hidden sm:block;
+    left: clamp(28px, 5vw, 52px);
+    bottom: clamp(110px, 18vh, 160px);
+    max-width: 280px;
+  }
+
+  .boot__log-label {
+    @apply block mb-3;
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 9px;
+    letter-spacing: 0.36em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.2);
+  }
+
+  .boot__log-list {
+    @apply m-0 p-0 list-none flex flex-col gap-2;
+    font-family: "Inter", sans-serif;
+    font-size: 12px;
+    line-height: 1.35;
+    color: rgba(255, 255, 255, 0.42);
+  }
+
+  .boot__log-list li {
+    @apply flex items-start gap-2;
+  }
+
+  .boot__log-mark {
+    color: #22d3ee;
+    opacity: 0.7;
+    line-height: 1.35;
+  }
+
+  .boot__footer {
+    @apply absolute bottom-0 left-0 right-0 z-[2];
+    padding: 0 clamp(28px, 5vw, 52px) clamp(28px, 5vw, 48px);
+  }
+
+  .boot__identity {
+    @apply flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-4 mb-4;
+  }
+
+  .boot__name {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 600;
+    font-size: clamp(18px, 3.4vw, 28px);
+    letter-spacing: -0.02em;
+    color: rgba(255, 255, 255, 0.92);
+  }
+
+  .boot__role {
+    font-family: "Inter", sans-serif;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.28);
+  }
+
+  .boot__meter {
+    @apply relative w-full overflow-hidden;
+    height: 2px;
+    background: rgba(255, 255, 255, 0.06);
+  }
+
+  .boot__meter-fill {
+    @apply absolute inset-y-0 left-0;
     background: linear-gradient(90deg, #818cf8 0%, #22d3ee 100%);
+    box-shadow: 0 0 12px rgba(129, 140, 248, 0.45);
+    transition: width 0.08s linear;
   }
 
-  .preloader__brand {
-    @apply mt-5 font-primary text-[10px] uppercase tracking-[8px] text-white/10;
+  .boot__shutter {
+    @apply absolute inset-y-0 z-[5] pointer-events-none;
+    width: 51%;
+    background: #050505;
+  }
+
+  .boot__shutter--left {
+    left: 0;
+    border-right: 1px solid rgba(129, 140, 248, 0.18);
+  }
+
+  .boot__shutter--right {
+    right: 0;
+    border-left: 1px solid rgba(34, 211, 238, 0.12);
+  }
+
+  .boot--exit {
+    background: transparent;
+    pointer-events: none;
+  }
+
+  @keyframes boot-scan {
+    0% { top: -25%; opacity: 0; }
+    15% { opacity: 0.45; }
+    85% { opacity: 0.2; }
+    100% { top: 110%; opacity: 0; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .boot__scan {
+      animation: none;
+      opacity: 0;
+    }
+
+    .boot__ring--progress circle,
+    .boot__meter-fill {
+      transition: none;
+    }
   }
 
   .projects-page__header {
