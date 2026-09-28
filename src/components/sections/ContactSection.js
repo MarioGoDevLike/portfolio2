@@ -1,915 +1,472 @@
-import React, { useState, useRef, useCallback, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { BsArrowRight, BsCheckLg, BsPhone, BsGlobe, BsLayers } from "react-icons/bs";
+import React, { useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { BsGlobe, BsLayers, BsPhone } from "react-icons/bs";
 import { FaWhatsapp } from "react-icons/fa";
-import { HiArrowLeft, HiArrowUpRight } from "react-icons/hi2";
+import {
+  HiArrowRight,
+  HiArrowUpRight,
+  HiCheck,
+  HiClock,
+  HiEnvelope,
+  HiExclamationCircle,
+  HiMapPin,
+  HiOutlineDocumentDuplicate,
+} from "react-icons/hi2";
 import { SITE } from "../../constants";
+import { submitInquiry } from "../../firebase";
 import AnimatedSection from "../ui/AnimatedSection";
 import SocialLinks from "../ui/SocialLinks";
-import { submitInquiry } from "../../firebase";
+import "./contact.css";
 
-/* ─── constants ──────────────────────────────────────────── */
 const EASE = [0.22, 1, 0.36, 1];
 
+/* Ids are stored in Firestore and read by the admin dashboard — keep them stable. */
 const PROJECT_TYPES = [
-  {
-    id: "mobile",
-    label: "Mobile App",
-    sub: "Flutter · React Native · Android",
-    Icon: BsPhone,
-    accent: "#818cf8",
-    glow: "rgba(129,140,248,0.22)",
-    border: "rgba(129,140,248,0.30)",
-  },
-  {
-    id: "web",
-    label: "Web Project",
-    sub: "React · WordPress · Tailwind",
-    Icon: BsGlobe,
-    accent: "#22d3ee",
-    glow: "rgba(34,211,238,0.22)",
-    border: "rgba(34,211,238,0.30)",
-  },
-  {
-    id: "both",
-    label: "Full-Stack",
-    sub: "Mobile + Web combined",
-    Icon: BsLayers,
-    accent: "#a78bfa",
-    glow: "rgba(167,139,250,0.22)",
-    border: "rgba(167,139,250,0.30)",
-  },
+  { id: "mobile", label: "Mobile app", sub: "iOS & Android", Icon: BsPhone },
+  { id: "web", label: "Website", sub: "Sites & web apps", Icon: BsGlobe },
+  { id: "both", label: "Both", sub: "Web + mobile", Icon: BsLayers },
 ];
-
-const BUDGETS = ["< $1k", "$1k–$5k", "$5k–$15k", "$15k+", "Let's discuss"];
+const BUDGETS = ["< $1k", "$1k–$5k", "$5k–$15k", "$15k+", "Not sure yet"];
 const TIMELINES = ["ASAP", "1–2 months", "3–6 months", "Flexible"];
 
-const PIPELINE_STEPS = [
-  "Validating",
-  "Securing",
-  "Transmitting",
-  "Confirming",
-];
+const LIMITS = { name: 100, email: 200, message: 2000 };
+/* Offline, Firestore queues writes and never settles the promise — cap the wait. */
+const SUBMIT_TIMEOUT_MS = 15000;
+const EMPTY_FORM = { projectType: "", name: "", email: "", budget: "", timeline: "", message: "", company: "" };
 
-/* ─── tiny helpers ───────────────────────────────────────── */
-const validateEmail = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+const isEmail = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
 
-/* ─── TypeCard — 3-D tilt project type card ─────────────── */
-const TypeCard = ({ item, selected, onSelect }) => {
-  const ref = useRef(null);
-  const [tilt, setTilt] = useState({ rx: 0, ry: 0 });
-  const [hovered, setHovered] = useState(false);
+function validate(form) {
+  const errors = {};
+  if (!form.projectType) errors.projectType = "Choose what you need.";
+  if (!form.name.trim()) errors.name = "Please enter your name.";
+  if (!isEmail(form.email.trim())) errors.email = "Enter a valid email so I can reply.";
+  if (form.message.trim().length < 10) errors.message = "A sentence or two about the project helps.";
+  return errors;
+}
 
-  const onMove = useCallback((e) => {
-    const r = ref.current?.getBoundingClientRect();
-    if (!r) return;
-    const x = (e.clientX - r.left) / r.width - 0.5;
-    const y = (e.clientY - r.top) / r.height - 0.5;
-    setTilt({ rx: -y * 14, ry: x * 14 });
-  }, []);
+/* ─── Direct channels ────────────────────────────── */
 
-  const onLeave = useCallback(() => {
-    setTilt({ rx: 0, ry: 0 });
-    setHovered(false);
-  }, []);
+const CopyEmailButton = () => {
+  const [copied, setCopied] = useState(false);
 
-  const active = selected === item.id;
+  useEffect(() => {
+    if (!copied) return undefined;
+    const t = setTimeout(() => setCopied(false), 2000);
+    return () => clearTimeout(t);
+  }, [copied]);
+
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(SITE.email);
+      setCopied(true);
+    } catch {
+      window.location.href = `mailto:${SITE.email}`;
+    }
+  };
 
   return (
-    <motion.button
-      ref={ref}
-      type="button"
-      onClick={() => onSelect(item.id)}
-      onMouseMove={onMove}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={onLeave}
-      whileTap={{ scale: 0.97 }}
-      style={{
-        perspective: 800,
-        background: "none",
-        border: "none",
-        padding: 0,
-        cursor: "pointer",
-        flex: 1,
-        minWidth: 0,
-        WebkitTapHighlightColor: "transparent",
-        touchAction: "manipulation",
-      }}
-    >
-      <motion.div
-        animate={{ rotateX: tilt.rx, rotateY: tilt.ry }}
-        transition={{ type: "spring", stiffness: 300, damping: 22 }}
-        style={{
-          transformStyle: "preserve-3d",
-          borderRadius: 20,
-          padding: "18px 16px",
-          minHeight: 80,
-          background: active
-            ? `linear-gradient(145deg, ${item.glow.replace("0.22", "0.18")}, rgba(0,0,0,0))`
-            : "rgba(255,255,255,0.025)",
-          border: `1px solid ${active ? item.border : "rgba(255,255,255,0.07)"}`,
-          boxShadow: active
-            ? `0 0 32px ${item.glow}, inset 0 1px 0 rgba(255,255,255,0.08)`
-            : hovered
-            ? "0 8px 32px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04)"
-            : "inset 0 1px 0 rgba(255,255,255,0.04)",
-          transition: "background 0.3s, border 0.3s, box-shadow 0.3s",
-          textAlign: "left",
-          position: "relative",
-          overflow: "hidden",
-        }}
-      >
-        {/* glare layer */}
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            background:
-              "linear-gradient(135deg, rgba(255,255,255,0.04) 0%, transparent 55%)",
-            borderRadius: 20,
-            pointerEvents: "none",
-          }}
-        />
-
-        {/* icon */}
-        <div
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            justifyContent: "center",
-            width: 38,
-            height: 38,
-            borderRadius: 11,
-            marginBottom: 14,
-            background: active ? `${item.glow}` : "rgba(255,255,255,0.05)",
-            border: `1px solid ${active ? item.border : "rgba(255,255,255,0.07)"}`,
-            color: active ? item.accent : "rgba(255,255,255,0.4)",
-            transition: "all 0.3s",
-          }}
-        >
-          <item.Icon size={17} />
-        </div>
-
-        <p
-          style={{
-            margin: 0,
-            fontFamily: "'Space Grotesk', sans-serif",
-            fontWeight: 600,
-            fontSize: 15,
-            color: active ? "#fff" : "rgba(255,255,255,0.72)",
-            transition: "color 0.3s",
-            lineHeight: 1.2,
-            marginBottom: 5,
-          }}
-        >
-          {item.label}
-        </p>
-        <p
-          style={{
-            margin: 0,
-            fontFamily: "'Inter', sans-serif",
-            fontSize: 11,
-            color: "rgba(255,255,255,0.28)",
-            lineHeight: 1.4,
-          }}
-        >
-          {item.sub}
-        </p>
-
-        {/* selected check */}
-        <AnimatePresence>
-          {active && (
-            <motion.span
-              initial={{ opacity: 0, scale: 0.5 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.5 }}
-              transition={{ type: "spring", stiffness: 500, damping: 28 }}
-              style={{
-                position: "absolute",
-                top: 12,
-                right: 12,
-                width: 20,
-                height: 20,
-                borderRadius: "50%",
-                background: item.accent,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                boxShadow: `0 0 12px ${item.glow}`,
-              }}
-            >
-              <BsCheckLg size={10} color="#000" />
-            </motion.span>
-          )}
-        </AnimatePresence>
-      </motion.div>
-    </motion.button>
+    <button type="button" className="ct-copy" onClick={copy} aria-label={copied ? "Email copied" : "Copy email address"}>
+      {copied ? <HiCheck aria-hidden="true" /> : <HiOutlineDocumentDuplicate aria-hidden="true" />}
+      <span aria-live="polite">{copied ? "Copied" : "Copy"}</span>
+    </button>
   );
 };
 
-/* ─── Chip — budget / timeline selector ─────────────────── */
-const Chip = ({ label, selected, onSelect }) => (
-  <motion.button
-    type="button"
-    onClick={() => onSelect(label)}
-    whileTap={{ scale: 0.94 }}
-    style={{
-      background: selected ? "rgba(129,140,248,0.16)" : "rgba(255,255,255,0.04)",
-      border: selected ? "1px solid rgba(129,140,248,0.40)" : "1px solid rgba(255,255,255,0.07)",
-      borderRadius: 10,
-      cursor: "pointer",
-      fontFamily: "'Space Grotesk', sans-serif",
-      fontSize: 12,
-      fontWeight: 500,
-      color: selected ? "#818cf8" : "rgba(255,255,255,0.42)",
-      transition: "all 0.22s ease",
-      boxShadow: selected ? "0 0 16px rgba(129,140,248,0.18)" : "none",
-      WebkitTapHighlightColor: "transparent",
-    }}
-  >
-    {label}
-  </motion.button>
+const DirectChannels = () => (
+  <ul className="ct-channels">
+    <li className="ct-channel">
+      <HiEnvelope className="ct-channel__icon" aria-hidden="true" />
+      <div className="ct-channel__body">
+        <span className="ct-channel__label">Email</span>
+        <a className="ct-channel__value" href={`mailto:${SITE.email}`}>
+          {SITE.email}
+        </a>
+      </div>
+      <CopyEmailButton />
+    </li>
+    <li className="ct-channel">
+      <FaWhatsapp className="ct-channel__icon" aria-hidden="true" />
+      <div className="ct-channel__body">
+        <span className="ct-channel__label">WhatsApp</span>
+        <a className="ct-channel__value" href={SITE.whatsappHref} target="_blank" rel="noopener noreferrer">
+          {SITE.whatsappDisplay}
+        </a>
+      </div>
+      <a
+        className="ct-copy"
+        href={SITE.whatsappHref}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Open WhatsApp chat"
+      >
+        <span>Chat</span>
+        <HiArrowUpRight aria-hidden="true" />
+      </a>
+    </li>
+    <li className="ct-channel">
+      <HiMapPin className="ct-channel__icon" aria-hidden="true" />
+      <div className="ct-channel__body">
+        <span className="ct-channel__label">Based in</span>
+        <span className="ct-channel__value">{SITE.location}</span>
+      </div>
+    </li>
+    <li className="ct-channel">
+      <HiClock className="ct-channel__icon" aria-hidden="true" />
+      <div className="ct-channel__body">
+        <span className="ct-channel__label">Reply time</span>
+        <span className="ct-channel__value">{SITE.responseTime}</span>
+      </div>
+    </li>
+  </ul>
 );
 
-/* ─── InlineInput ────────────────────────────────────────── */
-const InlineInput = ({ label, type = "text", value, onChange, error, placeholder, as = "input" }) => {
-  const Tag = as;
-  return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-      <label
-        style={{
-          fontFamily: "'Space Grotesk', sans-serif",
-          fontSize: 10,
-          fontWeight: 600,
-          letterSpacing: "0.2em",
-          textTransform: "uppercase",
-          color: error ? "#f87171" : "rgba(255,255,255,0.22)",
-        }}
-      >
-        {error || label}
+/* ─── Form pieces ────────────────────────────────── */
+
+const Field = ({ id, label, error, counter, children }) => (
+  <div className={`ct-field${error ? " has-error" : ""}`}>
+    <div className="ct-field__top">
+      <label htmlFor={id} className="ct-field__label">
+        {label}
       </label>
-      <Tag
-        type={as === "input" ? type : undefined}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        rows={as === "textarea" ? 4 : undefined}
-        style={{
-          background: "transparent",
-          border: "none",
-          borderBottom: `1px solid ${error ? "rgba(248,113,113,0.5)" : "rgba(255,255,255,0.10)"}`,
-          padding: "12px 0",
-          fontFamily: "'Inter', sans-serif",
-          fontSize: 14,
-          color: "rgba(255,255,255,0.9)",
-          outline: "none",
-          resize: "none",
-          width: "100%",
-          lineHeight: 1.6,
-          transition: "border-color 0.25s",
-        }}
-        onFocus={(e) => {
-          e.target.style.borderBottomColor = "rgba(129,140,248,0.55)";
-        }}
-        onBlur={(e) => {
-          e.target.style.borderBottomColor = error
-            ? "rgba(248,113,113,0.5)"
-            : "rgba(255,255,255,0.10)";
-        }}
-      />
+      {counter}
     </div>
-  );
-};
-
-/* ─── PipelineBar — animated transmit states ────────────── */
-const PipelineBar = ({ step }) => (
-  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 24, padding: "40px 0" }}>
-    <div style={{ position: "relative" }}>
-      {/* outer ring */}
-      <motion.div
-        animate={{ rotate: 360 }}
-        transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-        style={{
-          width: 72,
-          height: 72,
-          borderRadius: "50%",
-          border: "1px solid rgba(129,140,248,0.28)",
-          borderTopColor: "#818cf8",
-          position: "absolute",
-          inset: -8,
-        }}
-      />
-      {/* inner dot */}
-      <motion.div
-        animate={{ scale: [1, 1.15, 1], opacity: [0.8, 1, 0.8] }}
-        transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut" }}
-        style={{
-          width: 56,
-          height: 56,
-          borderRadius: "50%",
-          background: "radial-gradient(circle, rgba(129,140,248,0.28) 0%, transparent 70%)",
-          border: "1px solid rgba(129,140,248,0.22)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <span style={{ fontSize: 20 }}>📡</span>
-      </motion.div>
-    </div>
-
-    {/* step labels */}
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
-      <AnimatePresence mode="wait">
-        <motion.p
-          key={step}
-          initial={{ opacity: 0, y: 8, filter: "blur(6px)" }}
-          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-          exit={{ opacity: 0, y: -6, filter: "blur(6px)" }}
-          transition={{ duration: 0.3 }}
-          style={{
-            margin: 0,
-            fontFamily: "'Space Grotesk', sans-serif",
-            fontSize: 16,
-            fontWeight: 600,
-            color: "#818cf8",
-          }}
-        >
-          {PIPELINE_STEPS[step]}…
-        </motion.p>
-      </AnimatePresence>
-      <p style={{ margin: 0, fontFamily: "'Inter', sans-serif", fontSize: 11, color: "rgba(255,255,255,0.28)", letterSpacing: "0.1em" }}>
-        Securing your transmission
+    {children}
+    {error && (
+      <p id={`${id}-error`} className="ct-field__error">
+        <HiExclamationCircle aria-hidden="true" />
+        {error}
       </p>
-    </div>
-
-    {/* progress dots */}
-    <div style={{ display: "flex", gap: 6 }}>
-      {PIPELINE_STEPS.map((_, i) => (
-        <motion.div
-          key={i}
-          animate={{ opacity: i <= step ? 1 : 0.2, scale: i === step ? 1.3 : 1 }}
-          transition={{ duration: 0.3 }}
-          style={{
-            width: 6,
-            height: 6,
-            borderRadius: "50%",
-            background: i <= step ? "#818cf8" : "rgba(255,255,255,0.15)",
-          }}
-        />
-      ))}
-    </div>
+    )}
   </div>
 );
 
-/* ─── SuccessScreen ──────────────────────────────────────── */
-const SuccessScreen = ({ refId, projectType, onReset }) => {
-  const typeObj = PROJECT_TYPES.find((t) => t.id === projectType);
+/** Native radio group styled as chips — keeps keyboard arrows and screen-reader semantics. */
+const ChoiceGroup = ({ name, legend, options, value, onChange, optional, error, variant = "chip" }) => (
+  <fieldset
+    className={`ct-choices ct-choices--${variant}${error ? " has-error" : ""}`}
+    aria-describedby={error ? `${name}-error` : undefined}
+  >
+    <legend className="ct-field__label">
+      {legend}
+      {optional && <span className="ct-optional"> (optional)</span>}
+    </legend>
+    <div className="ct-choices__list">
+      {options.map((opt) => {
+        const id = typeof opt === "string" ? opt : opt.id;
+        const Icon = opt.Icon;
+        return (
+          <label key={id} className={`ct-choice${value === id ? " is-selected" : ""}`}>
+            <input
+              type="radio"
+              name={name}
+              value={id}
+              checked={value === id}
+              onChange={() => onChange(id)}
+              className="ct-sr"
+            />
+            {Icon && <Icon className="ct-choice__icon" aria-hidden="true" />}
+            <span className="ct-choice__text">
+              <span className="ct-choice__label">{typeof opt === "string" ? opt : opt.label}</span>
+              {opt.sub && <span className="ct-choice__sub">{opt.sub}</span>}
+            </span>
+          </label>
+        );
+      })}
+    </div>
+    {error && (
+      <p id={`${name}-error`} className="ct-field__error">
+        <HiExclamationCircle aria-hidden="true" />
+        {error}
+      </p>
+    )}
+  </fieldset>
+);
+
+const SuccessPanel = ({ name, email, refId, onReset }) => {
+  const headingRef = useRef(null);
+  useEffect(() => headingRef.current?.focus({ preventScroll: true }), []);
+  const firstName = name.trim().split(/\s+/)[0];
 
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.94 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.5, ease: EASE }}
-      style={{ textAlign: "center", padding: "32px 16px" }}
+      className="ct-success"
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.45, ease: EASE }}
     >
-      {/* Checkmark burst */}
-      <motion.div
-        initial={{ scale: 0.5, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ type: "spring", stiffness: 340, damping: 22, delay: 0.15 }}
-        style={{
-          display: "inline-flex",
-          alignItems: "center",
-          justifyContent: "center",
-          width: 72,
-          height: 72,
-          borderRadius: "50%",
-          background: "linear-gradient(135deg, rgba(129,140,248,0.24), rgba(34,211,238,0.16))",
-          border: "1px solid rgba(129,140,248,0.40)",
-          boxShadow: "0 0 48px rgba(129,140,248,0.28)",
-          marginBottom: 28,
-        }}
-      >
-        <BsCheckLg size={28} color="#818cf8" />
-      </motion.div>
-
-      {/* Title */}
-      <motion.h3
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, ease: EASE, delay: 0.25 }}
-        style={{
-          margin: "0 0 8px",
-          fontFamily: "'Space Grotesk', sans-serif",
-          fontWeight: 700,
-          fontSize: 22,
-          color: "#fff",
-        }}
-      >
-        Transmission Received
-      </motion.h3>
-
-      <motion.p
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.4, delay: 0.35 }}
-        style={{
-          margin: "0 0 28px",
-          fontFamily: "'Inter', sans-serif",
-          fontSize: 14,
-          color: "rgba(255,255,255,0.38)",
-        }}
-      >
-        Your {typeObj?.label} inquiry has been secured and delivered.
-        <br />I'll be in touch within 24 hours.
-      </motion.p>
-
-      {/* Reference ID card */}
-      <motion.div
-        initial={{ opacity: 0, y: 14 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, ease: EASE, delay: 0.45 }}
-        style={{
-          display: "inline-block",
-          background: "rgba(129,140,248,0.08)",
-          border: "1px solid rgba(129,140,248,0.22)",
-          borderRadius: 14,
-          padding: "18px 30px",
-          marginBottom: 32,
-        }}
-      >
-        <p style={{ margin: "0 0 5px", fontFamily: "'Space Grotesk', sans-serif", fontSize: 10, fontWeight: 600, letterSpacing: "0.24em", color: "rgba(129,140,248,0.7)", textTransform: "uppercase" }}>
-          Reference ID
-        </p>
-        <p style={{ margin: 0, fontFamily: "'Space Grotesk', sans-serif", fontSize: 24, fontWeight: 700, color: "#818cf8", letterSpacing: "0.05em" }}>
-          {refId}
-        </p>
-        <p style={{ margin: "6px 0 0", fontFamily: "'Inter', sans-serif", fontSize: 11, color: "rgba(255,255,255,0.24)" }}>
-          Save this ID to track your inquiry status
-        </p>
-      </motion.div>
-
-      {/* Status trail */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.4, delay: 0.55 }}
-        style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 8, marginBottom: 32, flexWrap: "wrap" }}
-      >
-        {["Received ✓", "Under Review", "Replied"].map((s, i) => (
-          <React.Fragment key={s}>
-            <span style={{
-              fontFamily: "'Space Grotesk', sans-serif",
-              fontSize: 11,
-              color: i === 0 ? "#34d399" : "rgba(255,255,255,0.22)",
-              fontWeight: i === 0 ? 600 : 400,
-            }}>
-              {s}
-            </span>
-            {i < 2 && <span style={{ color: "rgba(255,255,255,0.14)", fontSize: 11 }}>→</span>}
-          </React.Fragment>
-        ))}
-      </motion.div>
-
-      {/* Reset */}
-      <motion.button
-        type="button"
-        onClick={onReset}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.3, delay: 0.65 }}
-        style={{
-          background: "rgba(255,255,255,0.04)",
-          border: "1px solid rgba(255,255,255,0.08)",
-          borderRadius: 10,
-          padding: "9px 22px",
-          cursor: "pointer",
-          fontFamily: "'Space Grotesk', sans-serif",
-          fontSize: 12,
-          color: "rgba(255,255,255,0.38)",
-          transition: "all 0.2s",
-        }}
-        whileHover={{ color: "rgba(255,255,255,0.7)", borderColor: "rgba(255,255,255,0.18)" }}
-      >
-        Send another inquiry
-      </motion.button>
+      <span className="ct-success__icon" aria-hidden="true">
+        <HiCheck />
+      </span>
+      <h3 ref={headingRef} tabIndex={-1} className="ct-success__title">
+        Thanks, {firstName} — message sent.
+      </h3>
+      <p className="ct-success__text">
+        I'll reply to <strong>{email}</strong> {SITE.responseTime.toLowerCase()}.
+        {refId && (
+          <>
+            {" "}
+            If you follow up, mention reference <strong className="ct-ref">{refId}</strong>.
+          </>
+        )}
+      </p>
+      <button type="button" className="ct-btn ct-btn--ghost" onClick={onReset}>
+        Send another message
+      </button>
     </motion.div>
   );
 };
 
-/* ─── STEP PANELS ────────────────────────────────────────── */
-const STEP_VARIANTS = {
-  enter:  (dir) => ({ opacity: 0, x: dir > 0 ? 40 : -40, filter: "blur(8px)" }),
-  center: { opacity: 1, x: 0, filter: "blur(0px)" },
-  exit:   (dir) => ({ opacity: 0, x: dir > 0 ? -40 : 40, filter: "blur(8px)" }),
-};
+/* ─── Inquiry form ───────────────────────────────── */
 
-/* ─── MissionConsole — the form console panel ───────────── */
-const MissionConsole = () => {
-  const [isMobile, setIsMobile] = useState(() => typeof window !== "undefined" && window.innerWidth < 640);
-  const [step, setStep] = useState(0);
-
-  useEffect(() => {
-    const fn = () => setIsMobile(window.innerWidth < 640);
-    window.addEventListener("resize", fn, { passive: true });
-    return () => window.removeEventListener("resize", fn);
-  }, []);
-
-  const [dir, setDir] = useState(1);
-  const [pipelineStep, setPipelineStep] = useState(-1); // -1 = idle
-  const [refId, setRefId] = useState(null);
-  const [submitError, setSubmitError] = useState(null);
-
-  // form state
-  const [projectType, setProjectType] = useState(null);
-  const [budget, setBudget] = useState(null);
-  const [timeline, setTimeline] = useState(null);
-  const [message, setMessage] = useState("");
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-
+const InquiryForm = () => {
+  const [form, setForm] = useState(EMPTY_FORM);
   const [errors, setErrors] = useState({});
+  const [submitted, setSubmitted] = useState(false);
+  const [status, setStatus] = useState("idle"); // idle | sending | sent | error
+  const [refId, setRefId] = useState(null);
+  const formRef = useRef(null);
 
-  const go = useCallback((next) => {
-    setDir(next > step ? 1 : -1);
-    setStep(next);
-  }, [step]);
+  const update = (key) => (value) => {
+    const next = { ...form, [key]: value };
+    setForm(next);
+    // After the first submit attempt, re-check as the visitor fixes things.
+    if (submitted) setErrors(validate(next));
+  };
 
-  const validateStep = (s) => {
-    const errs = {};
-    if (s === 0 && !projectType) errs.projectType = "Please pick a project type";
-    if (s === 1 && !message.trim()) errs.message = "Please describe your project";
-    if (s === 2) {
-      if (!name.trim()) errs.name = "Name is required";
-      if (!validateEmail(email)) errs.email = "Enter a valid email";
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (status === "sending") return;
+    setSubmitted(true);
+
+    const found = validate(form);
+    setErrors(found);
+    const firstInvalid = Object.keys(found)[0];
+    if (firstInvalid) {
+      formRef.current?.querySelector(`[name="${firstInvalid}"]`)?.focus();
+      return;
     }
-    setErrors(errs);
-    return Object.keys(errs).length === 0;
-  };
 
-  const handleNext = () => {
-    if (!validateStep(step)) return;
-    go(step + 1);
-  };
+    // Honeypot: bots fill every field; people never see this one.
+    if (form.company) {
+      setStatus("sent");
+      return;
+    }
 
-  const handleSubmit = async () => {
-    if (!validateStep(2)) return;
-    setSubmitError(null);
-
-    // run pipeline animation
-    let s = 0;
-    setPipelineStep(0);
-    const tick = () => {
-      s++;
-      if (s < PIPELINE_STEPS.length) {
-        setPipelineStep(s);
-        setTimeout(tick, 800);
-      }
-    };
-    setTimeout(tick, 800);
-
-    const totalDelay = PIPELINE_STEPS.length * 800 + 200;
-
+    setStatus("sending");
+    let timer;
     try {
-      const id = await submitInquiry({
-        name: name.trim(),
-        email: email.trim().toLowerCase(),
-        projectType,
-        budget: budget || "Not specified",
-        timeline: timeline || "Not specified",
-        message: message.trim(),
-      });
-
-      setTimeout(() => {
-        setRefId(id);
-        setPipelineStep(-1);
-      }, totalDelay);
+      const id = await Promise.race([
+        submitInquiry({
+          name: form.name.trim(),
+          email: form.email.trim().toLowerCase(),
+          projectType: form.projectType,
+          budget: form.budget || "Not specified",
+          timeline: form.timeline || "Not specified",
+          message: form.message.trim(),
+        }),
+        new Promise((_, reject) => {
+          timer = setTimeout(() => reject(new Error("Submission timed out")), SUBMIT_TIMEOUT_MS);
+        }),
+      ]);
+      setRefId(id);
+      setStatus("sent");
     } catch (err) {
       console.error("Inquiry submission failed:", err);
-      setTimeout(() => {
-        setPipelineStep(-1);
-        setSubmitError("Submission failed — please email me directly.");
-      }, totalDelay);
+      setStatus("error");
+    } finally {
+      clearTimeout(timer);
     }
   };
 
   const reset = () => {
-    setStep(0); setDir(1); setPipelineStep(-1); setRefId(null); setSubmitError(null);
-    setProjectType(null); setBudget(null); setTimeline(null);
-    setMessage(""); setName(""); setEmail(""); setErrors({});
+    setForm(EMPTY_FORM);
+    setErrors({});
+    setSubmitted(false);
+    setRefId(null);
+    setStatus("idle");
   };
 
-  /* ── rendering ── */
-  const transmitting = pipelineStep >= 0;
+  const invalid = (key) => (errors[key] ? { "aria-invalid": true, "aria-describedby": `${key}-error` } : {});
+  const messageLeft = LIMITS.message - form.message.length;
 
   return (
-    <div
-      style={{
-        position: "relative",
-        background: "rgba(10,10,13,0.75)",
-        border: "1px solid rgba(255,255,255,0.07)",
-        borderRadius: 24,
-        padding: isMobile ? "24px 20px" : "32px 28px",
-        backdropFilter: "blur(28px)",
-        WebkitBackdropFilter: "blur(28px)",
-        boxShadow: "0 24px 80px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.04)",
-        overflow: "hidden",
-        minHeight: 360,
-      }}
-    >
-      {/* top-right corner glare */}
-      <div style={{ position: "absolute", top: 0, right: 0, width: 200, height: 200, background: "radial-gradient(circle at 100% 0%, rgba(129,140,248,0.07) 0%, transparent 65%)", pointerEvents: "none" }} />
-
-      {/* HUD corners */}
-      {[{ top: 10, left: 10 }, { top: 10, right: 10, transform: "rotate(90deg)" }, { bottom: 10, right: 10, transform: "rotate(180deg)" }, { bottom: 10, left: 10, transform: "rotate(270deg)" }].map((s, i) => (
-        <div key={i} aria-hidden="true" style={{ position: "absolute", width: 14, height: 14, ...s, pointerEvents: "none" }}>
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-            <path d="M1 7 L1 1 L7 1" stroke="rgba(129,140,248,0.25)" strokeWidth="1" fill="none" />
-          </svg>
-        </div>
-      ))}
-
-      {/* mission tag */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 9, fontWeight: 600, letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(129,140,248,0.7)" }}>
-            Mission Brief
-          </span>
-          <span style={{ width: 1, height: 10, background: "rgba(255,255,255,0.1)" }} />
-          {!transmitting && !refId && (
-            <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 9, color: "rgba(255,255,255,0.24)", letterSpacing: "0.1em" }}>
-              STEP {step + 1} / 3
-            </span>
-          )}
-        </div>
-        {!transmitting && !refId && (
-          <div style={{ display: "flex", gap: 5 }}>
-            {[0, 1, 2].map((i) => (
-              <div key={i} style={{ width: i <= step ? 16 : 6, height: 4, borderRadius: 999, background: i <= step ? "linear-gradient(90deg,#818cf8,#22d3ee)" : "rgba(255,255,255,0.1)", transition: "all 0.4s ease" }} />
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* ── success ── */}
-      {refId && <SuccessScreen refId={refId} projectType={projectType} onReset={reset} />}
-
-      {/* ── transmitting ── */}
-      {transmitting && <PipelineBar step={pipelineStep} />}
-
-      {/* ── error fallback ── */}
-      {submitError && !transmitting && !refId && (
-        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ color: "#f87171", fontSize: 13, fontFamily: "'Inter', sans-serif", marginBottom: 12 }}>
-          ⚠ {submitError}
-        </motion.p>
-      )}
-
-      {/* ── form steps ── */}
-      {!transmitting && !refId && (
-        <AnimatePresence mode="wait" custom={dir}>
-          <motion.div
-            key={step}
-            custom={dir}
-            variants={STEP_VARIANTS}
-            initial="enter"
-            animate="center"
-            exit="exit"
-            transition={{ duration: 0.32, ease: EASE }}
+    <div className="ct-card">
+      <AnimatePresence mode="wait" initial={false}>
+        {status === "sent" ? (
+          <SuccessPanel key="success" name={form.name} email={form.email.trim()} refId={refId} onReset={reset} />
+        ) : (
+          <motion.form
+            key="form"
+            ref={formRef}
+            className="ct-form"
+            onSubmit={handleSubmit}
+            noValidate
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.25 }}
           >
-            {/* ── STEP 0: Project Type ── */}
-            {step === 0 && (
-              <div>
-                <h3 style={{ margin: "0 0 6px", fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 20, color: "#fff" }}>
-                  What are you building?
-                </h3>
-                <p style={{ margin: "0 0 20px", fontFamily: "'Inter', sans-serif", fontSize: 13, color: "rgba(255,255,255,0.36)" }}>
-                  Select the type of project you have in mind.
-                </p>
-                {errors.projectType && (
-                  <p style={{ margin: "0 0 12px", color: "#f87171", fontSize: 12, fontFamily: "'Inter',sans-serif" }}>{errors.projectType}</p>
-                )}
-                <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", gap: isMobile ? 8 : 10, marginBottom: 24 }}>
-                  {PROJECT_TYPES.map((t) => (
-                    <TypeCard key={t.id} item={t} selected={projectType} onSelect={(id) => { setProjectType(id); setErrors((e) => ({ ...e, projectType: null })); }} />
-                  ))}
-                </div>
-              </div>
-            )}
+            <div className="ct-form__head">
+              <h3 className="ct-form__title">Start a project</h3>
+              <p className="ct-form__sub">Takes about a minute.</p>
+            </div>
 
-            {/* ── STEP 1: Scope ── */}
-            {step === 1 && (
-              <div>
-                <h3 style={{ margin: "0 0 6px", fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 20, color: "#fff" }}>
-                  Tell me about the scope
-                </h3>
-                <p style={{ margin: "0 0 20px", fontFamily: "'Inter', sans-serif", fontSize: 13, color: "rgba(255,255,255,0.36)" }}>
-                  Budget, timeline, and a brief description.
-                </p>
+            <ChoiceGroup
+              name="projectType"
+              legend="What do you need?"
+              options={PROJECT_TYPES}
+              value={form.projectType}
+              onChange={update("projectType")}
+              error={errors.projectType}
+              variant="card"
+            />
 
-                <div style={{ marginBottom: 18 }}>
-                  <label style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 10, fontWeight: 600, letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)", display: "block", marginBottom: 10 }}>
-                    Budget
-                  </label>
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: 7 }}>
-                    {BUDGETS.map((b) => <Chip key={b} label={b} selected={budget === b} onSelect={setBudget} />)}
-                  </div>
-                </div>
-
-                <div style={{ marginBottom: 20 }}>
-                  <label style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 10, fontWeight: 600, letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)", display: "block", marginBottom: 10 }}>
-                    Timeline
-                  </label>
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: 7 }}>
-                    {TIMELINES.map((t) => <Chip key={t} label={t} selected={timeline === t} onSelect={setTimeline} />)}
-                  </div>
-                </div>
-
-                <InlineInput
-                  label="Project Brief"
-                  as="textarea"
-                  value={message}
-                  onChange={(v) => { setMessage(v); setErrors((e) => ({ ...e, message: null })); }}
-                  placeholder="Describe your project, goals, features you need…"
-                  error={errors.message}
+            <div className="ct-row">
+              <Field id="name" label="Name" error={errors.name}>
+                <input
+                  id="name"
+                  name="name"
+                  className="ct-input"
+                  value={form.name}
+                  onChange={(e) => update("name")(e.target.value)}
+                  autoComplete="name"
+                  maxLength={LIMITS.name}
+                  placeholder="Your name"
+                  {...invalid("name")}
                 />
-              </div>
-            )}
+              </Field>
+              <Field id="email" label="Email" error={errors.email}>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  className="ct-input"
+                  value={form.email}
+                  onChange={(e) => update("email")(e.target.value)}
+                  autoComplete="email"
+                  inputMode="email"
+                  maxLength={LIMITS.email}
+                  placeholder="you@company.com"
+                  {...invalid("email")}
+                />
+              </Field>
+            </div>
 
-            {/* ── STEP 2: Identity ── */}
-            {step === 2 && (
-              <div>
-                <h3 style={{ margin: "0 0 6px", fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 20, color: "#fff" }}>
-                  Who's transmitting?
-                </h3>
-                <p style={{ margin: "0 0 20px", fontFamily: "'Inter', sans-serif", fontSize: 13, color: "rgba(255,255,255,0.36)" }}>
-                  So I can reply directly to you.
+            <ChoiceGroup
+              name="budget"
+              legend="Budget"
+              options={BUDGETS}
+              value={form.budget}
+              onChange={update("budget")}
+              optional
+            />
+            <ChoiceGroup
+              name="timeline"
+              legend="Timeline"
+              options={TIMELINES}
+              value={form.timeline}
+              onChange={update("timeline")}
+              optional
+            />
+
+            <Field
+              id="message"
+              label="Project details"
+              error={errors.message}
+              counter={
+                messageLeft < 200 && (
+                  <span className="ct-counter" aria-live="polite">
+                    {messageLeft} left
+                  </span>
+                )
+              }
+            >
+              <textarea
+                id="message"
+                name="message"
+                className="ct-input ct-input--area"
+                value={form.message}
+                onChange={(e) => update("message")(e.target.value)}
+                maxLength={LIMITS.message}
+                rows={5}
+                placeholder="What are you building, who is it for, and what should it do?"
+                {...invalid("message")}
+              />
+            </Field>
+
+            {/* Honeypot — hidden from people and assistive tech. */}
+            <div className="ct-hp" aria-hidden="true">
+              <label htmlFor="company">Company</label>
+              <input
+                id="company"
+                name="company"
+                tabIndex={-1}
+                autoComplete="off"
+                value={form.company}
+                onChange={(e) => update("company")(e.target.value)}
+              />
+            </div>
+
+            {status === "error" && (
+              <div className="ct-alert" role="alert">
+                <HiExclamationCircle aria-hidden="true" />
+                <p>
+                  Your message couldn't be sent. Please try again, or email me at{" "}
+                  <a href={`mailto:${SITE.email}`}>{SITE.email}</a>.
                 </p>
-
-                <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: isMobile ? "18px" : "20px 24px", marginBottom: 8 }}>
-                  <InlineInput label="Your Name" value={name} onChange={(v) => { setName(v); setErrors((e) => ({ ...e, name: null })); }} placeholder="Alex Johnson" error={errors.name} />
-                  <InlineInput label="Email Address" type="email" value={email} onChange={(v) => { setEmail(v); setErrors((e) => ({ ...e, email: null })); }} placeholder="you@domain.com" error={errors.email} />
-                </div>
               </div>
             )}
-          </motion.div>
-        </AnimatePresence>
-      )}
 
-      {/* ── Navigation buttons ── */}
-      {!transmitting && !refId && (
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 24 }}>
-          {step > 0 ? (
-            <motion.button
-              type="button"
-              onClick={() => go(step - 1)}
-              whileHover={{ x: -2 }}
-              style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 6, fontFamily: "'Space Grotesk', sans-serif", fontSize: 13, color: "rgba(255,255,255,0.36)", padding: 0 }}
-            >
-              <HiArrowLeft size={15} />
-              Back
-            </motion.button>
-          ) : <div />}
-
-          {step < 2 ? (
-            <motion.button
-              type="button"
-              onClick={handleNext}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.97 }}
-              style={{
-                display: "inline-flex", alignItems: "center", gap: 8,
-                background: "linear-gradient(135deg, #818cf8 0%, #22d3ee 100%)",
-                border: "none", borderRadius: 10, padding: "10px 22px",
-                fontFamily: "'Space Grotesk', sans-serif", fontSize: 13, fontWeight: 600, color: "#000",
-                cursor: "pointer",
-                boxShadow: "0 6px 24px rgba(129,140,248,0.28)",
-              }}
-            >
-              Continue <BsArrowRight size={13} />
-            </motion.button>
-          ) : (
-            <motion.button
-              type="button"
-              onClick={handleSubmit}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.97 }}
-              style={{
-                display: "inline-flex", alignItems: "center", gap: 8,
-                background: "linear-gradient(135deg, #818cf8 0%, #22d3ee 100%)",
-                border: "none", borderRadius: 10, padding: "10px 22px",
-                fontFamily: "'Space Grotesk', sans-serif", fontSize: 13, fontWeight: 600, color: "#000",
-                cursor: "pointer",
-                boxShadow: "0 6px 24px rgba(129,140,248,0.28)",
-              }}
-            >
-              Transmit <BsArrowRight size={13} />
-            </motion.button>
-          )}
-        </div>
-      )}
+            <div className="ct-form__foot">
+              <button type="submit" className="ct-btn ct-btn--primary" disabled={status === "sending"}>
+                {status === "sending" ? (
+                  <>
+                    <span className="ct-spinner" aria-hidden="true" />
+                    Sending…
+                  </>
+                ) : (
+                  <>
+                    Send message
+                    <HiArrowRight aria-hidden="true" />
+                  </>
+                )}
+              </button>
+              <p className="ct-form__note">No spam, no newsletters — just a reply.</p>
+            </div>
+          </motion.form>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
 
-/* ─── WhatsAppChannel — live direct line ─────────────────── */
-const WhatsAppChannel = () => (
-  <motion.a
-    href={SITE.whatsappHref}
-    target="_blank"
-    rel="noopener noreferrer"
-    className="wa-channel"
-    aria-label={`Open WhatsApp chat with Mario at ${SITE.whatsapp}`}
-    whileHover="hover"
-    initial="rest"
-    animate="rest"
-  >
-    <span className="wa-channel__scan" aria-hidden="true" />
+/* ─── Section ────────────────────────────────────── */
 
-    <div className="wa-channel__top">
-      <span className="wa-channel__live">
-        <span className="wa-channel__pulse" aria-hidden="true" />
-        Line open
-      </span>
-      <span className="wa-channel__freq" aria-hidden="true">
-        CH · WA
-        <span className="wa-channel__bars">
-          <i /><i /><i /><i />
-        </span>
-      </span>
-    </div>
-
-    <div className="wa-channel__preview" aria-hidden="true">
-      <motion.span
-        className="wa-channel__bubble"
-        variants={{
-          rest: { y: 0, opacity: 0.72 },
-          hover: { y: -2, opacity: 1 },
-        }}
-        transition={{ duration: 0.35, ease: EASE }}
-      >
-        Hey Mario — got a minute?
-      </motion.span>
-      <span className="wa-channel__typing">
-        <i /><i /><i />
-      </span>
-    </div>
-
-    <div className="wa-channel__main">
-      <span className="wa-channel__icon" aria-hidden="true">
-        <FaWhatsapp size={20} />
-      </span>
-      <span className="wa-channel__copy">
-        <span className="wa-channel__title">Direct line</span>
-        <span className="wa-channel__number">{SITE.whatsapp}</span>
-      </span>
-      <span className="wa-channel__cta">
-        Open chat
-        <HiArrowUpRight size={14} aria-hidden="true" />
-      </span>
-    </div>
-  </motion.a>
-);
-
-/* ─── ContactSection ─────────────────────────────────────── */
 const ContactSection = () => (
   <section className="section pb-28 md:pb-24 lg:pb-28" id="contact" data-tour="contact">
     <div className="container">
       <div className="divider mb-12 lg:mb-16" />
 
-      <div className="flex flex-col lg:flex-row gap-8 lg:gap-24">
-        {/* left column */}
-        <AnimatedSection direction="right" delay={0.2} className="flex-1">
-          <span className="label">Mission Brief</span>
-
-          <h2 className="text-display-sm mb-7">
-            Let's build
-            <br />
-            <span className="text-gradient">something great.</span>
+      <div className="ct-grid">
+        <AnimatedSection direction="right" delay={0.15} className="ct-info">
+          <span className="label">Contact</span>
+          <h2 className="text-display-sm ct-heading">
+            Let's build <span className="text-gradient">something great.</span>
           </h2>
-
-          <p className="text-body text-white/40 mb-8 max-w-[340px]">
-            Select your project type, describe your scope, and transmit — I'll
-            be back within 24 hours.
+          <p className="ct-lead">
+            Tell me about your project and I'll get back to you {SITE.responseTime.toLowerCase()} — usually sooner.
           </p>
 
-          <div className="wa-route">
-            <div className="wa-route__header">
-              <span className="wa-route__label">Faster path</span>
-              <span className="wa-route__rule" aria-hidden="true" />
-            </div>
-            <p className="wa-route__hint">
-              Skip the brief — ping me live on WhatsApp.
-            </p>
-            <WhatsAppChannel />
-          </div>
+          <p className="ct-status">
+            <span className="ct-status__dot" aria-hidden="true" />
+            {SITE.availability}
+          </p>
 
-          <SocialLinks email={SITE.email} className="mt-8 mb-0" />
+          <DirectChannels />
+          <SocialLinks className="ct-socials" />
         </AnimatedSection>
 
-        {/* right column — console */}
-        <AnimatedSection direction="left" delay={0.3} className="flex-1">
-          <MissionConsole />
+        <AnimatedSection direction="left" delay={0.25} className="ct-main">
+          <InquiryForm />
         </AnimatedSection>
       </div>
     </div>

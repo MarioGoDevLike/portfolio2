@@ -1,235 +1,244 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { resolveTourTarget, speakNarration } from "../services/tourApi";
+import { speak } from "../services/assistantApi";
+
+/** Tour stops, in order. Each targets [data-tour="<id>"] (or the fallback selector). */
+export const TOUR_STOPS = [
+  {
+    id: "home",
+    fallback: "#home",
+    label: "Intro",
+    line: "Welcome. This portfolio shows how Mario works — clean design, smooth motion, and a strong first impression.",
+  },
+  {
+    id: "about",
+    fallback: "#about",
+    label: "About",
+    line: "Mario is a mobile and web developer. He builds with React, Flutter, and Firebase, and focuses on products that hold up in the real world.",
+  },
+  {
+    id: "services",
+    fallback: "#services",
+    label: "Services",
+    line: "He covers both mobile and web with the same care — clear structure, solid code, and products clients can trust.",
+  },
+  {
+    id: "work",
+    fallback: "#work",
+    label: "Work",
+    line: "These are real client projects — marketplace, news, and delivery apps, plus polished websites.",
+  },
+  {
+    id: "work-featured",
+    fallback: "#work",
+    label: "Featured",
+    line: "The featured project shows his standard: he owns the full build and ships something polished and ready to use.",
+  },
+  {
+    id: "contact",
+    fallback: "#contact",
+    label: "Contact",
+    line: "If you're looking for a reliable developer, this is the next step. Mario is available and replies quickly.",
+  },
+];
 
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+const isMobile = () => window.innerWidth < 768;
 
-async function scrollToTarget(el) {
-  if (!el) return;
-  const isMobile = window.innerWidth < 768;
-  el.scrollIntoView({
-    behavior: "smooth",
-    block: isMobile ? "start" : "center",
-    inline: "nearest",
-  });
-  await wait(isMobile ? 900 : 700);
-  if (isMobile) {
-    window.scrollBy({ top: -72, left: 0, behavior: "smooth" });
-    await wait(220);
-  }
+/** Roughly 200 wpm plus a beat, so written lines stay up long enough to read. */
+const readingTime = (text) => Math.max(4500, text.split(/\s+/).length * 300 + 1200);
+
+function findTarget(item) {
+  return document.querySelector(`[data-tour="${item.id}"]`) || document.querySelector(item.fallback);
 }
 
+async function scrollToTarget(el) {
+  el.scrollIntoView({ behavior: "smooth", block: isMobile() ? "start" : "center" });
+  await wait(isMobile() ? 850 : 700);
+}
+
+/** Spotlight box around the element, clamped so it never sits under the HUD. */
 function readRect(el) {
   if (!el) return null;
   const r = el.getBoundingClientRect();
-  const isMobile = window.innerWidth < 768;
-  const pad = isMobile ? 10 : 14;
-  const hudReserve = isMobile ? 168 : 120;
-  const maxW = window.innerWidth - (isMobile ? 16 : 24);
-  const maxH = window.innerHeight - hudReserve - (isMobile ? 12 : 24);
-  const width = Math.min(maxW, Math.max(120, r.width + pad * 2));
-  const height = Math.min(maxH, Math.max(90, r.height + pad * 2));
-  let left = r.left + r.width / 2 - width / 2;
-  let top = r.top + r.height / 2 - height / 2;
-  left = Math.max(8, Math.min(left, window.innerWidth - width - 8));
-  top = Math.max(8, Math.min(top, window.innerHeight - height - hudReserve));
+  const mobile = isMobile();
+  const pad = mobile ? 10 : 14;
+  const hudReserve = mobile ? 190 : 150;
+  const width = Math.min(window.innerWidth - 16, Math.max(120, r.width + pad * 2));
+  const height = Math.min(window.innerHeight - hudReserve - 16, Math.max(90, r.height + pad * 2));
+  const left = Math.max(8, Math.min(r.left + r.width / 2 - width / 2, window.innerWidth - width - 8));
+  const top = Math.max(8, Math.min(r.top + r.height / 2 - height / 2, window.innerHeight - height - hudReserve));
   return { top, left, width, height };
 }
 
-async function waitWhilePaused(pauseRef, runIdRef, runId) {
-  while (pauseRef.current) {
-    if (runIdRef.current !== runId) return false;
-    await wait(120);
-  }
-  return runIdRef.current === runId;
-}
-
 /**
- * Runs a planned tour: scroll → spotlight → narrate → wait for voice/dwell → next.
+ * Guided tour engine: scroll → spotlight → narrate (text, optionally voice) → next.
+ * Every run gets an id; bumping it cancels whatever run is in flight.
  */
-export default function useConciergeTour({ voiceEnabled }) {
+export default function useConciergeTour({ onFinish } = {}) {
   const [active, setActive] = useState(false);
-  const [stepIndex, setStepIndex] = useState(-1);
-  const [steps, setSteps] = useState([]);
-  const [meta, setMeta] = useState({ title: "", vibe: "" });
+  const [index, setIndex] = useState(-1);
+  const [paused, setPaused] = useState(false);
+  const [voice, setVoice] = useState(false);
   const [spotlight, setSpotlight] = useState(null);
-  const [narration, setNarration] = useState("");
-  const [phase, setPhase] = useState("idle");
 
-  const runIdRef = useRef(0);
-  const pauseRef = useRef(false);
-  const stopSpeechRef = useRef(() => {});
-  const stepsRef = useRef([]);
+  const runRef = useRef(0);
+  const stopsRef = useRef([]);
   const indexRef = useRef(-1);
-  const voiceRef = useRef(voiceEnabled);
+  const pausedRef = useRef(false);
+  const voiceRef = useRef(false);
+  const cancelSpeechRef = useRef(() => {});
+  const onFinishRef = useRef(onFinish);
+  onFinishRef.current = onFinish;
 
-  voiceRef.current = voiceEnabled;
+  const setPausedBoth = (value) => {
+    pausedRef.current = value;
+    setPaused(value);
+  };
 
-  const clearSpotlight = useCallback(() => setSpotlight(null), []);
-
-  const stop = useCallback(() => {
-    runIdRef.current += 1;
-    pauseRef.current = false;
-    stopSpeechRef.current();
+  const end = useCallback(() => {
+    runRef.current += 1;
+    cancelSpeechRef.current();
+    setPausedBoth(false);
     setActive(false);
-    setPhase("idle");
-    setStepIndex(-1);
-    setNarration("");
-    clearSpotlight();
+    setIndex(-1);
+    setSpotlight(null);
     indexRef.current = -1;
-  }, [clearSpotlight]);
-
-  const syncSpotlight = useCallback(() => {
-    const step = stepsRef.current[indexRef.current];
-    if (!step) return;
-    const el = resolveTourTarget(step.id);
-    setSpotlight(readRect(el));
   }, []);
 
-  useEffect(() => {
-    if (!active) return undefined;
-    const onScroll = () => syncSpotlight();
-    const onResize = () => syncSpotlight();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onResize);
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onResize);
-    };
-  }, [active, syncSpotlight]);
+  const finish = useCallback(() => {
+    end();
+    onFinishRef.current?.();
+  }, [end]);
 
-  const holdOnStep = useCallback(async (step, runId) => {
-    const stillActive = () => runIdRef.current === runId;
+  /** Holds a stop until it has been readable long enough and any speech has finished. */
+  const hold = useCallback(async (item, runId) => {
+    const alive = () => runRef.current === runId;
+    let speechDone = true;
 
     if (voiceRef.current) {
-      stopSpeechRef.current();
-      const { promise, cancel } = speakNarration(step.narration, { enabled: true });
-      stopSpeechRef.current = cancel;
-
-      await promise;
-      if (!stillActive()) return;
-
-      // Brief beat after speech before scrolling on.
-      await wait(450);
-      if (!stillActive()) return;
-      if (!(await waitWhilePaused(pauseRef, runIdRef, runId))) return;
-      return;
+      speechDone = false;
+      const speech = speak(item.line);
+      cancelSpeechRef.current = speech.cancel;
+      speech.promise.then(() => {
+        speechDone = true;
+      });
     }
 
-    // No voice — keep the written line on screen for dwellMs.
-    const dwell = step.dwellMs || 4800;
-    const tick = 80;
+    const dwell = readingTime(item.line);
     let elapsed = 0;
-    while (elapsed < dwell) {
-      if (!stillActive()) return;
-      if (!(await waitWhilePaused(pauseRef, runIdRef, runId))) return;
-      await wait(tick);
-      elapsed += tick;
+    while (elapsed < dwell || !speechDone) {
+      if (!alive()) return false;
+      await wait(100);
+      if (!pausedRef.current) elapsed += 100;
     }
+    return alive();
   }, []);
 
   const runFrom = useCallback(
-    async (startAt, runId) => {
-      setPhase("running");
+    async (start, runId) => {
+      const stops = stopsRef.current;
       setActive(true);
 
-      for (let i = startAt; i < stepsRef.current.length; i++) {
-        if (runIdRef.current !== runId) return;
-        if (!(await waitWhilePaused(pauseRef, runIdRef, runId))) return;
-
-        const step = stepsRef.current[i];
+      for (let i = start; i < stops.length; i++) {
+        if (runRef.current !== runId) return;
         indexRef.current = i;
-        setStepIndex(i);
+        setIndex(i);
 
-        const el = resolveTourTarget(step.id);
+        const el = findTarget(stops[i]);
+        setSpotlight(null);
         await scrollToTarget(el);
-        if (runIdRef.current !== runId) return;
-
+        if (runRef.current !== runId) return;
         setSpotlight(readRect(el));
-        setNarration(step.narration);
 
-        await holdOnStep(step, runId);
-        if (runIdRef.current !== runId) return;
+        if (!(await hold(stops[i], runId))) return;
       }
 
-      if (runIdRef.current !== runId) return;
-
-      setPhase("done");
-      setNarration("Tour complete. Take the wheel — or ask for another path.");
-      stopSpeechRef.current();
-
-      if (voiceRef.current) {
-        const { promise, cancel } = speakNarration(
-          "Tour complete. Take the wheel — or ask for another path.",
-          { enabled: true }
-        );
-        stopSpeechRef.current = cancel;
-        await promise;
-      } else {
-        await wait(1600);
-      }
-
-      if (runIdRef.current === runId) stop();
+      if (runRef.current === runId) finish();
     },
-    [holdOnStep, stop]
+    [hold, finish]
   );
 
-  const start = useCallback(
-    async (tour) => {
-      stopSpeechRef.current();
-      pauseRef.current = false;
-      const nextSteps = tour?.steps || [];
-      stepsRef.current = nextSteps;
-      setSteps(nextSteps);
-      setMeta({ title: tour?.title || "Site tour", vibe: tour?.vibe || "" });
-      setStepIndex(-1);
-      indexRef.current = -1;
-      const runId = runIdRef.current + 1;
-      runIdRef.current = runId;
-      await runFrom(0, runId);
+  const restartAt = useCallback(
+    (i) => {
+      cancelSpeechRef.current();
+      setPausedBoth(false);
+      const runId = runRef.current + 1;
+      runRef.current = runId;
+      runFrom(i, runId);
     },
     [runFrom]
   );
 
-  const togglePause = useCallback(() => {
-    if (!active) return;
-    pauseRef.current = !pauseRef.current;
-    setPhase(pauseRef.current ? "paused" : "running");
+  const start = useCallback(() => {
+    stopsRef.current = TOUR_STOPS.filter((item) => findTarget(item));
+    if (stopsRef.current.length) restartAt(0);
+  }, [restartAt]);
 
+  const next = useCallback(() => {
+    const i = indexRef.current + 1;
+    if (i >= stopsRef.current.length) finish();
+    else restartAt(i);
+  }, [restartAt, finish]);
+
+  const prev = useCallback(() => {
+    if (indexRef.current > 0) restartAt(indexRef.current - 1);
+  }, [restartAt]);
+
+  const togglePause = useCallback(() => {
+    const value = !pausedRef.current;
+    setPausedBoth(value);
     try {
-      if (typeof window !== "undefined" && window.speechSynthesis) {
-        if (pauseRef.current) window.speechSynthesis.pause();
-        else window.speechSynthesis.resume();
-      }
+      if (value) window.speechSynthesis?.pause();
+      else window.speechSynthesis?.resume();
     } catch {
-      /* ignore */
+      /* speech not available */
     }
+  }, []);
+
+  /** Turning voice off silences the current line; turning it on applies from the next stop. */
+  const toggleVoice = useCallback(() => {
+    voiceRef.current = !voiceRef.current;
+    setVoice(voiceRef.current);
+    if (!voiceRef.current) cancelSpeechRef.current();
+  }, []);
+
+  // Keep the spotlight glued to its element while the page moves.
+  useEffect(() => {
+    if (!active) return undefined;
+    const sync = () => {
+      const item = stopsRef.current[indexRef.current];
+      if (item) setSpotlight(readRect(findTarget(item)));
+    };
+    window.addEventListener("scroll", sync, { passive: true });
+    window.addEventListener("resize", sync);
+    return () => {
+      window.removeEventListener("scroll", sync);
+      window.removeEventListener("resize", sync);
+    };
   }, [active]);
 
-  const skip = useCallback(() => {
-    if (!active || phase === "done") return;
-    const next = indexRef.current + 1;
-    stopSpeechRef.current();
-    if (next >= stepsRef.current.length) {
-      stop();
-      return;
-    }
-    const runId = runIdRef.current + 1;
-    runIdRef.current = runId;
-    pauseRef.current = false;
-    runFrom(next, runId);
-  }, [active, phase, runFrom, stop]);
+  // Cancel any running tour on unmount.
+  useEffect(
+    () => () => {
+      runRef.current += 1;
+      cancelSpeechRef.current();
+    },
+    []
+  );
 
   return {
     active,
-    phase,
-    steps,
-    stepIndex,
-    meta,
+    index,
+    total: stopsRef.current.length,
+    current: stopsRef.current[index] || null,
+    paused,
+    voice,
     spotlight,
-    narration,
     start,
-    stop,
+    end,
+    next,
+    prev,
     togglePause,
-    skip,
+    toggleVoice,
   };
 }

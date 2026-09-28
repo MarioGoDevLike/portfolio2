@@ -1,87 +1,63 @@
 /**
- * Local dev proxy for AI Site Concierge.
- * GEMINI_API_KEY in project-root .env (restart npm start after changes).
+ * Local dev bridge for the serverless API: runs api/ask.js (the same handler
+ * Vercel deploys) inside the CRA dev server.
+ * Put GEMINI_API_KEY in the project-root .env and restart npm start.
  */
-module.exports = function setupProxy(app) {
-  const readJsonBody = (req) =>
-    new Promise((resolve, reject) => {
-      let raw = "";
-      req.on("data", (chunk) => {
-        raw += chunk;
-        if (raw.length > 200_000) {
-          req.destroy();
-          reject(new Error("Payload too large"));
-        }
-      });
-      req.on("end", () => {
-        try {
-          resolve(raw ? JSON.parse(raw) : {});
-        } catch (error) {
-          reject(error);
-        }
-      });
-      req.on("error", reject);
+const path = require("path");
+
+const MAX_BODY = 50_000;
+const API_DIR = path.resolve(__dirname, "../api");
+
+const readJsonBody = (req) =>
+  new Promise((resolve, reject) => {
+    let raw = "";
+    req.on("data", (chunk) => {
+      raw += chunk;
+      if (raw.length > MAX_BODY) {
+        req.destroy();
+        reject(new Error("Payload too large"));
+      }
     });
-
-  const sendJson = (res, status, payload) => {
-    res.setHeader("Content-Type", "application/json");
-    res.statusCode = status;
-    res.end(JSON.stringify(payload));
-  };
-
-  const reload = (relativePath) => {
-    const full = require.resolve(relativePath);
-    delete require.cache[full];
-    return require(full);
-  };
-
-  const statusFor = (error) =>
-    error.code === "MISSING_API_KEY" || error.code === "INVALID_INPUT"
-      ? 400
-      : error.status && error.status >= 400 && error.status < 600
-        ? error.status
-        : 500;
-
-  app.post("/api/tour", async (req, res) => {
-    try {
-      reload("../api/tourStops");
-      reload("../api/portfolioKnowledge");
-      reload("../api/geminiClient");
-      const { planTour } = reload("../api/planTour");
-      const body = await readJsonBody(req);
-      const apiKey = process.env.GEMINI_API_KEY || body.apiKey || "";
-      const tour = await planTour({
-        prompt: body.prompt,
-        apiKey,
-      });
-      sendJson(res, 200, { ok: true, tour });
-    } catch (error) {
-      sendJson(res, statusFor(error), {
-        ok: false,
-        code: error.code || "UNKNOWN",
-        error: error.message || "Tour planning failed",
-      });
-    }
+    req.on("end", () => {
+      try {
+        resolve(raw ? JSON.parse(raw) : {});
+      } catch (error) {
+        reject(error);
+      }
+    });
+    req.on("error", reject);
   });
 
-  app.post("/api/ask", async (req, res) => {
+/** Adds the Vercel-style res.status().json() helpers the handler uses. */
+const withVercelHelpers = (res) => {
+  res.status = (code) => {
+    res.statusCode = code;
+    return res;
+  };
+  res.json = (payload) => {
+    res.setHeader("Content-Type", "application/json");
+    res.end(JSON.stringify(payload));
+  };
+  return res;
+};
+
+/** Re-require api/* on every call so edits apply without restarting. */
+const loadHandler = () => {
+  Object.keys(require.cache)
+    .filter((key) => key.startsWith(API_DIR))
+    .forEach((key) => delete require.cache[key]);
+  return require(path.join(API_DIR, "ask"));
+};
+
+module.exports = function setupProxy(app) {
+  app.all("/api/ask", async (req, res) => {
+    withVercelHelpers(res);
     try {
-      reload("../api/portfolioKnowledge");
-      reload("../api/geminiClient");
-      const { askPortfolio } = reload("../api/askPortfolio");
-      const body = await readJsonBody(req);
-      const apiKey = process.env.GEMINI_API_KEY || body.apiKey || "";
-      const result = await askPortfolio({
-        question: body.question,
-        apiKey,
-      });
-      sendJson(res, 200, { ok: true, result });
-    } catch (error) {
-      sendJson(res, statusFor(error), {
-        ok: false,
-        code: error.code || "UNKNOWN",
-        error: error.message || "Ask failed",
-      });
+      req.body = req.method === "POST" ? await readJsonBody(req) : {};
+    } catch {
+      res.status(400).json({ ok: false, error: "Invalid request body" });
+      return;
     }
+    await loadHandler()(req, res);
   });
 };

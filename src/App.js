@@ -4,12 +4,7 @@ import Preloader from "./components/layout/Preloader";
 import RouteScrollHandler from "./components/layout/RouteScrollHandler";
 import HomePage from "./pages/HomePage";
 import ProjectsPage from "./pages/ProjectsPage";
-import ElloCafePage from "./pages/ElloCafePage";
-import RaffoulMotorsPage from "./pages/RaffoulMotorsPage";
-import TopSpeedPage from "./pages/TopSpeedPage";
-import AlterPage from "./pages/AlterPage";
-import MartixPage from "./pages/MartixPage";
-import ArabFilesPage from "./pages/ArabFilesPage";
+import CaseStudyPage from "./pages/CaseStudyPage";
 import MaintenancePage from "./pages/MaintenancePage";
 import AdminDashboardPage from "./pages/AdminDashboardPage";
 
@@ -38,12 +33,7 @@ const AppRoutes = () => {
           <Route path="/admin" element={<AdminDashboardPage />} />
           <Route path="/" element={<HomePage />} />
           <Route path="/projects" element={<ProjectsPage />} />
-          <Route path="/projects/ello-cafe" element={<ElloCafePage />} />
-          <Route path="/projects/raffoul-motors" element={<RaffoulMotorsPage />} />
-          <Route path="/projects/top-speed" element={<TopSpeedPage />} />
-          <Route path="/projects/alter" element={<AlterPage />} />
-          <Route path="/projects/martix" element={<MartixPage />} />
-          <Route path="/projects/arabfiles" element={<ArabFilesPage />} />
+          <Route path="/projects/:slug" element={<CaseStudyPage />} />
         </Routes>
         </>
       )}

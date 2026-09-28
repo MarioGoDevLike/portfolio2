@@ -1,16 +1,21 @@
-const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-2.5-flash";
+/**
+ * Minimal Gemini generateContent client that returns parsed JSON.
+ * Tries the configured model first, then falls back only when a model is
+ * missing or overloaded. Error details stay server-side.
+ */
 
-const MODEL_FALLBACKS = [
-  GEMINI_MODEL,
-  "gemini-2.5-flash",
-  "gemini-2.5-flash-lite",
-  "gemini-flash-latest",
-  "gemini-2.0-flash",
+/**
+ * Aliases track Google's current models, so retirements don't break the site.
+ * Flash-Lite with minimal thinking answers in ~1s and is plenty for grounded
+ * short answers; full Flash is the fallback when Lite is overloaded.
+ */
+const MODELS = [
+  { name: process.env.GEMINI_MODEL || "gemini-flash-lite-latest", thinking: { thinkingLevel: "minimal" } },
+  { name: "gemini-flash-latest" },
 ];
 
-function permissionMessage() {
-  return "Gemini blocked this API key (permission denied). Create a new key at https://aistudio.google.com/apikey — prefer “Restrict to Gemini API” — paste it into .env as GEMINI_API_KEY, then restart npm start.";
-}
+const TIMEOUT_MS = 8000;
+const TRY_NEXT_MODEL = new Set([404, 429, 500, 503]);
 
 function extractJson(text) {
   const trimmed = String(text || "").trim();
@@ -24,101 +29,93 @@ function extractJson(text) {
   }
 }
 
-/**
- * Calls Gemini generateContent and returns parsed JSON.
- */
-async function generateJson({ apiKey, prompt, temperature = 0.4 }) {
-  if (!apiKey) {
-    const err = new Error(
-      "Missing Gemini API key. Add GEMINI_API_KEY to your .env file (see .env.example)."
+async function callModel(model, apiKey, body) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
+  try {
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
+        body: JSON.stringify(body),
+        signal: controller.signal,
+      }
     );
-    err.code = "MISSING_API_KEY";
-    throw err;
+    const payload = await response.json().catch(() => ({}));
+    return { response, payload };
+  } finally {
+    clearTimeout(timer);
   }
+}
 
-  const requestBody = {
-    contents: [{ role: "user", parts: [{ text: prompt }] }],
+/**
+ * @param {object} options
+ * @param {string} options.apiKey
+ * @param {string} options.system    System instruction text.
+ * @param {Array<{role: "user"|"model", text: string}>} options.turns  Conversation, oldest first.
+ * @param {object} [options.schema]  Response schema (OpenAPI subset) the JSON must match.
+ * @param {number} [options.temperature]
+ */
+async function generateJson({ apiKey, system, turns, schema, temperature = 0.4 }) {
+  const body = {
+    systemInstruction: { parts: [{ text: system }] },
+    contents: turns.map((t) => ({ role: t.role, parts: [{ text: t.text }] })),
     generationConfig: {
       temperature,
       responseMimeType: "application/json",
+      ...(schema ? { responseSchema: schema } : {}),
     },
   };
 
-  const tried = new Set();
-  let response;
-  let payload = {};
-  let models = [...MODEL_FALLBACKS];
-
-  const isModelMissing = (status, message = "") =>
-    status === 404 || /not found|unknown model|not supported/i.test(message);
-
-  for (let i = 0; i < models.length; i++) {
-    const model = models[i];
-    if (tried.has(model)) continue;
-    tried.add(model);
-
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`;
-    response = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(requestBody),
-    });
-    payload = await response.json().catch(() => ({}));
-
-    if (response.ok) break;
-
-    const message = payload?.error?.message || "";
-    if (!isModelMissing(response.status, message)) break;
-
-    if (i === models.length - 1) {
-      try {
-        const listRes = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(apiKey)}`
-        );
-        const listPayload = await listRes.json().catch(() => ({}));
-        const discovered = (listPayload.models || [])
-          .filter((m) =>
-            (m.supportedGenerationMethods || []).includes("generateContent")
-          )
-          .map((m) => String(m.name || "").replace(/^models\//, ""))
-          .filter((name) => /flash/i.test(name) && !tried.has(name));
-        models = models.concat(discovered.slice(0, 5));
-      } catch {
-        /* ignore */
-      }
+  let last;
+  let networkError;
+  for (const model of MODELS) {
+    const generationConfig = model.thinking
+      ? { ...body.generationConfig, thinkingConfig: model.thinking }
+      : body.generationConfig;
+    try {
+      last = await callModel(model.name, apiKey, { ...body, generationConfig });
+    } catch (error) {
+      // Timeout or network failure — give the next model a chance.
+      networkError = error;
+      continue;
     }
+    if (last.response.ok || !TRY_NEXT_MODEL.has(last.response.status)) break;
   }
 
-  if (!response?.ok) {
-    let message =
-      payload?.error?.message ||
-      `Gemini request failed (${response?.status || "unknown"})`;
-
-    if (
-      response?.status === 403 ||
-      /permission|PERMISSION_DENIED|forbidden/i.test(message)
-    ) {
-      message = permissionMessage();
-    }
-
-    const err = new Error(message);
-    err.code = "GEMINI_ERROR";
-    err.status = response?.status;
+  if (!last) {
+    const err = new Error(`Gemini unreachable: ${networkError?.message || "unknown error"}`);
+    err.code = "GEMINI_UNREACHABLE";
     throw err;
   }
 
-  const text = payload?.candidates?.[0]?.content?.parts
-    ?.map((p) => p.text || "")
+  const { response, payload } = last;
+  if (!response.ok) {
+    const err = new Error(payload?.error?.message || `Gemini request failed (${response.status})`);
+    err.code = "GEMINI_ERROR";
+    err.status = response.status;
+    throw err;
+  }
+
+  const candidate = payload?.candidates?.[0];
+  const text = candidate?.content?.parts
+    ?.filter((p) => !p.thought)
+    .map((p) => p.text || "")
     .join("")
     .trim();
-
   if (!text) {
-    const err = new Error("Gemini returned an empty response. Try again.");
+    const err = new Error(`Gemini returned no text (finishReason: ${candidate?.finishReason || "unknown"})`);
     err.code = "EMPTY_RESPONSE";
     throw err;
   }
 
-  return extractJson(text);
+  try {
+    return extractJson(text);
+  } catch (error) {
+    error.message = `${error.message}: ${text.slice(0, 160)}`;
+    throw error;
+  }
 }
 
 module.exports = { generateJson, extractJson };
