@@ -20,12 +20,16 @@
   html {
     scroll-behavior: auto;
     background-color: #050505;
+    /* clip, not hidden: hidden makes a scroll container and breaks position: sticky */
     overflow-x: hidden;
+    overflow-x: clip;
     max-width: 100%;
   }
 
   body {
-    @apply font-secondary text-[#f1f5f9] overflow-x-hidden;
+    @apply font-secondary text-[#f1f5f9];
+    overflow-x: hidden;
+    overflow-x: clip;
     max-width: 100%;
     background-color: #050505;
     font-size: 16px;
@@ -424,26 +428,6 @@
 
   .project-card__media--featured {
     height: 220px;
-  }
-
-  .project-card__image {
-    @apply w-full h-full object-cover transition-transform duration-700 group-hover:scale-105;
-    filter: brightness(0.88) saturate(0.9);
-  }
-
-  .project-card__image--contain {
-    @apply object-contain p-6 group-hover:scale-100;
-    filter: none;
-  }
-
-  .project-card__overlay {
-    @apply absolute inset-0;
-    background: linear-gradient(to top, rgba(5, 5, 5, 0.8) 0%, transparent 55%);
-  }
-
-  .project-card__hover-tint {
-    @apply absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300;
-    background: rgba(5, 5, 5, 0.35);
   }
 
   .project-card__body {
@@ -894,6 +878,121 @@
   .project-card__media--featured { height: 380px; }
 }
 
+/* Looping accent line on project and service cards. Animates transform +
+   opacity only, so the compositor runs it — no per-frame layout or paint,
+   and the browser skips it while off-screen. translateY(%) on a full-height
+   wrapper equals the old `top: %` positions. */
+.scan-sweep {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  animation-fill-mode: backwards;
+}
+
+.scan-sweep--card {
+  animation-name: scan-sweep-card;
+  animation-duration: 4s;
+}
+
+.scan-sweep--service {
+  animation-name: scan-sweep-service;
+  animation-duration: 3.5s;
+}
+
+/* Hero ambient loops: CSS so the compositor runs them and skips them off-screen */
+.hero-spin {
+  animation: hero-spin linear infinite;
+}
+
+.hero-spin--reverse {
+  animation-direction: reverse;
+}
+
+.hero-aurora {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+
+.hero-aurora--violet {
+  animation-name: hero-aurora-violet;
+  animation-duration: 14s;
+}
+
+.hero-aurora--cyan {
+  animation-name: hero-aurora-cyan;
+  animation-duration: 11s;
+  animation-delay: 2.5s;
+}
+
+.hero-pulse {
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+
+.hero-pulse--mobile {
+  animation-name: hero-pulse-mobile;
+  animation-duration: 3.2s;
+}
+
+.hero-pulse--desktop {
+  animation-name: hero-pulse-desktop;
+  animation-duration: 3.4s;
+}
+
+.hero-bob {
+  animation: hero-bob 1.8s ease-in-out infinite;
+}
+
+@keyframes hero-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes hero-aurora-violet {
+  0%      { transform: scale(1); }
+  33.333% { transform: scale(1.09); }
+  66.667% { transform: scale(0.95); }
+  100%    { transform: scale(1); }
+}
+
+@keyframes hero-aurora-cyan {
+  0%      { transform: scale(1); }
+  33.333% { transform: scale(0.92); }
+  66.667% { transform: scale(1.07); }
+  100%    { transform: scale(1); }
+}
+
+@keyframes hero-pulse-mobile {
+  0%, 100% { opacity: 0.28; transform: scale(1); }
+  50%      { opacity: 0.68; transform: scale(1.016); }
+}
+
+@keyframes hero-pulse-desktop {
+  0%, 100% { opacity: 0.32; transform: scale(1); }
+  50%      { opacity: 0.72; transform: scale(1.014); }
+}
+
+@keyframes hero-bob {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(6px); }
+}
+
+@keyframes scan-sweep-card {
+  0%, 100% { transform: translateY(10%); opacity: 0; }
+  50%      { transform: translateY(92%); opacity: 0.55; }
+}
+
+@keyframes scan-sweep-service {
+  0%, 100% { transform: translateY(22%); opacity: 0; }
+  50%      { transform: translateY(78%); opacity: 0.6; }
+}
+
 @keyframes marquee-ltr {
   0%   { transform: translateX(0); }
   100% { transform: translateX(-50%); }
@@ -969,6 +1068,7 @@
 
 #root {
   overflow-x: hidden;
+  overflow-x: clip;
   max-width: 100%;
 }
 

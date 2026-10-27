@@ -37,10 +37,9 @@ const LetterReveal = ({ text, baseDelay = 0, active }) =>
 
 /* ─── rotating SVG ring ───────────────────────── */
 const OrbitalRing = ({ size, dashArray, stroke, duration, reverse = false }) => (
-  <motion.div
-    style={{ position: "absolute", inset: -(size - AVATAR_SIZE) / 2, zIndex: 0 }}
-    animate={{ rotate: reverse ? -360 : 360 }}
-    transition={{ duration, repeat: Infinity, ease: "linear" }}
+  <div
+    className={`hero-spin${reverse ? " hero-spin--reverse" : ""}`}
+    style={{ position: "absolute", inset: -(size - AVATAR_SIZE) / 2, zIndex: 0, animationDuration: `${duration}s` }}
     aria-hidden="true"
   >
     <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} fill="none">
@@ -53,7 +52,7 @@ const OrbitalRing = ({ size, dashArray, stroke, duration, reverse = false }) => 
         strokeDasharray={dashArray}
       />
     </svg>
-  </motion.div>
+  </div>
 );
 
 /* ─── HERO SECTION ────────────────────────────── */
@@ -104,33 +103,39 @@ const HeroSection = () => {
             position: "absolute",
             width: 660,
             height: 660,
-            borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(129,140,248,0.22) 0%, transparent 62%)",
-            filter: "blur(90px)",
             top: "-22%",
             right: "-8%",
             x: b1x,
             y: b1y,
           }}
-          animate={{ scale: [1, 1.09, 0.95, 1] }}
-          transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
-        />
+        >
+          <div
+            className="hero-aurora hero-aurora--violet"
+            style={{
+              background: "radial-gradient(circle, rgba(129,140,248,0.22) 0%, transparent 62%)",
+              filter: "blur(90px)",
+            }}
+          />
+        </motion.div>
         <motion.div
           style={{
             position: "absolute",
             width: 500,
             height: 500,
-            borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(34,211,238,0.14) 0%, transparent 62%)",
-            filter: "blur(80px)",
             bottom: "-18%",
             left: "-6%",
             x: b2x,
             y: b2y,
           }}
-          animate={{ scale: [1, 0.92, 1.07, 1] }}
-          transition={{ duration: 11, repeat: Infinity, ease: "easeInOut", delay: 2.5 }}
-        />
+        >
+          <div
+            className="hero-aurora hero-aurora--cyan"
+            style={{
+              background: "radial-gradient(circle, rgba(34,211,238,0.14) 0%, transparent 62%)",
+              filter: "blur(80px)",
+            }}
+          />
+        </motion.div>
         {/* mid-tone indigo accent */}
         <div
           style={{
@@ -167,30 +172,21 @@ const HeroSection = () => {
           {/* Avatar */}
           <div style={{ position: "relative", width: 172, height: 172 }}>
             {/* outer rotating ring */}
-            <motion.div
-              style={{ position: "absolute", inset: -18 }}
-              animate={{ rotate: 360 }}
-              transition={{ duration: 26, repeat: Infinity, ease: "linear" }}
-            >
+            <div className="hero-spin" style={{ position: "absolute", inset: -18, animationDuration: "26s" }}>
               <svg width={208} height={208} viewBox="0 0 208 208" fill="none">
                 <circle cx={104} cy={104} r={101} stroke="rgba(129,140,248,0.22)" strokeWidth="1" strokeDasharray="6 12" />
               </svg>
-            </motion.div>
+            </div>
             {/* inner counter-rotating ring */}
-            <motion.div
-              style={{ position: "absolute", inset: -8 }}
-              animate={{ rotate: -360 }}
-              transition={{ duration: 18, repeat: Infinity, ease: "linear" }}
-            >
+            <div className="hero-spin hero-spin--reverse" style={{ position: "absolute", inset: -8, animationDuration: "18s" }}>
               <svg width={188} height={188} viewBox="0 0 188 188" fill="none">
                 <circle cx={94} cy={94} r={91} stroke="rgba(34,211,238,0.14)" strokeWidth="1" strokeDasharray="3 16" />
               </svg>
-            </motion.div>
+            </div>
             {/* pulse ring */}
-            <motion.div
+            <div
+              className="hero-pulse hero-pulse--mobile"
               style={{ position: "absolute", inset: -3, borderRadius: "50%", border: "1px solid rgba(129,140,248,0.28)" }}
-              animate={{ opacity: [0.28, 0.68, 0.28], scale: [1, 1.016, 1] }}
-              transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut" }}
             />
             <div
               style={{
@@ -410,7 +406,8 @@ const HeroSection = () => {
               />
 
               {/* pulsing static halo */}
-              <motion.div
+              <div
+                className="hero-pulse hero-pulse--desktop"
                 style={{
                   position: "absolute",
                   inset: -5,
@@ -418,8 +415,6 @@ const HeroSection = () => {
                   border: "1px solid rgba(129,140,248,0.32)",
                   zIndex: 0,
                 }}
-                animate={{ opacity: [0.32, 0.72, 0.32], scale: [1, 1.014, 1] }}
-                transition={{ duration: 3.4, repeat: Infinity, ease: "easeInOut" }}
               />
 
               {/* avatar image */}
@@ -522,13 +517,9 @@ const HeroSection = () => {
           animate={{ opacity: inView ? 1 : 0 }}
           transition={{ duration: inView ? 0.5 : 0.3, delay: inView ? 1.6 : 0 }}
         >
-          <motion.div
-            animate={{ y: [0, 6, 0] }}
-            transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
-            className="text-white/20"
-          >
+          <div className="text-white/20 hero-bob">
             <BsArrowDown size={14} />
-          </motion.div>
+          </div>
           <span className="scroll-hint">Scroll to explore</span>
         </motion.div>
       </div>

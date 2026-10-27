@@ -320,6 +320,7 @@ export const CASE_STUDIES = [
         id: "vendor",
         device: "phone",
         eyebrow: "App One",
+        navLabel: "Vendor App",
         title: "Vendor App",
         description: "Flutter · for business owners and dispatchers",
         screens: [
@@ -339,6 +340,7 @@ export const CASE_STUDIES = [
         id: "driver",
         device: "phone",
         eyebrow: "App Two",
+        navLabel: "Driver App",
         title: "Driver App",
         description: "Flutter · for delivery drivers on the road",
         screens: [

@@ -1,9 +1,22 @@
-import elloImage from "../assets/ello1.webp";
-import raffoulImage from "../assets/raffoulmotors.webp";
-import topSpeedImage from "../assets/Top_speed_apps/topspeedlogo.webp";
-import alterLogo from "../assets/alter_images/alter logo white .webp";
-import martixLogo from "../assets/Martix/martix-logo-2.webp";
+import elloLogo from "../assets/ello1.webp";
+import elloWebHome from "../assets/ello_website_images/home page.webp";
+import elloAppHome from "../assets/ello_app_images/Home page.webp";
+import raffoulLogo from "../assets/raffoulmotors.webp";
+import raffoulWebHome from "../assets/raffoul_motors_web/home_page_1.webp";
+import raffoulMobileHome from "../assets/raffoul_motors_web/mobile_view_home_page.webp";
 import arabFilesLogo from "../assets/Arabfiles/arab-files-logo.webp";
+import arabFilesVideo from "../assets/Arabfiles/arabfiles.mp4";
+import arabFilesPoster from "../assets/Arabfiles/arabfiles.poster.webp";
+import martixLogo from "../assets/Martix/martix-logo-2.webp";
+import martixVideo from "../assets/Martix/martix stores.mp4";
+import martixPoster from "../assets/Martix/martix stores.poster.webp";
+import topSpeedLogo from "../assets/Top_speed_apps/topspeedlogo.webp";
+import topSpeedVendor from "../assets/Top_speed_apps/vendor_dashboard_page.webp";
+import topSpeedDriver from "../assets/Top_speed_apps/driver_dashboard_page.webp";
+import alterLogo from "../assets/alter_images/alter logo white .webp";
+import alterWebVideo from "../assets/alter_images/alter_web_view.mp4";
+import alterWebPoster from "../assets/alter_images/alter_web_view.poster.webp";
+import alterMobilePoster from "../assets/alter_images/alter_mobile_view.poster.webp";
 
 export const SKILLS = [
   "React",
@@ -52,9 +65,9 @@ export const PROJECTS_ALL = [
     category: "Mobile / Web Application E-learning",
     description:
       "A comprehensive e-learning platform accessible via both mobile and web. Features interactive courses, user progress tracking, and a responsive, intuitive interface for seamless learning across all devices.",
- 
-    image: elloImage,
-    imageFit: "contain",
+    logo: elloLogo,
+    logoBadge: "light",
+    showcase: { desktop: elloWebHome, phones: [elloAppHome] },
     caseStudyPath: "/projects/ello-cafe",
     liveHref: "https://ellos-new-website.vercel.app/",
     tag: "Web",
@@ -68,8 +81,8 @@ export const PROJECTS_ALL = [
     category: "Car Dealership Platform",
     description:
       "A bilingual dealership platform for a family-run pre-owned car showroom in South Lebanon. Full inventory browsing, car detail pages, workshop section, and a private admin panel.",
-    image: raffoulImage,
-    imageFit: "contain",
+    logo: raffoulLogo,
+    showcase: { desktop: raffoulWebHome, phones: [raffoulMobileHome] },
     caseStudyPath: "/projects/raffoul-motors",
     tag: "Web",
     accent: "cyan",
@@ -81,8 +94,8 @@ export const PROJECTS_ALL = [
     category: "News · Flutter Mobile App",
     description:
       "A production Flutter news client for a Lebanese/Arab media brand — RTL-first feeds, categories, article details, video, and push alerts powered by the live Arabfiles API.",
-    image: arabFilesLogo,
-    imageFit: "contain",
+    logo: arabFilesLogo,
+    showcase: { phones: [arabFilesPoster], phoneVideo: arabFilesVideo },
     caseStudyPath: "/projects/arabfiles",
     tag: "Mobile",
     accent: "violet",
@@ -94,8 +107,8 @@ export const PROJECTS_ALL = [
     category: "Marketplace · Flutter Customer App",
     description:
       "A live multi-vendor marketplace customer app — browse stores and deals, checkout, manage orders, and chat with sellers in realtime. Built in Flutter for Android (iOS-ready) against martixstores.com.",
-    image: martixLogo,
-    imageFit: "contain",
+    logo: martixLogo,
+    showcase: { phones: [martixPoster], phoneVideo: martixVideo },
     caseStudyPath: "/projects/martix",
     liveHref: "https://martixstores.com/",
     tag: "Mobile",
@@ -108,8 +121,8 @@ export const PROJECTS_ALL = [
     category: "Delivery Platform · Mobile Apps",
     description:
       "A dual-app delivery ecosystem for vendors and drivers. Vendors post and track orders; drivers receive push notifications, manage packages, and are GPS-tracked on duty. Built with Flutter, PHP, and Firebase.",
-    image: topSpeedImage,
-    imageFit: "contain",
+    logo: topSpeedLogo,
+    showcase: { phones: [topSpeedVendor, topSpeedDriver] },
     caseStudyPath: "/projects/top-speed",
     tag: "Mobile",
     accent: "violet",
@@ -121,9 +134,8 @@ export const PROJECTS_ALL = [
     category: "PR & Marketing Agency Website",
     description:
       "A premium React.js website for a MENA-region PR & marketing agency. Cinematic hero, live campaign stats, artist marquee, influencer showcase, and fully responsive mobile experience.",
-    image: alterLogo,
-    imageFit: "contain",
-    mobileImagePadding: "14px 48px",
+    logo: alterLogo,
+    showcase: { desktop: alterWebPoster, desktopVideo: alterWebVideo, phones: [alterMobilePoster] },
     caseStudyPath: "/projects/alter",
     liveHref: "https://altercoms.vercel.app/",
     tag: "Web",

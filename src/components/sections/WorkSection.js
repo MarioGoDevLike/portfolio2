@@ -9,28 +9,10 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import { HOME_PROJECTS } from "../../constants";
 import AnimatedSection from "../ui/AnimatedSection";
-import OptimizedImage from "../ui/OptimizedImage";
-import LazyVideo from "../ui/LazyVideo";
+import ProjectShowcase, { ACCENT } from "../project/ProjectShowcase";
 import { saveHomeScroll } from "../../utils/homeScroll";
 
 const EASE_EXPO = [0.22, 1, 0.36, 1];
-
-const ACCENT = {
-  violet: {
-    color: "#818cf8",
-    glow: "rgba(129,140,248,0.32)",
-    softGlow: "rgba(129,140,248,0.12)",
-    bg: "rgba(129,140,248,0.07)",
-    border: "rgba(129,140,248,0.22)",
-  },
-  cyan: {
-    color: "#22d3ee",
-    glow: "rgba(34,211,238,0.28)",
-    softGlow: "rgba(34,211,238,0.10)",
-    bg: "rgba(34,211,238,0.07)",
-    border: "rgba(34,211,238,0.20)",
-  },
-};
 
 /* ─── Browser chrome mock (web projects) ─── */
 const BrowserChrome = ({ href, accentColor }) => (
@@ -92,7 +74,7 @@ const Card3D = ({ project, featured = false, index = 0, onCustomClick }) => {
   const cardRef = useRef(null);
   const [hovered, setHovered] = useState(false);
   const meta = ACCENT[project.accent] || ACCENT.violet;
-  const isWeb = project.tag === "Web";
+  const hasBrowser = Boolean(project.showcase?.desktop);
 
   const mx = useMotionValue(0);
   const my = useMotionValue(0);
@@ -122,7 +104,6 @@ const Card3D = ({ project, featured = false, index = 0, onCustomClick }) => {
   }, [mx, my]);
 
   const imageHeight = featured ? 420 : 280;
-  const imageFit = project.imageFit || "cover";
   const cardRadius = 22;
   const enterDir = featured ? 0 : index % 2 === 0 ? -60 : 60;
 
@@ -160,27 +141,14 @@ const Card3D = ({ project, featured = false, index = 0, onCustomClick }) => {
         }}
       >
         <div style={{ position: "absolute", inset: -1, borderRadius: cardRadius, background: hovered ? meta.softGlow : "transparent", transition: "background 0.4s ease", pointerEvents: "none", zIndex: 0 }} aria-hidden="true" />
-        {isWeb && <BrowserChrome href={project.liveHref || project.href} accentColor={meta.color} />}
+        {hasBrowser && <BrowserChrome href={project.liveHref || project.href} accentColor={meta.color} />}
         <div style={{ position: "relative", height: imageHeight, overflow: "hidden", background: "#050505" }}>
-          {project.previewVideo ? (
-            <motion.div style={{ position: "absolute", inset: 0, x: imgX, y: imgY }}>
-              <LazyVideo src={project.previewVideo}
-                style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top", filter: `brightness(${hovered ? 0.82 : 0.72}) saturate(0.9)`, transition: "filter 0.35s ease", display: "block" }} />
-            </motion.div>
-          ) : project.image && (
-            <motion.div style={{ position: "absolute", inset: imageFit === "contain" ? 0 : "-5% -3%", x: imageFit === "contain" ? 0 : imgX, y: imageFit === "contain" ? 0 : imgY, display: "flex", alignItems: "center", justifyContent: "center", padding: imageFit === "contain" ? "28px 40px" : 0 }}>
-              <OptimizedImage src={project.image} alt={project.title}
-                style={{ width: imageFit === "contain" ? "auto" : "100%", height: imageFit === "contain" ? "auto" : "100%", maxWidth: "100%", maxHeight: "100%", objectFit: imageFit, objectPosition: "center", filter: imageFit === "contain" ? "none" : `brightness(${hovered ? 0.82 : 0.72}) saturate(0.9)`, transition: "filter 0.35s ease", display: "block" }} />
-            </motion.div>
-          )}
-          <div style={{ position: "absolute", inset: 0, background: imageFit === "contain" && !project.previewVideo ? "none" : "linear-gradient(to top, rgba(5,5,5,0.96) 0%, rgba(5,5,5,0.3) 42%, transparent 70%)", pointerEvents: "none" }} aria-hidden="true" />
+          <ProjectShowcase project={project} active={hovered} parallax={{ x: imgX, y: imgY }} />
           <motion.div style={{ position: "absolute", inset: 0, background: glareGradient, pointerEvents: "none", opacity: hovered ? 1 : 0, transition: "opacity 0.3s ease" }} aria-hidden="true" />
-          <motion.div
-            style={{ position: "absolute", left: 0, right: 0, height: 1, background: `linear-gradient(90deg, transparent, ${meta.color}, transparent)`, opacity: 0.55, pointerEvents: "none" }}
-            animate={{ top: ["10%", "92%", "10%"], opacity: [0, 0.55, 0] }}
-            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: index * 0.7 }}
-            aria-hidden="true"
-          />
+          {/* scan line — CSS keyframes on transform/opacity so it stays off the main thread */}
+          <div className="scan-sweep scan-sweep--card" style={{ animationDelay: `${index * 0.7}s` }} aria-hidden="true">
+            <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 1, background: `linear-gradient(90deg, transparent, ${meta.color}, transparent)` }} />
+          </div>
           {project.tag && (
             <span style={{ position: "absolute", top: 14, right: 14, fontFamily: "'Space Grotesk', sans-serif", fontSize: 9, letterSpacing: "0.28em", textTransform: "uppercase", padding: "5px 11px", borderRadius: 999, background: "rgba(0,0,0,0.6)", border: `1px solid ${meta.border}`, color: meta.color, backdropFilter: "blur(8px)", zIndex: 5 }}>
               {project.tag}
@@ -215,82 +183,16 @@ const Card3D = ({ project, featured = false, index = 0, onCustomClick }) => {
    MOBILE-ONLY COMPONENTS
 ══════════════════════════════════════════ */
 
-const getMobileContainPadding = (project, height) =>
-  project.mobileImagePadding || (height >= 200 ? "24px 36px" : "18px 32px");
-
-const MobileCardMedia = ({ project, height, imageFit }) => {
-  if (project.previewVideo) {
-    return (
-      <div style={{ position: "relative", height, overflow: "hidden", background: "#050505" }}>
-        <LazyVideo
-          src={project.previewVideo}
-          style={{
-            width: "100%",
-            height: "100%",
-            objectFit: "cover",
-            objectPosition: "top",
-            filter: "brightness(0.75) saturate(0.88)",
-            display: "block",
-          }}
-        />
-      </div>
-    );
-  }
-
-  if (!project.image) {
-    return <div style={{ height, background: "#050505" }} aria-hidden="true" />;
-  }
-
-  if (imageFit === "contain") {
-    return (
-      <div
-        style={{
-          position: "relative",
-          height,
-          overflow: "hidden",
-          background: "#050505",
-          padding: getMobileContainPadding(project, height),
-          boxSizing: "border-box",
-        }}
-      >
-        <OptimizedImage
-          src={project.image}
-          alt={project.title}
-          style={{
-            width: "100%",
-            height: "100%",
-            objectFit: "contain",
-            objectPosition: "center",
-            display: "block",
-          }}
-        />
-      </div>
-    );
-  }
-
-  return (
-    <div style={{ position: "relative", height, overflow: "hidden", background: "#050505" }}>
-      <OptimizedImage
-        src={project.image}
-        alt={project.title}
-        style={{
-          width: "100%",
-          height: "100%",
-          objectFit: imageFit,
-          objectPosition: "center",
-          filter: "brightness(0.75) saturate(0.88)",
-          display: "block",
-        }}
-      />
-    </div>
-  );
-};
+const MobileCardMedia = ({ project, height, active = false }) => (
+  <div style={{ position: "relative", height, overflow: "hidden" }}>
+    <ProjectShowcase project={project} active={active} compact />
+  </div>
+);
 
 /* ─── Mobile featured card ─── */
 const MobileFeaturedCard = ({ project, onCustomClick }) => {
   const meta = ACCENT[project.accent] || ACCENT.violet;
-  const isWeb = project.tag === "Web";
-  const imageFit = project.imageFit || "cover";
+  const hasBrowser = Boolean(project.showcase?.desktop);
 
   return (
     <motion.div
@@ -311,14 +213,10 @@ const MobileFeaturedCard = ({ project, onCustomClick }) => {
         userSelect: "none",
       }}
     >
-      {isWeb && <BrowserChrome href={project.liveHref || project.href} accentColor={meta.color} />}
+      {hasBrowser && <BrowserChrome href={project.liveHref || project.href} accentColor={meta.color} />}
 
       <div style={{ position: "relative" }}>
-        <MobileCardMedia project={project} height={210} imageFit={imageFit} />
-
-        {imageFit !== "contain" && (
-          <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(5,5,5,0.95) 0%, rgba(5,5,5,0.18) 50%, transparent 75%)", pointerEvents: "none" }} aria-hidden="true" />
-        )}
+        <MobileCardMedia project={project} height={230} />
 
         {/* Gradient accent line at top */}
         <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: `linear-gradient(90deg, transparent, ${meta.color}, transparent)`, opacity: 0.5 }} aria-hidden="true" />
@@ -366,8 +264,7 @@ const MobileFeaturedCard = ({ project, onCustomClick }) => {
 /* ─── Mobile carousel card ─── */
 const MobileCarouselCard = ({ project, onCustomClick, isActive }) => {
   const meta = ACCENT[project.accent] || ACCENT.violet;
-  const isWeb = project.tag === "Web";
-  const imageFit = project.imageFit || "cover";
+  const hasBrowser = Boolean(project.showcase?.desktop);
 
   return (
     <motion.div
@@ -391,14 +288,10 @@ const MobileCarouselCard = ({ project, onCustomClick, isActive }) => {
         userSelect: "none",
       }}
     >
-      {isWeb && <BrowserChrome href={project.liveHref || project.href} accentColor={meta.color} />}
+      {hasBrowser && <BrowserChrome href={project.liveHref || project.href} accentColor={meta.color} />}
 
       <div style={{ position: "relative" }}>
-        <MobileCardMedia project={project} height={160} imageFit={imageFit} />
-
-        {imageFit !== "contain" && (
-          <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(5,5,5,0.9) 0%, transparent 60%)", pointerEvents: "none" }} aria-hidden="true" />
-        )}
+        <MobileCardMedia project={project} height={180} active={isActive} />
 
         {project.tag && (
           <span style={{ position: "absolute", top: 10, right: 10, fontFamily: "'Space Grotesk',sans-serif", fontSize: 8, letterSpacing: "0.22em", textTransform: "uppercase", padding: "3px 8px", borderRadius: 999, background: "rgba(0,0,0,0.65)", border: `1px solid ${meta.border}`, color: meta.color, backdropFilter: "blur(10px)" }}>

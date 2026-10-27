@@ -188,17 +188,13 @@ const ServiceMonolith = ({ service, index, baseRotateY = 0 }) => {
           </div>
 
           {/* scan line */}
-          <motion.div
-            className="absolute left-6 right-6 h-px pointer-events-none"
-            style={{
-              background: `linear-gradient(90deg, transparent, ${meta.accent}, transparent)`,
-              opacity: 0.5,
-              top: "50%",
-            }}
-            animate={{ top: ["22%", "78%", "22%"], opacity: [0, 0.6, 0] }}
-            transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut", delay: index * 0.5 }}
-            aria-hidden="true"
-          />
+          {/* scan line — CSS keyframes on transform/opacity so it stays off the main thread */}
+          <div className="scan-sweep scan-sweep--service" style={{ animationDelay: `${index * 0.5}s` }} aria-hidden="true">
+            <div
+              className="absolute top-0 left-6 right-6 h-px"
+              style={{ background: `linear-gradient(90deg, transparent, ${meta.accent}, transparent)` }}
+            />
+          </div>
         </div>
 
         {/* arrow affordance */}

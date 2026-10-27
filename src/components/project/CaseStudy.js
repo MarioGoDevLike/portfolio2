@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { AnimatePresence, MotionConfig, motion, useInView, useReducedMotion } from "framer-motion";
+import { AnimatePresence, MotionConfig, motion, useInView, useReducedMotion, useScroll } from "framer-motion";
 import { HiArrowLeft, HiArrowRight, HiArrowUpRight, HiArrowsPointingOut, HiLockClosed, HiXMark } from "react-icons/hi2";
 import LazyVideo from "../ui/LazyVideo";
 import OptimizedImage from "../ui/OptimizedImage";
@@ -254,19 +254,15 @@ const Lightbox = ({ showcase, index, step, onClose }) => {
 
 const Section = ({ id, number, eyebrow, title, description, children }) => (
   <section id={id} className="cs-section" aria-labelledby={`${id}-title`}>
-    <div className="cs-container cs-section__grid">
-      <Reveal className="cs-section__index">
+    <Reveal className="cs-section__head">
+      <p className="cs-section__index">
         <span className="cs-section__number">{pad(number)}</span>
         <span className="cs-section__eyebrow">{eyebrow}</span>
-      </Reveal>
-      <div className="cs-section__body">
-        <Reveal className="cs-section__head">
-          <h2 id={`${id}-title`} className="cs-h2">{title}</h2>
-          {description && <p className="cs-section__desc">{description}</p>}
-        </Reveal>
-        {children}
-      </div>
-    </div>
+      </p>
+      <h2 id={`${id}-title`} className="cs-h2">{title}</h2>
+      {description && <p className="cs-section__desc">{description}</p>}
+    </Reveal>
+    {children}
   </section>
 );
 
@@ -366,34 +362,114 @@ const Showcase = ({ showcase, number }) => {
   );
 };
 
-const Stack = ({ stack, number }) => (
+const ENGINEERING_ID = "engineering";
+
+const hasEngineering = (stack) => Boolean(stack.description || stack.capabilities);
+
+const Engineering = ({ stack, number }) => (
   <Section
-    id="stack"
+    id={ENGINEERING_ID}
     number={number}
-    eyebrow={stack.eyebrow || "Architecture"}
+    eyebrow={stack.eyebrow || "Engineering"}
     title={stack.title}
     description={stack.description}
   >
-    <div className="cs-stack">
-      {stack.groups.map((group, i) => (
-        <Reveal key={group.category} delay={i * 0.08} className="cs-stack__group">
-          <h3 className="cs-stack__category">{group.category}</h3>
-          <ul className="cs-stack__items">
-            {group.items.map((item) => <li key={item}>{item}</li>)}
-          </ul>
-        </Reveal>
-      ))}
-    </div>
-
     {stack.capabilities && (
       <Reveal delay={0.1} className="cs-capabilities">
-        <h3 className="cs-stack__category">Key capabilities</h3>
+        <h3 className="cs-aside__label">Key capabilities</h3>
         <ul>
           {stack.capabilities.map((line) => <li key={line}>{line}</li>)}
         </ul>
       </Reveal>
     )}
   </Section>
+);
+
+/* ─── Sidebar ────────────────────────────────────── */
+
+/** Id of the section crossing the upper-middle of the viewport. */
+function useActiveSection(ids) {
+  const key = ids.join("|");
+  const [active, setActive] = useState(ids[0]);
+
+  useEffect(() => {
+    const els = key.split("|").map((id) => document.getElementById(id)).filter(Boolean);
+    const obs = new IntersectionObserver(
+      (entries) => entries.forEach((e) => e.isIntersecting && setActive(e.target.id)),
+      { rootMargin: "-35% 0px -60% 0px" }
+    );
+    els.forEach((el) => obs.observe(el));
+    return () => obs.disconnect();
+  }, [key]);
+
+  return active;
+}
+
+const SectionNav = ({ sections, active }) => {
+  const listRef = useRef(null);
+
+  // On narrow screens the nav is a horizontal chip row — keep the active chip in view.
+  useEffect(() => {
+    const list = listRef.current;
+    const chip = list?.querySelector('[aria-current="location"]');
+    if (!chip || list.scrollWidth <= list.clientWidth) return;
+    list.scrollTo({ left: chip.offsetLeft - 20, behavior: "smooth" });
+  }, [active]);
+
+  return (
+    <nav className="cs-toc" aria-label="On this page">
+      <p className="cs-aside__label">On this page</p>
+      <ol ref={listRef}>
+        {sections.map((s, i) => (
+          <li key={s.id}>
+            <a
+              href={`#${s.id}`}
+              aria-current={active === s.id ? "location" : undefined}
+              onClick={(e) => {
+                e.preventDefault();
+                scrollToId(s.id);
+              }}
+            >
+              <span className="cs-toc__num">{pad(i + 1)}</span>
+              {s.label}
+            </a>
+          </li>
+        ))}
+      </ol>
+    </nav>
+  );
+};
+
+const Facts = ({ study }) => (
+  <div className="cs-facts">
+    <dl className="cs-facts__list">
+      {study.meta.map((m) => (
+        <div key={m.label} className="cs-facts__item">
+          <dt>{m.label}</dt>
+          <dd>{m.value}</dd>
+        </div>
+      ))}
+    </dl>
+
+    <div className="cs-facts__stack">
+      <p className="cs-aside__label">Tech stack</p>
+      {study.stack.groups.map((group) => (
+        <div key={group.category} className="cs-facts__group">
+          <span className="cs-facts__category">{group.category}</span>
+          <ul className="cs-chips">
+            {group.items.map((item) => <li key={item}>{item}</li>)}
+          </ul>
+        </div>
+      ))}
+    </div>
+
+    {study.liveUrl && (
+      <a className="cs-btn cs-btn--primary cs-facts__cta" href={study.liveUrl} target="_blank" rel="noopener noreferrer">
+        {study.liveLabel || "Visit live site"}
+        <HiArrowUpRight aria-hidden="true" />
+      </a>
+    )}
+  </div>
 );
 
 /* ─── Hero ───────────────────────────────────────── */
@@ -481,15 +557,6 @@ const Hero = ({ study, position, total }) => {
           </motion.div>
         </div>
 
-        <motion.dl className="cs-meta" {...rise(0.3)}>
-          {study.meta.map((m) => (
-            <div key={m.label} className="cs-meta__item">
-              <dt>{m.label}</dt>
-              <dd>{m.value}</dd>
-            </div>
-          ))}
-        </motion.dl>
-
         <HeroStage study={study} />
       </div>
     </header>
@@ -500,6 +567,7 @@ const Hero = ({ study, position, total }) => {
 
 const TopBar = ({ study }) => {
   const [scrolled, setScrolled] = useState(false);
+  const { scrollYProgress } = useScroll();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -524,6 +592,7 @@ const TopBar = ({ study }) => {
           <span className="cs-topbar__spacer" />
         )}
       </div>
+      <motion.span className="cs-topbar__progress" style={{ scaleX: scrollYProgress }} aria-hidden="true" />
     </nav>
   );
 };
@@ -550,6 +619,12 @@ const NextProject = ({ next }) => (
 const CaseStudy = ({ study }) => {
   const position = CASE_STUDIES.findIndex((c) => c.slug === study.slug);
   const next = CASE_STUDIES[(position + 1) % CASE_STUDIES.length];
+  const showEngineering = hasEngineering(study.stack);
+  const sections = [
+    ...study.showcases.map((s) => ({ id: s.id, label: s.navLabel || s.eyebrow })),
+    ...(showEngineering ? [{ id: ENGINEERING_ID, label: study.stack.eyebrow || "Engineering" }] : []),
+  ];
+  const active = useActiveSection(sections.map((s) => s.id));
 
   useEffect(() => {
     const previous = document.title;
@@ -563,10 +638,18 @@ const CaseStudy = ({ study }) => {
         <TopBar study={study} />
         <main>
           <Hero study={study} position={position + 1} total={CASE_STUDIES.length} />
-          {study.showcases.map((showcase, i) => (
-            <Showcase key={showcase.id} showcase={showcase} number={i + 1} />
-          ))}
-          <Stack stack={study.stack} number={study.showcases.length + 1} />
+          <div className="cs-container cs-body">
+            <aside className="cs-aside" aria-label="Project details">
+              <SectionNav sections={sections} active={active} />
+              <Facts study={study} />
+            </aside>
+            <div className="cs-main">
+              {study.showcases.map((showcase, i) => (
+                <Showcase key={showcase.id} showcase={showcase} number={i + 1} />
+              ))}
+              {showEngineering && <Engineering stack={study.stack} number={study.showcases.length + 1} />}
+            </div>
+          </div>
         </main>
         <NextProject next={next} />
       </div>

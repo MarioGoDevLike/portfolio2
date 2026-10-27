@@ -65,6 +65,9 @@ const BASE_POINTS = genSpherePoints(SKILLS.length);
 const TagCloud3D = ({ width = 380, height = 460, radius = 152 }) => {
   const wrapRef    = useRef(null);
   const inView     = useInView(wrapRef, { once: false, margin: "0px 0px -60px 0px" });
+  // Looser observer for the RAF loop: spin only while on screen (and never for
+  // the instance the responsive layout hides).
+  const onScreen   = useInView(wrapRef, { margin: "120px 0px" });
   const rotRef     = useRef({ x: 0.22, y: 0 });
   const dragRef    = useRef({ on: false, lastX: 0, lastY: 0 });
   const pausedRef  = useRef(false);
@@ -82,8 +85,9 @@ const TagCloud3D = ({ width = 380, height = 460, radius = 152 }) => {
     setVisible(false);
   }, [inView]);
 
-  /* auto-rotation RAF loop */
+  /* auto-rotation RAF loop — paused while off screen */
   useEffect(() => {
+    if (!onScreen) return undefined;
     const tick = () => {
       if (!pausedRef.current && !dragRef.current.on) {
         rotRef.current.y += 0.0045;
@@ -93,7 +97,7 @@ const TagCloud3D = ({ width = 380, height = 460, radius = 152 }) => {
     };
     rafRef.current = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(rafRef.current);
-  }, []);
+  }, [onScreen]);
 
   /* pause on hover */
   useEffect(() => {
